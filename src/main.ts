@@ -61,7 +61,8 @@ async function bootstrap() {
   SwaggerModule.setup('_dds8/docs', app, document);
 
   // await app.listen(4000);
-  await app.listen(4000, '0.0.0.0');
+  // await app.listen(4000, '0.0.0.0');
+  await app.listen(process.env.PORT ?? 4000);
 
   console.log(await app.getUrl());
   console.log('Swagger: ' + (await app.getUrl()) + '/docs');
