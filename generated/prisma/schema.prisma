@@ -1,0 +1,269 @@
+// // This is your Prisma schema file,
+// // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// // Get a free hosted Postgres database in seconds: `npx create-db`
+
+// generator client {
+//   provider = "prisma-client"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+// }
+
+// enum Role {
+//   ADMIN
+//   RESIDENT
+//   GUARD
+// }
+
+// enum VisitorStatus {
+//   PENDING
+//   APPROVED
+//   DENIED
+//   CHECKED_IN
+//   CHECKED_OUT
+// }
+
+// model User {
+//   id         String   @id @default(uuid())
+//   first_name String
+//   last_name  String
+//   email      String   @unique
+//   dob        String
+//   gender     String
+//   phone      String
+//   password   String
+//   role       Role
+//   createdAt  DateTime @default(now())
+
+//   resident Resident?
+// }
+
+// model Resident {
+//   id                             String    @id @default(uuid())
+//   userId                         String    @unique
+//   house_no                       String
+//   block                          String
+//   home_address                   String
+//   state_of_origin                String
+//   lga                            String
+//   id_type                        String
+//   id_no                          String
+//   id_document_front              String
+//   id_document_back               String
+//   bvn                            String?
+//   alternate_phone                String?
+//   next_of_kin_name               String?
+//   next_of_kin_phone              String?
+//   next_of_kin_email              String?
+//   next_of_kin_relationship       String?
+//   guarantor_name                 String
+//   guarantor_occupation           String
+//   guarantor_work_address         String
+//   guarantor_id_no                String
+//   guarantor_id_relationship      String
+//   signed_guarantor_letter_upload String
+//   vehicle_plate_no               String
+//   vehicle_make                   String
+//   vehicle_color                  String?
+//   proof_of_address_upload        String
+//   pasport                        String
+//   tenancy_ownership_doc          String
+//   wallet_pin                     String?
+//   ndprConsentDataProcessing      Boolean
+//   ndprConsentIdentity            Boolean
+//   ndprConsentThirdParty          Boolean
+//   ndprConsentGivenAt             DateTime?
+//   createdAt                      DateTime  @default(now())
+
+//   user     User      @relation(fields: [userId], references: [id])
+//   visitors Visitor[]
+// }
+
+// model Visitor {
+//   id         String        @id @default(uuid())
+//   residentId String
+//   name       String
+//   phone      String?
+//   status     VisitorStatus @default(PENDING)
+//   visitDate  DateTime
+//   createdAt  DateTime      @default(now())
+
+//   resident Resident  @relation(fields: [residentId], references: [id])
+//   gateLogs GateLog[]
+// }
+
+// model GateLog {
+//   id        String   @id @default(uuid())
+//   visitorId String
+//   guardId   String
+//   action    String // CHECK_IN / CHECK_OUT
+//   timestamp DateTime @default(now())
+
+//   visitor Visitor @relation(fields: [visitorId], references: [id])
+// }
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  RESIDENT
+  GUARD
+}
+
+enum VisitorStatus {
+  PENDING
+  APPROVED
+  DENIED
+  CHECKED_IN
+  CHECKED_OUT
+}
+
+enum ResidentStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  ACTIVE
+}
+
+// model EstateSettings {
+//   id               String  @id @default(uuid())
+//   estateId         String  @unique
+//   levyAmount       Int
+//   currency         String
+//   timezone         String
+//   sosResponseSLA   Int
+
+//   maintenanceP1    Int
+//   maintenanceP2    Int
+//   maintenanceP3    Int
+
+//   estate Estate @relation(fields: [estateId], references: [id])
+// }
+
+model Estate {
+  id          String     @id @default(uuid())
+  name        String
+  address     String
+  totalHouses Int
+  createdAt   DateTime   @default(now())
+  settings    Json?
+  residents   Resident[]
+  users       User[]
+  visitors    Visitor[]
+}
+
+model User {
+  id String @id @default(uuid())
+
+  email       String   @unique
+  password    String
+  role        Role
+  first_login Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  estateId String
+  estate   Estate    @relation(fields: [estateId], references: [id])
+  resident Resident?
+  gateLogs GateLog[]
+}
+
+model Resident {
+  id String @id @default(uuid())
+
+  first_name String
+  last_name  String
+  email      String @unique
+  phone      String
+  dob        String
+  gender     String
+  estateId   String
+
+  userId String? @unique
+
+  status ResidentStatus @default(PENDING)
+
+  house_no        String
+  block           String
+  home_address    String
+  state_of_origin String
+  lga             String
+
+  id_type           String
+  id_no             String
+  id_document_front String
+  id_document_back  String
+  bvn               String?
+  alternate_phone   String?
+
+  next_of_kin_name         String?
+  next_of_kin_phone        String?
+  next_of_kin_email        String?
+  next_of_kin_relationship String?
+
+  guarantor_name                 String
+  guarantor_occupation           String
+  guarantor_work_address         String
+  guarantor_id_no                String
+  guarantor_id_relationship      String
+  signed_guarantor_letter_upload String
+
+  vehicle_plate_no String
+  vehicle_make     String
+  vehicle_color    String?
+
+  proof_of_address_upload String
+  passport                String
+  tenancy_ownership_doc   String
+
+  wallet_pin String?
+
+  ndprConsentDataProcessing Boolean
+  ndprConsentIdentity       Boolean
+  ndprConsentThirdParty     Boolean
+  ndprConsentGivenAt        DateTime?
+
+  approvedAt DateTime?
+  rejectedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  estate   Estate    @relation(fields: [estateId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id])
+  visitors Visitor[]
+}
+
+model Visitor {
+  id         String        @id @default(uuid())
+  estateId   String
+  residentId String
+  name       String
+  phone      String?
+  status     VisitorStatus @default(PENDING)
+  visitDate  DateTime
+  createdAt  DateTime      @default(now())
+
+  estate   Estate    @relation(fields: [estateId], references: [id])
+  resident Resident  @relation(fields: [residentId], references: [id])
+  gateLogs GateLog[]
+}
+
+model GateLog {
+  id        String   @id @default(uuid())
+  visitorId String
+  guardId   String
+  action    String // CHECK_IN / CHECK_OUT
+  timestamp DateTime @default(now())
+
+  guard   User    @relation(fields: [guardId], references: [id])
+  visitor Visitor @relation(fields: [visitorId], references: [id])
+}
