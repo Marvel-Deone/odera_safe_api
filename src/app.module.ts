@@ -7,6 +7,10 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './apis/auth/auth.module';
 import { VisitorModule } from './apis/visitor/visitor.module';
+import { DashboardService } from './apis/dashboard/dashboard.service';
+import { DashboardController } from './apis/dashboard/dashboard.controller';
+import { DashboardModule } from './apis/dashboard/dashboard.module';
+import { PrismaModule } from './database/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -20,12 +24,14 @@ import { VisitorModule } from './apis/visitor/visitor.module';
         expiresIn: '7d',
       },
     }),
+    PrismaModule,
     ResidentModule,
     DatabaseModule,
     AuthModule,
-    VisitorModule
+    VisitorModule,
+    DashboardModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, DashboardController],
+  providers: [AppService, DashboardService],
 })
 export class AppModule { }
