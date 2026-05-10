@@ -12,6 +12,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum GuardRole {
+  GUARD
+  SUPER_GUARD
+}
+
 enum Role {
   ADMIN
   RESIDENT
@@ -24,6 +29,8 @@ enum VisitorStatus {
   DENIED
   CHECKED_IN
   CHECKED_OUT
+  REVOKED
+  EXPIRED
 }
 
 enum ResidentStatus {
@@ -37,6 +44,18 @@ enum ResidentStatus {
 enum GateAction {
   CHECK_IN
   CHECK_OUT
+  DENY
+}
+
+enum LogCategory {
+  VISITOR
+  STAFF
+  VEHICLE
+  SECURITY
+  WALLET
+  MAINTENANCE
+  COMMUNITY
+  SYSTEM
 }
 
 // model EstateSettings {
@@ -55,15 +74,17 @@ enum GateAction {
 // }
 
 model Estate {
-  id          String     @id @default(uuid())
-  name        String
-  address     String
-  totalHouses Int
-  createdAt   DateTime   @default(now())
-  settings    Json?
-  residents   Resident[]
-  users       User[]
-  visitors    Visitor[]
+  id           String        @id @default(uuid())
+  name         String
+  address      String
+  totalHouses  Int
+  createdAt    DateTime      @default(now())
+  settings     Json?
+  residents    Resident[]
+  users        User[]
+  visitors     Visitor[]
+  activityLogs ActivityLog[]
+  guards       Guard[]
 }
 
 model User {
@@ -79,6 +100,7 @@ model User {
   estate   Estate    @relation(fields: [estateId], references: [id])
   resident Resident?
   gateLogs GateLog[]
+  guard    Guard?
 }
 
 model Resident {
@@ -146,6 +168,77 @@ model Resident {
   visitors Visitor[]
 }
 
+model Guard {
+  id       String @id @default(uuid())
+  userId   String @unique
+  estateId String
+
+  role GuardRole
+
+  full_name String
+  phone     String
+  email     String?
+
+  zone_assignment String?
+  shift_pattern   String?
+  duty_cycle      String?
+
+  resumption_date DateTime?
+
+  // IDENTITY
+  government_id_type String?
+  government_id_no   String?
+  nin                String?
+
+  height               String?
+  build                String?
+  distinguishing_marks String?
+
+  id_document_url String?
+
+  // NEXT OF KIN
+  nok_name         String?
+  nok_phone        String?
+  nok_relationship String?
+
+  // GUARANTOR
+  guarantor_name         String?
+  guarantor_phone        String?
+  guarantor_occupation   String?
+  guarantor_work_address String?
+  guarantor_nin          String?
+  guarantor_relationship String?
+  guarantor_letter_url   String?
+
+  // CERTIFICATIONS
+  first_aid         Boolean @default(false)
+  fire_safety       Boolean @default(false)
+  qr_gate_ops       Boolean @default(false)
+  biometric_capture Boolean @default(false)
+  crisis_response   Boolean @default(false)
+  female_screening  Boolean @default(false)
+  self_defence      Boolean @default(false)
+  cctv_operation    Boolean @default(false)
+
+  // PAYROLL
+  salary_band    String?
+  bank_name      String?
+  account_number String?
+  account_name   String?
+
+  passport_photo_url String?
+
+  is_active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estate Estate @relation(fields: [estateId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  gateLogs GateLog[]
+}
+
 model Visitor {
   id String @id @default(uuid())
 
@@ -157,7 +250,7 @@ model Visitor {
   purpose  String?
   plate_no String?
 
-  visitDate DateTime
+  visit_date DateTime @default(now())
 
   // PASS CONTROL
   total_entries     Int
@@ -196,8 +289,31 @@ model GateLog {
   visitorId String
   guardId   String
   action    GateAction
-  timestamp DateTime   @default(now())
 
-  guard   User    @relation(fields: [guardId], references: [id])
+  createdAt DateTime   @default(now())
+  
   visitor Visitor @relation(fields: [visitorId], references: [id])
+  guard   Guard   @relation(fields: [guardId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+  userId  String?
+}
+
+model ActivityLog {
+  id String @id @default(uuid())
+
+  estateId String
+
+  category LogCategory
+  action   String
+
+  description String
+
+  actorId   String?
+  actorRole Role?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  estate Estate @relation(fields: [estateId], references: [id])
 }

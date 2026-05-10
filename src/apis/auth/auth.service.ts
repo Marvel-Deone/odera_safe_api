@@ -47,6 +47,7 @@ export class AuthService {
             sub: user.id,
             role: user.role,
             estateId: user.estateId,
+            first_login: user.first_login,
         })
 
         return success(

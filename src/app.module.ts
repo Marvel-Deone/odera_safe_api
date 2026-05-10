@@ -11,6 +11,7 @@ import { DashboardService } from './apis/dashboard/dashboard.service';
 import { DashboardController } from './apis/dashboard/dashboard.controller';
 import { DashboardModule } from './apis/dashboard/dashboard.module';
 import { PrismaModule } from './database/prisma/prisma.module';
+import { GuardModule } from './apis/guard/guard.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { PrismaModule } from './database/prisma/prisma.module';
     DatabaseModule,
     AuthModule,
     VisitorModule,
-    DashboardModule
+    DashboardModule,
+    GuardModule
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

@@ -8,6 +8,7 @@ import {
   Max,
   IsBoolean,
   Matches,
+  IsNumber,
 } from 'class-validator'
 
 export class CreateVisitorDto {
@@ -45,7 +46,7 @@ export class CreateVisitorDto {
     example: '2026-05-10T14:00:00.000Z',
   })
   @IsDateString()
-  visitDate!: string
+  visit_date!: string
 
   @ApiProperty({
     example: 2,
@@ -60,6 +61,37 @@ export class CreateVisitorDto {
     example: true,
     description: 'Enable biometric capture at gate (₦500)',
   })
+  @IsOptional()
+  @IsBoolean()
+  biometric_enabled?: boolean
+}
+
+export class UpdateVisitorDto {
+  @IsOptional()
+  @IsString()
+  name?: string
+
+  @IsOptional()
+  @IsString()
+  phone?: string
+
+  @IsOptional()
+  @IsString()
+  purpose?: string
+
+  @IsOptional()
+  @IsString()
+  plate_no?: string
+
+  @IsOptional()
+  @IsDateString()
+  visit_date?: string
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  total_entries?: number
+
   @IsOptional()
   @IsBoolean()
   biometric_enabled?: boolean

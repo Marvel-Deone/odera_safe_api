@@ -42,7 +42,7 @@ export class DashboardService {
 
     const visitorsToday = await this.prisma.visitor.count({
       where: {
-        visitDate: {
+        visit_date: {
           gte: todayStart,
           lte: todayEnd,
         },
@@ -75,7 +75,7 @@ export class DashboardService {
     // Visitor traffic (last 7 days)
     const visitorTrafficRaw =
       await this.prisma.visitor.groupBy({
-        by: ['visitDate'],
+        by: ['visit_date'],
       })
 
     const visitorTraffic =
