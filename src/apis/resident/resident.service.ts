@@ -191,4 +191,83 @@ export class ResidentService {
             HttpStatus.OK,
         )
     }
+
+    async getDashboard(userId: string) {
+        const resident =
+            await this.prisma.resident.findFirst({
+                where: {
+                    userId,
+                },
+            })
+
+        if (!resident) {
+            return error(
+                'Resident not found',
+                'Resident profile does not exist',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const activeVisitors =
+            await this.prisma.visitor.count({
+                where: {
+                    residentId: resident.id,
+                    status: {
+                        in: [
+                            'PENDING',
+                            'CHECKED_IN',
+                        ],
+                    },
+                },
+            })
+
+        const pendingApprovals =
+            await this.prisma.visitor.count({
+                where: {
+                    residentId: resident.id,
+                    status: 'PENDING',
+                },
+            })
+
+        const totalPasses =
+            await this.prisma.visitor.count({
+                where: {
+                    residentId: resident.id,
+                },
+            })
+
+        const recentVisitors =
+            await this.prisma.visitor.findMany({
+                where: {
+                    residentId: resident.id,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                take: 5,
+            })
+
+        const recentLogs =
+            await this.prisma.activityLog.findMany({
+                where: {
+                    actorId: userId,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                take: 10,
+            })
+
+        return success(
+            {
+                activeVisitors,
+                pendingApprovals,
+                totalPasses,
+                recentVisitors,
+                recentLogs,
+            },
+            'Dashboard Loaded',
+            'Resident dashboard fetched successfully',
+        )
+    }
 }

@@ -23,6 +23,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../auth/guards/roles.guard'
 import { Roles } from '../auth/decorators/roles.decorator'
 import { Role } from '@prisma/client'
+import { CurrentUser } from '../auth/decorators/current-user.decorator'
 
 @ApiTags('Residents (Admin)')
 @ApiBearerAuth()
@@ -72,6 +73,23 @@ export class ResidentController {
   })
   async onboardResident(@Body() dto: CreateResidentDto) {
     return this.residentService.onboardResident(dto)
+  }
+
+  @Get('dashboard')
+  @Roles(Role.RESIDENT)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Fetch resident dashboard analytics',
+    description: 'Returns resident analytics',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Resident analytics fetched successfully',
+  })
+  async dashboard(
+    @CurrentUser() user: any,
+  ) {
+    return this.residentService.getDashboard(user.id,)
   }
 
   @Get(':residentId')

@@ -28,12 +28,7 @@ export class VisitorService {
         private prisma: PrismaService,
     ) { }
 
-    /*
-  |--------------------------------------------------------------------------
-  | RESIDENT: CREATE VISITOR
-  |--------------------------------------------------------------------------
-  */
-
+    // resident: create visitor
     async createVisitor(
         userId: string,
         dto: CreateVisitorDto,
@@ -58,12 +53,7 @@ export class VisitorService {
         const smsCode =
             this.generateSMSCode()
 
-        /*
-    |--------------------------------------------------------------------------
-    | QR PAYLOAD
-    |--------------------------------------------------------------------------
-    */
-
+        // qr payload
         const qrPayload = {
             visitorId: crypto.randomUUID(),
             passCode,
@@ -79,12 +69,7 @@ export class VisitorService {
                 encodedPayload,
             )
 
-        /*
-    |--------------------------------------------------------------------------
-    | CREATE VISITOR
-    |--------------------------------------------------------------------------
-    */
-
+        // Create visitor
         const visitor =
             await this.prisma.visitor.create({
                 data: {
@@ -118,21 +103,6 @@ export class VisitorService {
                         dto.biometric_enabled ??
                         false,
 
-                    /*
-          |--------------------------------------------------------------------------
-          | STATUS FLOW
-          |--------------------------------------------------------------------------
-          |
-          | PENDING
-          | CHECKED_IN
-          | CHECKED_OUT
-          | DENIED
-          | REVOKED
-          | EXPIRED
-          |
-          |--------------------------------------------------------------------------
-          */
-
                     status:
                         VisitorStatus.PENDING,
 
@@ -143,12 +113,6 @@ export class VisitorService {
                         .toDate(),
                 },
             })
-
-        /*
-    |--------------------------------------------------------------------------
-    | CREATE ACTIVITY LOG
-    |--------------------------------------------------------------------------
-    */
 
         await this.createActivityLog({
             estateId: resident.estateId,
@@ -195,12 +159,7 @@ export class VisitorService {
         )
     }
 
-    /*
-  |--------------------------------------------------------------------------
-  | RESIDENT: GET VISITORS
-  |--------------------------------------------------------------------------
-  */
-
+    // Resident: get visitor
     async getResidentVisitors(
         userId: string,
     ) {
@@ -392,7 +351,7 @@ export class VisitorService {
                 },
             })
 
-        // LOG
+        // logs
         await this.createActivityLog({
             estateId: resident.estateId,
 
@@ -476,8 +435,7 @@ export class VisitorService {
         )
     }
 
-    // GUARD: VALIDATE VISITOR
-
+    // guard: validate visitor
     async validateVisitor(
         code: string,
     ) {
@@ -507,12 +465,7 @@ export class VisitorService {
             )
         }
 
-        /*
-    |--------------------------------------------------------------------------
-    | REVOKED
-    |--------------------------------------------------------------------------
-    */
-
+        // revoked
         if (
             visitor.status ===
             VisitorStatus.REVOKED
@@ -524,12 +477,7 @@ export class VisitorService {
             )
         }
 
-        /*
-    |--------------------------------------------------------------------------
-    | DENIED
-    |--------------------------------------------------------------------------
-    */
-
+        // denied
         if (
             visitor.status ===
             VisitorStatus.DENIED
@@ -541,24 +489,7 @@ export class VisitorService {
             )
         }
 
-        // Checked-in
-        if (
-            visitor.status ===
-            VisitorStatus.CHECKED_IN
-        ) {
-            return error(
-                'Already Checked In',
-                'Visitor is already inside estate',
-                HttpStatus.BAD_REQUEST,
-            )
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | EXPIRED
-    |--------------------------------------------------------------------------
-    */
-
+        // expired
         if (
             dayjs().isAfter(
                 visitor.expiresAt,
@@ -582,12 +513,7 @@ export class VisitorService {
             )
         }
 
-        /*
-    |--------------------------------------------------------------------------
-    | NO ENTRIES
-    |--------------------------------------------------------------------------
-    */
-
+        // No entries
         if (
             visitor.remaining_entries <=
             0
@@ -606,12 +532,7 @@ export class VisitorService {
         )
     }
 
-    /*
-  |--------------------------------------------------------------------------
-  | GUARD: QR SCAN
-  |--------------------------------------------------------------------------
-  */
-
+    //   guard: qr scan
     async scanQR(
         qrData: string,
         guardId: string,
@@ -670,16 +591,33 @@ export class VisitorService {
             },
         })
 
-        return this.checkIn(
-            passCode,
-            guardId,
+        return success(
+            visitor,
+            'Visitor Valid',
+            'Visitor validated successfully',
         )
     }
 
+    // guard: deny visitor
     async denyVisitor(
         visitorId: string,
-        guardId: string,
+        userId: string,
     ) {
+        const guard =
+            await this.prisma.guard.findUnique({
+                where: {
+                    userId,
+                },
+            })
+
+        if (!guard) {
+            return error(
+                'Guard Not Found',
+                'No guard profile linked to this account',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
         const visitor =
             await this.prisma.visitor.findUnique({
                 where: {
@@ -695,76 +633,127 @@ export class VisitorService {
             )
         }
 
-        const updated =
-            await this.prisma.visitor.update({
-                where: {
-                    id: visitor.id,
+        if (
+            visitor.status ===
+            VisitorStatus.DENIED
+        ) {
+            return error(
+                'Already Denied',
+                'Visitor has already been denied access',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        if (
+            visitor.status ===
+            VisitorStatus.CHECKED_IN
+        ) {
+            return error(
+                'Visitor Checked In',
+                'Cannot deny a visitor already inside the estate',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        if (
+            visitor.status ===
+            VisitorStatus.REVOKED
+        ) {
+            return error(
+                'Visitor Revoked',
+                'Visitor invitation has already been revoked',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        const result =
+            await this.prisma.$transaction(
+                async (tx) => {
+                    const updated =
+                        await tx.visitor.update({
+                            where: {
+                                id: visitor.id,
+                            },
+
+                            data: {
+                                status:
+                                    VisitorStatus.DENIED,
+                            },
+                        })
+
+                    await tx.gateLog.create({
+                        data: {
+                            visitorId:
+                                visitor.id,
+
+                            guardId:
+                                guard.id,
+
+                            action:
+                                'DENY',
+                        },
+                    })
+
+                    await tx.activityLog.create({
+                        data: {
+                            estateId:
+                                visitor.estateId,
+
+                            category:
+                                LogCategory.VISITOR,
+
+                            action:
+                                'VISITOR_DENIED',
+
+                            description: `${visitor.name} was denied access at the gate`,
+
+                            actorId:
+                                guard.id,
+
+                            actorRole:
+                                Role.GUARD,
+
+                            metadata: {
+                                visitorId:
+                                    visitor.id,
+
+                                visitorName:
+                                    visitor.name,
+                            },
+                        },
+                    })
+
+                    return updated
                 },
-
-                data: {
-                    status:
-                        VisitorStatus.DENIED,
-                },
-            })
-
-        /*
-      |--------------------------------------------------------------------------
-      | GATE LOG
-      |--------------------------------------------------------------------------
-      */
-
-        await this.prisma.gateLog.create({
-            data: {
-                visitorId: visitor.id,
-                guardId,
-                action: 'DENY',
-            },
-        })
-
-        /*
-      |--------------------------------------------------------------------------
-      | ACTIVITY LOG
-      |--------------------------------------------------------------------------
-      */
-
-        await this.createActivityLog({
-            estateId: visitor.estateId,
-
-            category:
-                LogCategory.VISITOR,
-
-            action: 'VISITOR_DENIED',
-
-            description: `${visitor.name} was denied access at the gate`,
-
-            actorId: guardId,
-
-            actorRole:
-                Role.GUARD,
-
-            metadata: {
-                visitorId: visitor.id,
-                visitorName: visitor.name,
-            },
-        })
+            )
 
         return success(
-            updated,
+            result,
             'Access Denied',
             'Visitor access denied successfully',
         )
     }
 
-    /*
-  |--------------------------------------------------------------------------
-  | GUARD: CHECK IN
-  |--------------------------------------------------------------------------
-  */
-
+    //  guard: check-in
     async checkIn(
         code: string,
-        guardId: string,
+        userId: string,
     ) {
+        const guard =
+            await this.prisma.guard.findUnique({
+                where: {
+                    userId,
+                },
+            })
+
+        if (!guard) {
+            return error(
+                'Guard Not Found',
+                'No guard profile linked to this account',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
         const visitor =
             await this.prisma.visitor.findFirst({
                 where: {
@@ -786,12 +775,6 @@ export class VisitorService {
                 HttpStatus.NOT_FOUND,
             )
         }
-
-        /*
-    |--------------------------------------------------------------------------
-    | VALIDATIONS
-    |--------------------------------------------------------------------------
-    */
 
         if (
             visitor.status ===
@@ -828,8 +811,7 @@ export class VisitorService {
         }
 
         if (
-            visitor.remaining_entries <=
-            0
+            visitor.remaining_entries <= 0
         ) {
             return error(
                 'Limit Reached',
@@ -849,82 +831,101 @@ export class VisitorService {
             )
         }
 
-        /*
-    |--------------------------------------------------------------------------
-    | CHECK IN
-    |--------------------------------------------------------------------------
-    */
+        const result =
+            await this.prisma.$transaction(
+                async (tx) => {
+                    const updated =
+                        await tx.visitor.update({
+                            where: {
+                                id: visitor.id,
+                            },
 
-        const updated =
-            await this.prisma.visitor.update({
-                where: {
-                    id: visitor.id,
+                            data: {
+                                status:
+                                    VisitorStatus.CHECKED_IN,
+
+                                checkedInAt:
+                                    new Date(),
+
+                                remaining_entries:
+                                {
+                                    decrement: 1,
+                                },
+                            },
+                        })
+
+                    await tx.activityLog.create({
+                        data: {
+                            estateId:
+                                visitor.estateId,
+
+                            category:
+                                LogCategory.VISITOR,
+
+                            action:
+                                'VISITOR_CHECKED_IN',
+
+                            description: `${visitor.name} checked in at the gate`,
+
+                            actorId: guard.id,
+
+                            actorRole:
+                                Role.GUARD,
+
+                            metadata: {
+                                visitorId:
+                                    visitor.id,
+
+                                visitorName:
+                                    visitor.name,
+                            },
+                        },
+                    })
+
+                    await tx.gateLog.create({
+                        data: {
+                            visitorId:
+                                visitor.id,
+
+                            guardId:
+                                guard.id,
+
+                            action:
+                                'CHECK_IN',
+                        },
+                    })
+
+                    return updated
                 },
-
-                data: {
-                    status:
-                        VisitorStatus.CHECKED_IN,
-
-                    checkedInAt: new Date(),
-
-                    remaining_entries: {
-                        decrement: 1,
-                    },
-                },
-            })
-
-        /*
-    |--------------------------------------------------------------------------
-    | LOG
-    |--------------------------------------------------------------------------
-    */
-
-        await this.createActivityLog({
-            estateId: visitor.estateId,
-
-            category:
-                LogCategory.VISITOR,
-
-            action: 'VISITOR_CHECKED_IN',
-
-            description: `${visitor.name} checked in at the gate`,
-
-            actorId: guardId,
-
-            actorRole:
-                Role.GUARD,
-
-            metadata: {
-                visitorId: visitor.id,
-                visitorName: visitor.name,
-            },
-        })
-
-        await this.prisma.gateLog.create({
-            data: {
-                visitorId: visitor.id,
-                guardId,
-                action: 'CHECK_IN',
-            },
-        })
+            )
 
         return success(
-            updated,
+            result,
             'Checked In',
             'Visitor checked in successfully',
         )
     }
 
-    /*
-  |--------------------------------------------------------------------------
-  | GUARD: CHECK OUT
-  |--------------------------------------------------------------------------
-  */
-
+    //   guard: check-out
     async checkOut(
         code: string,
-        guardId: string,
+        userId: string,
     ) {
+        const guard =
+            await this.prisma.guard.findUnique({
+                where: {
+                    userId,
+                },
+            })
+
+        if (!guard) {
+            return error(
+                'Guard Not Found',
+                'No guard profile linked to this account',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
         const visitor =
             await this.prisma.visitor.findFirst({
                 where: {
@@ -947,69 +948,86 @@ export class VisitorService {
             )
         }
 
-        const updated =
-            await this.prisma.visitor.update({
-                where: {
-                    id: visitor.id,
+        if (
+            visitor.status !==
+            VisitorStatus.CHECKED_IN
+        ) {
+            return error(
+                'Invalid Status',
+                'Visitor is not currently checked in',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        const result =
+            await this.prisma.$transaction(
+                async (tx) => {
+                    const updated =
+                        await tx.visitor.update({
+                            where: {
+                                id: visitor.id,
+                            },
+
+                            data: {
+                                status:
+                                    VisitorStatus.CHECKED_OUT,
+
+                                checkedOutAt:
+                                    new Date(),
+                            },
+                        })
+
+                    await tx.activityLog.create({
+                        data: {
+                            estateId:
+                                visitor.estateId,
+
+                            category:
+                                LogCategory.VISITOR,
+
+                            action:
+                                'VISITOR_CHECKED_OUT',
+
+                            description: `${visitor.name} checked out from the estate`,
+
+                            actorId:
+                                guard.id,
+
+                            actorRole:
+                                Role.GUARD,
+
+                            metadata: {
+                                visitorId:
+                                    visitor.id,
+                            },
+                        },
+                    })
+
+                    await tx.gateLog.create({
+                        data: {
+                            visitorId:
+                                visitor.id,
+
+                            guardId:
+                                guard.id,
+
+                            action:
+                                'CHECK_OUT',
+                        },
+                    })
+
+                    return updated
                 },
-
-                data: {
-                    status:
-                        VisitorStatus.CHECKED_OUT,
-
-                    checkedOutAt:
-                        new Date(),
-                },
-            })
-
-        /*
-    |--------------------------------------------------------------------------
-    | LOG
-    |--------------------------------------------------------------------------
-    */
-
-        await this.createActivityLog({
-            estateId: visitor.estateId,
-
-            category:
-                LogCategory.VISITOR,
-
-            action:
-                'VISITOR_CHECKED_OUT',
-
-            description: `${visitor.name} checked out from the estate`,
-
-            actorId: guardId,
-
-            actorRole:
-                Role.GUARD,
-
-            metadata: {
-                visitorId: visitor.id,
-            },
-        })
-
-        await this.prisma.gateLog.create({
-            data: {
-                visitorId: visitor.id,
-                guardId,
-                action: 'CHECK_OUT',
-            },
-        })
+            )
 
         return success(
-            updated,
+            result,
             'Checked Out',
             'Visitor checked out successfully',
         )
     }
 
-    /*
-  |--------------------------------------------------------------------------
-  | RESIDENT: REVOKE VISITOR
-  |--------------------------------------------------------------------------
-  */
-
+    //   resident/admin: revoke visitor
     async revokeVisitor(
         visitorId: string,
         userId: string,
@@ -1043,56 +1061,79 @@ export class VisitorService {
             )
         }
 
-        const updated =
-            await this.prisma.visitor.update({
-                where: {
-                    id: visitor.id,
+        if (
+            visitor.status ===
+            VisitorStatus.REVOKED
+        ) {
+            return error(
+                'Already Revoked',
+                'Visitor invitation already revoked',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        if (
+            visitor.status ===
+            VisitorStatus.CHECKED_IN
+        ) {
+            return error(
+                'Visitor Checked In',
+                'Cannot revoke a visitor currently inside the estate',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        const result =
+            await this.prisma.$transaction(
+                async (tx) => {
+                    const updated =
+                        await tx.visitor.update({
+                            where: {
+                                id: visitor.id,
+                            },
+
+                            data: {
+                                status:
+                                    VisitorStatus.REVOKED,
+                            },
+                        })
+
+                    await tx.activityLog.create({
+                        data: {
+                            estateId:
+                                visitor.estateId,
+
+                            category:
+                                LogCategory.VISITOR,
+
+                            action:
+                                'VISITOR_REVOKED',
+
+                            description: `Visitor invitation revoked for ${visitor.name}`,
+
+                            actorId:
+                                userId,
+
+                            actorRole:
+                                Role.RESIDENT,
+
+                            metadata: {
+                                visitorId:
+                                    visitor.id,
+                            },
+                        },
+                    })
+
+                    return updated
                 },
-
-                data: {
-                    status:
-                        VisitorStatus.REVOKED,
-                },
-            })
-
-        /*
-    |--------------------------------------------------------------------------
-    | LOG
-    |--------------------------------------------------------------------------
-    */
-
-        await this.createActivityLog({
-            estateId: visitor.estateId,
-
-            category:
-                LogCategory.VISITOR,
-
-            action: 'VISITOR_REVOKED',
-
-            description: `Visitor invitation revoked for ${visitor.name}`,
-
-            actorId: userId,
-
-            actorRole:
-                Role.RESIDENT,
-
-            metadata: {
-                visitorId: visitor.id,
-            },
-        })
+            )
 
         return success(
-            updated,
+            result,
             'Visitor Revoked',
             'Visitor invitation revoked successfully',
         )
     }
-
-    /*
-  |--------------------------------------------------------------------------
-  | HELPERS
-  |--------------------------------------------------------------------------
-  */
 
     private generatePassCode(): string {
         return Math.random()
@@ -1114,8 +1155,6 @@ export class VisitorService {
 
         return `${part1}-${part2}`
     }
-
-    //   ACTIVITY LOG
 
     private async createActivityLog(
         data: {
