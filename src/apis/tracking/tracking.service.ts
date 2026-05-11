@@ -197,7 +197,7 @@ export class TrackingService {
     async getTrackingHistory(
         sessionId: string,
     ) {
-        return this.prisma.visitorLocation.findMany({
+        const history = this.prisma.visitorLocation.findMany({
             where: {
                 trackingSessionId:
                     sessionId,
@@ -209,5 +209,11 @@ export class TrackingService {
 
             take: 1000,
         })
+
+        return success(
+            history,
+            'Visitors Tracking History Retrieved',
+            'Visitors tracking history retrieved',
+        )
     }
 }
