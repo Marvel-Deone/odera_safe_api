@@ -162,4 +162,17 @@ export class TrackingController {
       sessionId,
     )
   }
+  @Post(':sessionId/history')
+  @ApiOperation({
+    summary:
+      'Get tracking history',
+  })
+  async getTrackingHistory(
+    @Param('sessionId')
+    sessionId: string,
+  ) {
+    return this.trackingService.getTrackingHistory(
+      sessionId,
+    )
+  }
 }

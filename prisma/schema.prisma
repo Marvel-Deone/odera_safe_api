@@ -303,7 +303,14 @@ model TrackingSession {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  locations VisitorLocation[]
+  locations      VisitorLocation[]
+  currentLat     Float?
+  currentLng     Float?
+  lastLocationAt DateTime?
+
+  @@index([visitorId])
+  @@index([isActive])
+  @@index([visitorId, isActive])
 }
 
 model VisitorLocation {
@@ -321,7 +328,9 @@ model VisitorLocation {
   visitor   Visitor? @relation(fields: [visitorId], references: [id])
   visitorId String?
 
-  @@index([trackingSessionId])
+  @@index([visitorId])
+  @@index([createdAt])
+  @@index([trackingSessionId, createdAt])
 }
 
 model GateLog {

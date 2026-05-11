@@ -931,16 +931,160 @@ export class VisitorService {
     }
 
     //   guard: check-out
-    async checkOut(
-        code: string,
-        userId: string,
-    ) {
-        const guard =
-            await this.prisma.guard.findUnique({
-                where: {
-                    userId,
-                },
-            })
+    // async checkOut(
+    //     code: string,
+    //     userId: string,
+    // ) {
+    //     const guard =
+    //         await this.prisma.guard.findUnique({
+    //             where: {
+    //                 userId,
+    //             },
+    //         })
+
+    //     if (!guard) {
+    //         return error(
+    //             'Guard Not Found',
+    //             'No guard profile linked to this account',
+    //             HttpStatus.BAD_REQUEST,
+    //         )
+    //     }
+
+    //     const visitor =
+    //         await this.prisma.visitor.findFirst({
+    //             where: {
+    //                 OR: [
+    //                     {
+    //                         passCode: code,
+    //                     },
+    //                     {
+    //                         sms_code: code,
+    //                     },
+    //                 ],
+    //             },
+    //         })
+
+    //     if (!visitor) {
+    //         return error(
+    //             'Not Found',
+    //             'Visitor not found',
+    //             HttpStatus.NOT_FOUND,
+    //         )
+    //     }
+
+    //     if (
+    //         visitor.status !==
+    //         VisitorStatus.CHECKED_IN
+    //     ) {
+    //         return error(
+    //             'Invalid Status',
+    //             'Visitor is not currently checked in',
+    //             HttpStatus.BAD_REQUEST,
+    //         )
+    //     }
+
+    //     const result =
+    //         await this.prisma.$transaction(
+    //             async (tx) => {
+    //                 const updated =
+    //                     await tx.visitor.update({
+    //                         where: {
+    //                             id: visitor.id,
+    //                         },
+
+    //                         data: {
+    //                             status:
+    //                                 VisitorStatus.CHECKED_OUT,
+
+    //                             checkedOutAt:
+    //                                 new Date(),
+    //                         },
+    //                     })
+
+    //                 await tx.trackingSession.updateMany({
+    //                     where: {
+    //                         visitorId: visitor.id,
+    //                         isActive: true,
+    //                     },
+
+    //                     data: {
+    //                         isActive: false,
+    //                         endedAt: new Date(),
+    //                     },
+    //                 })
+
+    //                 await tx.activityLog.create({
+    //                     data: {
+    //                         estateId:
+    //                             visitor.estateId,
+
+    //                         category:
+    //                             LogCategory.VISITOR,
+
+    //                         action:
+    //                             'VISITOR_CHECKED_OUT',
+
+    //                         description: `${visitor.name} checked out from the estate`,
+
+    //                         actorId:
+    //                             guard.id,
+
+    //                         actorRole:
+    //                             Role.GUARD,
+
+    //                         metadata: {
+    //                             visitorId:
+    //                                 visitor.id,
+    //                         },
+    //                     },
+    //                 })
+
+    //                 await tx.gateLog.create({
+    //                     data: {
+    //                         visitorId:
+    //                             visitor.id,
+
+    //                         guardId:
+    //                             guard.id,
+
+    //                         action:
+    //                             'CHECK_OUT',
+    //                     },
+    //                 })
+
+    //                 const activeSession =
+    //                     await this.prisma.trackingSession.findFirst({
+    //                         where: {
+    //                             visitorId:
+    //                                 visitor.id,
+
+    //                             isActive: true,
+    //                         },
+    //                     })
+
+    //                 if (activeSession) {
+    //                     await this.trackingService.stopTracking(
+    //                         activeSession.id,
+    //                     )
+    //                 }
+
+    //                 return updated
+    //             },
+    //         )
+
+    //     return success(
+    //         result,
+    //         'Checked Out',
+    //         'Visitor checked out successfully',
+    //     )
+    // }
+
+    async checkOut(code: string, userId: string) {
+        const guard = await this.prisma.guard.findUnique({
+            where: {
+                userId,
+            },
+        })
 
         if (!guard) {
             return error(
@@ -950,19 +1094,14 @@ export class VisitorService {
             )
         }
 
-        const visitor =
-            await this.prisma.visitor.findFirst({
-                where: {
-                    OR: [
-                        {
-                            passCode: code,
-                        },
-                        {
-                            sms_code: code,
-                        },
-                    ],
-                },
-            })
+        const visitor = await this.prisma.visitor.findFirst({
+            where: {
+                OR: [
+                    { passCode: code },
+                    { sms_code: code },
+                ],
+            },
+        })
 
         if (!visitor) {
             return error(
@@ -973,8 +1112,7 @@ export class VisitorService {
         }
 
         if (
-            visitor.status !==
-            VisitorStatus.CHECKED_IN
+            visitor.status !== VisitorStatus.CHECKED_IN
         ) {
             return error(
                 'Invalid Status',
@@ -983,94 +1121,79 @@ export class VisitorService {
             )
         }
 
-        const result =
-            await this.prisma.$transaction(
-                async (tx) => {
-                    const updated =
-                        await tx.visitor.update({
-                            where: {
-                                id: visitor.id,
-                            },
-
-                            data: {
-                                status:
-                                    VisitorStatus.CHECKED_OUT,
-
-                                checkedOutAt:
-                                    new Date(),
-                            },
-                        })
-
-                    await tx.trackingSession.updateMany({
-                        where: {
-                            visitorId: visitor.id,
-                            isActive: true,
-                        },
-
-                        data: {
-                            isActive: false,
-                            endedAt: new Date(),
-                        },
-                    })
-
-                    await tx.activityLog.create({
-                        data: {
-                            estateId:
-                                visitor.estateId,
-
-                            category:
-                                LogCategory.VISITOR,
-
-                            action:
-                                'VISITOR_CHECKED_OUT',
-
-                            description: `${visitor.name} checked out from the estate`,
-
-                            actorId:
-                                guard.id,
-
-                            actorRole:
-                                Role.GUARD,
-
-                            metadata: {
-                                visitorId:
-                                    visitor.id,
-                            },
-                        },
-                    })
-
-                    await tx.gateLog.create({
-                        data: {
-                            visitorId:
-                                visitor.id,
-
-                            guardId:
-                                guard.id,
-
-                            action:
-                                'CHECK_OUT',
-                        },
-                    })
-
-                    const activeSession =
-                        await this.prisma.trackingSession.findFirst({
-                            where: {
-                                visitorId:
-                                    visitor.id,
-
-                                isActive: true,
-                            },
-                        })
-
-                    if (activeSession) {
-                        await this.trackingService.stopTracking(
-                            activeSession.id,
-                        )
-                    }
-
-                    return updated
+        // fetch active session BEFORE transaction
+        const activeSession =
+            await this.prisma.trackingSession.findFirst({
+                where: {
+                    visitorId: visitor.id,
+                    isActive: true,
                 },
+            })
+
+        const result =
+            await this.prisma.$transaction(async (tx) => {
+                const updated = await tx.visitor.update({
+                    where: {
+                        id: visitor.id,
+                    },
+
+                    data: {
+                        status:
+                            VisitorStatus.CHECKED_OUT,
+
+                        checkedOutAt: new Date(),
+                    },
+                })
+
+                await tx.trackingSession.updateMany({
+                    where: {
+                        visitorId: visitor.id,
+                        isActive: true,
+                    },
+
+                    data: {
+                        isActive: false,
+                        endedAt: new Date(),
+                    },
+                })
+
+                await tx.activityLog.create({
+                    data: {
+                        estateId: visitor.estateId,
+
+                        category: LogCategory.VISITOR,
+
+                        action: 'VISITOR_CHECKED_OUT',
+
+                        description: `${visitor.name} checked out from the estate`,
+
+                        actorId: guard.id,
+
+                        actorRole: Role.GUARD,
+
+                        metadata: {
+                            visitorId: visitor.id,
+                        },
+                    },
+                })
+
+                await tx.gateLog.create({
+                    data: {
+                        visitorId: visitor.id,
+                        guardId: guard.id,
+                        action: 'CHECK_OUT',
+                    },
+                })
+
+                return updated
+            })
+
+        // OUTSIDE transaction
+        if (activeSession) {
+            await this.trackingService.stopTracking(
+                activeSession.id,
             )
+        }
 
         return success(
             result,

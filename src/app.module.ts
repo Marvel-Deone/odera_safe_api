@@ -14,9 +14,11 @@ import { PrismaModule } from './database/prisma/prisma.module';
 import { GuardModule } from './apis/guard/guard.module';
 import { TrackingModule } from './apis/tracking/tracking.module';
 import { SmsModule } from './apis/sms/sms.module';
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
