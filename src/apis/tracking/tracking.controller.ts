@@ -162,7 +162,8 @@ export class TrackingController {
       sessionId,
     )
   }
-  @Post(':sessionId/history')
+
+  @Get(':sessionId/history')
   @ApiOperation({
     summary:
       'Get tracking history',
