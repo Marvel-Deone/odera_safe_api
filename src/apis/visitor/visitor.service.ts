@@ -21,11 +21,13 @@ import {
 } from '../../common/utils/response.util'
 
 import { CreateVisitorDto, UpdateVisitorDto } from './dto/visitor.dto'
+import { TrackingService } from '../tracking/tracking.service'
 
 @Injectable()
 export class VisitorService {
     constructor(
         private prisma: PrismaService,
+        private trackingService: TrackingService,
     ) { }
 
     // resident: create visitor
@@ -831,6 +833,7 @@ export class VisitorService {
             )
         }
 
+        let tracking;
         const result =
             await this.prisma.$transaction(
                 async (tx) => {
@@ -895,12 +898,33 @@ export class VisitorService {
                         },
                     })
 
+                    // START TRACKING SESSION
+                    // const tracking =
+                    tracking =
+                        await this.trackingService.startTracking(
+                            visitor.id,
+                        )
+
+                    // SEND TRACKING LINK SMS
+                    // await this.smsService.sendTrackingLink({
+                    //     phone:
+                    //         visitor.phone,
+
+                    //     visitorName:
+                    //         visitor.name,
+
+                    //     trackingToken:
+                    //         tracking.trackingUrl,
+                    // })
+
                     return updated
                 },
             )
 
         return success(
-            result,
+            { ...result, tracking }, //remove in prod
+            // result,
+            // tracking, 
             'Checked In',
             'Visitor checked in successfully',
         )
@@ -977,6 +1001,18 @@ export class VisitorService {
                             },
                         })
 
+                    await tx.trackingSession.updateMany({
+                        where: {
+                            visitorId: visitor.id,
+                            isActive: true,
+                        },
+
+                        data: {
+                            isActive: false,
+                            endedAt: new Date(),
+                        },
+                    })
+
                     await tx.activityLog.create({
                         data: {
                             estateId:
@@ -1015,6 +1051,22 @@ export class VisitorService {
                                 'CHECK_OUT',
                         },
                     })
+
+                    const activeSession =
+                        await this.prisma.trackingSession.findFirst({
+                            where: {
+                                visitorId:
+                                    visitor.id,
+
+                                isActive: true,
+                            },
+                        })
+
+                    if (activeSession) {
+                        await this.trackingService.stopTracking(
+                            activeSession.id,
+                        )
+                    }
 
                     return updated
                 },

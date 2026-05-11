@@ -18,6 +18,7 @@ enum GuardRole {
 }
 
 enum Role {
+  SUPERADMIN
   ADMIN
   RESIDENT
   GUARD
@@ -281,7 +282,46 @@ model Visitor {
   estate   Estate   @relation(fields: [estateId], references: [id])
   resident Resident @relation(fields: [residentId], references: [id])
 
-  gateLogs GateLog[]
+  gateLogs         GateLog[]
+  visitorLocations VisitorLocation[]
+  trackingSessions TrackingSession[]
+}
+
+model TrackingSession {
+  id String @id @default(cuid())
+
+  visitorId String
+  visitor   Visitor @relation(fields: [visitorId], references: [id])
+
+  token String @unique
+
+  isActive Boolean @default(true)
+
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locations VisitorLocation[]
+}
+
+model VisitorLocation {
+  id String @id @default(cuid())
+
+  trackingSessionId String
+
+  trackingSession TrackingSession @relation(fields: [trackingSessionId], references: [id])
+
+  latitude  Float
+  longitude Float
+  accuracy  Float?
+
+  createdAt DateTime @default(now())
+  visitor   Visitor? @relation(fields: [visitorId], references: [id])
+  visitorId String?
+
+  @@index([trackingSessionId])
 }
 
 model GateLog {
@@ -290,8 +330,8 @@ model GateLog {
   guardId   String
   action    GateAction
 
-  createdAt DateTime   @default(now())
-  
+  createdAt DateTime @default(now())
+
   visitor Visitor @relation(fields: [visitorId], references: [id])
   guard   Guard   @relation(fields: [guardId], references: [id])
   user    User?   @relation(fields: [userId], references: [id])
