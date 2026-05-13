@@ -573,6 +573,25 @@ export class VisitorService {
             )
         }
 
+        await this.prisma.gateQueue.upsert({
+            where: {
+                visitorId_status: {
+                    visitorId: visitor.id,
+                    status: 'WAITING',
+                },
+            },
+
+            update: {
+                scannedAt: new Date(),
+            },
+
+            create: {
+                estateId: visitor.estateId,
+                visitorId: visitor.id,
+                status: 'WAITING',
+            },
+        })
+
         await this.createActivityLog({
             estateId: visitor.estateId,
 
@@ -725,6 +744,25 @@ export class VisitorService {
                         },
                     })
 
+                    // REMOVE FROM QUEUE
+                    await tx.gateQueue.updateMany({
+                        where: {
+                            visitorId:
+                                visitor.id,
+
+                            status:
+                                'WAITING',
+                        },
+
+                        data: {
+                            status:
+                                'DENIED',
+
+                            processedAt:
+                                new Date(),
+                        },
+                    })
+
                     return updated
                 },
             )
@@ -833,7 +871,8 @@ export class VisitorService {
             )
         }
 
-        let tracking;
+        let tracking
+
         const result =
             await this.prisma.$transaction(
                 async (tx) => {
@@ -881,6 +920,9 @@ export class VisitorService {
 
                                 visitorName:
                                     visitor.name,
+
+                                visitorPlateNo:
+                                    visitor.plate_no,
                             },
                         },
                     })
@@ -898,33 +940,37 @@ export class VisitorService {
                         },
                     })
 
+                    // REMOVE FROM QUEUE
+                    await tx.gateQueue.updateMany({
+                        where: {
+                            visitorId:
+                                visitor.id,
+
+                            status:
+                                'WAITING',
+                        },
+
+                        data: {
+                            status:
+                                'APPROVED',
+
+                            processedAt:
+                                new Date(),
+                        },
+                    })
+
                     // START TRACKING SESSION
-                    // const tracking =
                     tracking =
                         await this.trackingService.startTracking(
                             visitor.id,
                         )
-
-                    // SEND TRACKING LINK SMS
-                    // await this.smsService.sendTrackingLink({
-                    //     phone:
-                    //         visitor.phone,
-
-                    //     visitorName:
-                    //         visitor.name,
-
-                    //     trackingToken:
-                    //         tracking.trackingUrl,
-                    // })
 
                     return updated
                 },
             )
 
         return success(
-            { ...result, tracking }, //remove in prod
-            // result,
-            // tracking, 
+            { ...result, tracking },
             'Checked In',
             'Visitor checked in successfully',
         )
@@ -1173,6 +1219,8 @@ export class VisitorService {
 
                         metadata: {
                             visitorId: visitor.id,
+                            visitorName: visitor.name,
+                            visitorPlateNo: visitor.plate_no,
                         },
                     },
                 })
@@ -1295,6 +1343,8 @@ export class VisitorService {
                             metadata: {
                                 visitorId:
                                     visitor.id,
+                                visitorName: visitor.name,
+                                visitorPlateNo: visitor.plate_no
                             },
                         },
                     })

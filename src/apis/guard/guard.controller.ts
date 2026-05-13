@@ -276,4 +276,21 @@ export class GuardController {
       user.id,
     )
   }
+
+  @Get('guards/gate-queue')
+  @Roles(
+    Role.GUARD,
+    Role.ADMIN,
+  )
+
+  @ApiOperation({
+    summary: 'Gate queue',
+  })
+  async getGateQueue(
+    @CurrentUser() user: any,
+  ) {
+    return this.guardsService.getGateQueue(
+      user.id,
+    )
+  }
 }

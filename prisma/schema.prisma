@@ -86,6 +86,7 @@ model Estate {
   visitors     Visitor[]
   activityLogs ActivityLog[]
   guards       Guard[]
+  gateQueues   GateQueue[]
 }
 
 model User {
@@ -285,6 +286,7 @@ model Visitor {
   gateLogs         GateLog[]
   visitorLocations VisitorLocation[]
   trackingSessions TrackingSession[]
+  gateQueues       GateQueue[]
 }
 
 model TrackingSession {
@@ -366,3 +368,33 @@ model ActivityLog {
 
   estate Estate @relation(fields: [estateId], references: [id])
 }
+
+model GateQueue {
+  id String @id @default(uuid())
+
+  estateId  String
+  visitorId String
+
+  status GateQueueStatus @default(WAITING)
+
+  scannedAt DateTime @default(now())
+  processedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estate  Estate  @relation(fields: [estateId], references: [id])
+  visitor Visitor @relation(fields: [visitorId], references: [id])
+
+  @@unique([visitorId, status])
+}
+
+enum GateQueueStatus {
+  WAITING
+  APPROVED
+  DENIED
+  COMPLETED
+  PROCESSED
+}
+
+// VISITOR_SCAN_FAILED
