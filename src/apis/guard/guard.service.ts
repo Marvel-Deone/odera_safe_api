@@ -1147,6 +1147,38 @@ export class GuardService {
         )
     }
 
+    async getMyRoster(userId: string) {
+        const guard = await this.prisma.guard.findFirst({
+            where: { userId },
+        })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const shifts = await this.prisma.guardShift.findMany({
+            where: {
+                guardId: guard.id,
+                shiftDate: {
+                    gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                },
+            },
+            orderBy: {
+                shiftDate: 'asc',
+            },
+        })
+
+        return success(
+            shifts,
+            'Roster Retrieved',
+            'Your roster fetched successfully',
+        )
+    }
+
     async clockIn(userId: string, dto: any) {
         const guard = await this.prisma.guard.findFirst({
             where: { userId },

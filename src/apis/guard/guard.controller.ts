@@ -153,6 +153,17 @@ export class GuardController {
     )
   }
 
+  @Get('my-roster')
+   @Roles(Role.GUARD)
+
+  @ApiOperation({
+    summary: 'My Roster',
+  })
+  
+  getMyRoster(@Req() req: any) {
+    return this.guardsService.getMyRoster(req.user.id)
+  }
+
   @Patch(
     'admin/guards/:guardId',
   )
