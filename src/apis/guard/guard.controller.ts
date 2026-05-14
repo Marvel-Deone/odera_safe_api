@@ -153,8 +153,15 @@ export class GuardController {
     )
   }
 
+  @Get('guards/upcoming-resumptions')
+  getUpcomingResumptions(@Req() req: any) {
+    return this.guardsService.getUpcomingResumptions(
+      req.user.id,
+    )
+  }
+
   @Get('guards/my-roster')
-   @Roles(Role.GUARD)
+  @Roles(Role.GUARD)
 
   @ApiOperation({
     summary: 'My Roster',

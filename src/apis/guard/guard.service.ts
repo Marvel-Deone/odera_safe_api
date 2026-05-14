@@ -1179,6 +1179,55 @@ export class GuardService {
         )
     }
 
+    async getUpcomingResumptions(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin profile not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const next7Days = new Date(today)
+        next7Days.setDate(next7Days.getDate() + 7)
+
+        const guards = await this.prisma.guard.findMany({
+            where: {
+                estateId: admin.estateId,
+                is_active: true,
+                resumption_date: {
+                    not: null,
+                    lte: next7Days,
+                },
+            },
+            orderBy: {
+                resumption_date: 'asc',
+            },
+            select: {
+                id: true,
+                full_name: true,
+                phone: true,
+                zone_assignment: true,
+                shift_pattern: true,
+                resumption_date: true,
+                role: true,
+            },
+        })
+
+        return success(
+            guards,
+            'Upcoming Resumptions',
+            'Upcoming resumption dates fetched successfully',
+        )
+    }
+
     async clockIn(userId: string, dto: any) {
         const guard = await this.prisma.guard.findFirst({
             where: { userId },
