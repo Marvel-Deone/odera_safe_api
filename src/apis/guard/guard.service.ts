@@ -1113,7 +1113,7 @@ export class GuardService {
         await this.prisma.guardShift.deleteMany({
             where: {
                 estateId: admin.estateId,
-                date: {
+                shiftDate: {
                     gte: startDate,
                 },
             },
