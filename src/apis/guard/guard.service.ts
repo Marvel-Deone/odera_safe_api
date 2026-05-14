@@ -5,8 +5,10 @@ import {
 
 import {
     GateAction,
+    GuardRole,
     LogCategory,
     Role,
+    ShiftType,
     VisitorStatus,
 } from '@prisma/client'
 
@@ -276,12 +278,6 @@ export class GuardService {
         )
     }
 
-    /*
-  |--------------------------------------------------------------------------
-  | ADMIN: GET SINGLE GUARD
-  |--------------------------------------------------------------------------
-  */
-
     async getGuardById(
         userId: string,
         guardId: string,
@@ -336,12 +332,6 @@ export class GuardService {
         )
     }
 
-    /*
-  |--------------------------------------------------------------------------
-  | ADMIN: SUSPEND GUARD
-  |--------------------------------------------------------------------------
-  */
-
     async suspendGuard(
         userId: string,
         guardId: string,
@@ -394,12 +384,6 @@ export class GuardService {
             'Guard suspended successfully',
         )
     }
-
-    /*
-  |--------------------------------------------------------------------------
-  | ADMIN: ACTIVATE GUARD
-  |--------------------------------------------------------------------------
-  */
 
     async activateGuard(
         userId: string,
@@ -454,11 +438,180 @@ export class GuardService {
         )
     }
 
-    /*
-  |--------------------------------------------------------------------------
-  | DASHBOARD
-  |--------------------------------------------------------------------------
-  */
+    async updateGuard(
+        userId: string,
+        guardId: string,
+        dto: any,
+    ) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const existingGuard =
+            await this.prisma.guard.findFirst({
+                where: {
+                    id: guardId,
+                    estateId: admin.estateId,
+                },
+            })
+
+        if (!existingGuard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const guard =
+            await this.prisma.guard.update({
+                where: {
+                    id: guardId,
+                },
+                data: {
+                    ...dto,
+                    resumption_date:
+                        dto.resumption_date
+                            ? new Date(dto.resumption_date)
+                            : undefined,
+                },
+                include: {
+                    user: true,
+                },
+            })
+
+        await this.createActivityLog({
+            estateId: admin.estateId,
+            category: LogCategory.SECURITY,
+            action: 'GUARD_UPDATED',
+            description: `Guard profile updated for ${guard.full_name}`,
+            actorId: userId,
+            actorRole: admin.role,
+            metadata: {
+                guardId: guard.id,
+            },
+        })
+
+        return success(
+            guard,
+            'Guard Updated',
+            'Guard updated successfully',
+        )
+    }
+
+    async promoteGuard(
+        userId: string,
+        guardId: string,
+        dto?: { role?: GuardRole },
+    ) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        // Only Admin or Super Admin
+        if (
+            admin.role !== Role.ADMIN &&
+            admin.role !== Role.SUPER_ADMIN
+        ) {
+            return error(
+                'Forbidden',
+                'You are not allowed to promote guards',
+                HttpStatus.FORBIDDEN,
+            )
+        }
+
+        const guard = await this.prisma.guard.findFirst({
+            where: {
+                id: guardId,
+                estateId: admin.estateId,
+            },
+        })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        if (!guard.is_active) {
+            return error(
+                'Invalid Operation',
+                'Cannot promote inactive guard',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        // Determine new role
+        let newRole: GuardRole
+
+        if (dto?.role) {
+            newRole = dto.role
+        } else {
+            // Toggle role
+            newRole =
+                guard.role === GuardRole.GUARD
+                    ? GuardRole.SUPER_GUARD
+                    : GuardRole.GUARD
+        }
+
+        // Prevent invalid promotions
+        if (
+            newRole !== GuardRole.GUARD &&
+            newRole !== GuardRole.SUPER_GUARD
+        ) {
+            return error(
+                'Invalid Role',
+                'Invalid guard role',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        const updatedGuard =
+            await this.prisma.guard.update({
+                where: { id: guardId },
+                data: {
+                    role: newRole,
+                },
+            })
+
+        await this.createActivityLog({
+            estateId: admin.estateId,
+            category: LogCategory.SECURITY,
+            action: 'GUARD_PROMOTED',
+            description: `${guard.full_name} is now ${newRole}`,
+            actorId: userId,
+            actorRole: admin.role,
+            metadata: {
+                guardId: guard.id,
+                previousRole: guard.role,
+                newRole,
+            },
+        })
+
+        return success(
+            updatedGuard,
+            'Guard Updated',
+            `Guard role updated to ${newRole}`,
+        )
+    }
 
     async getDashboard(
         userId: string,
@@ -554,52 +707,6 @@ export class GuardService {
             'Guard dashboard fetched successfully',
         )
     }
-
-    /*
-  |--------------------------------------------------------------------------
-  | ACTIVITY FEED
-  |--------------------------------------------------------------------------
-  */
-
-    // async getActivityFeed(
-    //     userId: string,
-    // ) {
-    //     const guard =
-    //         await this.prisma.guard.findFirst({
-    //             where: {
-    //                 userId,
-    //             },
-    //         })
-
-    //     if (!guard) {
-    //         return error(
-    //             'Not Found',
-    //             'Guard not found',
-    //             HttpStatus.NOT_FOUND,
-    //         )
-    //     }
-
-    //     const logs =
-    //         await this.prisma.activityLog.findMany({
-    //             where: {
-    //                 estateId: guard.estateId,
-    //                 category:
-    //                     LogCategory.VISITOR,
-    //             },
-
-    //             orderBy: {
-    //                 createdAt: 'desc',
-    //             },
-
-    //             take: 50,
-    //         })
-
-    //     return success(
-    //         logs,
-    //         'Activity Feed Retrieved',
-    //         'Gate activity feed fetched successfully',
-    //     )
-    // }
 
     async getActivityFeed(
         userId: string,
@@ -824,11 +931,487 @@ export class GuardService {
         )
     }
 
-    /*
-|--------------------------------------------------------------------------
-| HELPERS
-|--------------------------------------------------------------------------
-*/
+    async getWeeklySchedule(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin profile not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const startOfWeek = new Date()
+        startOfWeek.setHours(0, 0, 0, 0)
+
+        const endOfWeek = new Date(startOfWeek)
+        endOfWeek.setDate(startOfWeek.getDate() + 7)
+
+        const shifts = await this.prisma.guardShift.findMany({
+            where: {
+                estateId: admin.estateId,
+                shiftDate: {
+                    gte: startOfWeek,
+                    lte: endOfWeek,
+                },
+            },
+            include: {
+                guard: true,
+            },
+            orderBy: {
+                shiftDate: 'asc',
+            },
+        })
+
+        return success(shifts, 'Schedule Retrieved', 'Weekly guard schedule fetched successfully', HttpStatus.OK)
+    }
+
+    async assignShift(userId: string, dto: any) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin profile not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const guard = await this.prisma.guard.findFirst({
+            where: {
+                id: dto.guardId,
+                estateId: admin.estateId,
+            },
+        })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const shift = await this.prisma.guardShift.create({
+            data: {
+                guardId: guard.id,
+                estateId: admin.estateId,
+
+                shiftDate: new Date(dto.date),
+                shiftType: dto.shiftType,
+
+                startTime: new Date(dto.startTime),
+                endTime: new Date(dto.endTime),
+            },
+        })
+
+        return success(shift, 'Shift assigned', 'Guard shift assigned successfully', HttpStatus.OK)
+    }
+
+    async generateWeeklySchedule(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin profile not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const guards = await this.prisma.guard.findMany({
+            where: {
+                estateId: admin.estateId,
+                is_active: true,
+            },
+            orderBy: {
+                createdAt: 'asc',
+            },
+        })
+
+        if (!guards.length) {
+            return error(
+                'Not Found',
+                'No guards found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const shiftPattern: ShiftType[] = [
+            ShiftType.DAY,
+            ShiftType.DAY,
+            ShiftType.NIGHT,
+            ShiftType.NIGHT,
+            ShiftType.REST,
+            ShiftType.STANDBY,
+            ShiftType.REST,
+        ]
+
+        const startDate = new Date()
+        startDate.setHours(0, 0, 0, 0)
+
+        const shiftsToCreate: Array<{
+            guardId: string
+            estateId: string
+            shiftDate: Date
+            shiftType: typeof ShiftType[keyof typeof ShiftType]
+            startTime: Date
+            endTime: Date
+        }> = []
+
+        for (let i = 0; i < guards.length; i++) {
+            const guard = guards[i]
+
+            for (let day = 0; day < 7; day++) {
+                const date = new Date(startDate)
+                date.setDate(startDate.getDate() + day)
+
+                const shiftType =
+                    shiftPattern[(i + day) % shiftPattern.length]
+
+                let startTime = new Date(date)
+                let endTime = new Date(date)
+
+                if (shiftType === ShiftType.DAY) {
+                    startTime.setHours(8, 0, 0)
+                    endTime.setHours(20, 0, 0)
+                }
+
+                if (shiftType === ShiftType.NIGHT) {
+                    startTime.setHours(20, 0, 0)
+                    endTime.setDate(endTime.getDate() + 1)
+                    endTime.setHours(8, 0, 0)
+                }
+
+                if (
+                    shiftType === ShiftType.REST ||
+                    shiftType === ShiftType.STANDBY
+                ) {
+                    startTime.setHours(0, 0, 0)
+                    endTime.setHours(0, 0, 0)
+                }
+
+                shiftsToCreate.push({
+                    guardId: guard.id,
+                    estateId: admin.estateId,
+                    shiftDate: date,
+                    shiftType,
+                    startTime,
+                    endTime,
+                })
+            }
+        }
+
+        // clear existing week
+        await this.prisma.guardShift.deleteMany({
+            where: {
+                estateId: admin.estateId,
+                date: {
+                    gte: startDate,
+                },
+            },
+        })
+
+        await this.prisma.guardShift.createMany({
+            data: shiftsToCreate,
+        })
+
+        return success(
+            shiftsToCreate.length,
+            'Schedule Generated',
+            'Weekly guard schedule created successfully',
+        )
+    }
+
+    async clockIn(userId: string, dto: any) {
+        const guard = await this.prisma.guard.findFirst({
+            where: { userId },
+        })
+
+        if (!guard) {
+            return error('Guard not found')
+        }
+
+        const now = new Date()
+
+        const shift = await this.prisma.guardShift.findFirst({
+            where: {
+                guardId: guard.id,
+                shiftDate: {
+                    gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                },
+            },
+        })
+
+        if (!shift) {
+            return error('No shift scheduled today')
+        }
+
+        if (shift.status === 'ONGOING') {
+            return error('Already clocked in')
+        }
+
+        // Calculate lateness
+        let minutesLate = 0
+
+        if (shift.startTime && now > shift.startTime) {
+            minutesLate = Math.floor(
+                (now.getTime() - shift.startTime.getTime()) / 60000,
+            )
+        }
+
+        const attendanceStatus =
+            minutesLate > 0 ? 'LATE' : 'PRESENT'
+
+        // Update shift
+        await this.prisma.guardShift.update({
+            where: { id: shift.id },
+            data: {
+                status: 'ONGOING',
+            },
+        })
+
+        // Create / update attendance
+        await this.prisma.guardAttendance.upsert({
+            where: { shiftId: shift.id },
+            update: {
+                clockInAt: now,
+                clockInLatitude: dto.latitude,
+                clockInLongitude: dto.longitude,
+                clockInPhotoUrl: dto.photo,
+                minutesLate,
+                attendanceStatus,
+                status: attendanceStatus,
+            },
+            create: {
+                shiftId: shift.id,
+                guardId: guard.id,
+                clockInAt: now,
+                clockInLatitude: dto.latitude,
+                clockInLongitude: dto.longitude,
+                clockInPhotoUrl: dto.photo,
+                minutesLate,
+                attendanceStatus,
+                status: attendanceStatus,
+            },
+        })
+
+        return success(
+            {
+                minutesLate,
+                status: attendanceStatus,
+            },
+            'Clock In Successful',
+            'You are now on duty',
+            HttpStatus.OK
+        )
+    }
+
+    async clockOut(userId: string, dto: any) {
+        const guard = await this.prisma.guard.findFirst({
+            where: { userId },
+        })
+
+        if (!guard) return error('Guard not found')
+
+        const shift = await this.prisma.guardShift.findFirst({
+            where: {
+                guardId: guard.id,
+                status: 'ONGOING',
+            },
+        })
+
+        if (!shift) {
+            return error('No active shift')
+        }
+
+        const now = new Date()
+
+        const attendance =
+            await this.prisma.guardAttendance.findUnique({
+                where: { shiftId: shift.id },
+            })
+
+        let minutesWorked = 0
+
+        if (attendance?.clockInAt) {
+            minutesWorked = Math.floor(
+                (now.getTime() - attendance.clockInAt.getTime()) /
+                60000,
+            )
+        }
+
+        await this.prisma.guardShift.update({
+            where: { id: shift.id },
+            data: {
+                status: 'COMPLETED',
+            },
+        })
+
+        await this.prisma.guardAttendance.update({
+            where: { shiftId: shift.id },
+            data: {
+                clockOutAt: now,
+                clockOutLatitude: dto.latitude,
+                clockOutLongitude: dto.longitude,
+                clockOutPhotoUrl: dto.photo,
+                minutesWorked,
+            },
+        })
+
+        return success(
+            { minutesWorked },
+            'Clock Out Successful',
+            'Shift completed',
+        )
+    }
+
+    async autoShiftRunner() {
+        const now = new Date()
+
+        await this.prisma.guardShift.updateMany({
+            where: {
+                startTime: { lte: now },
+                endTime: { gte: now },
+                status: 'SCHEDULED',
+            },
+            data: {
+                status: 'ONGOING',
+            },
+        })
+    }
+
+    async getOnDutyGuards(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) return error('Unauthorized')
+
+        const shifts = await this.prisma.guardShift.findMany({
+            where: {
+                estateId: admin.estateId,
+                status: 'ONGOING',
+            },
+            include: {
+                guard: true,
+                attendance: true,
+            },
+        })
+
+        const data = shifts.map((s) => ({
+            guardId: s.guard.id,
+            name: s.guard.full_name,
+            zone: s.zone || s.guard.zone_assignment,
+            shiftType: s.shiftType,
+            clockIn: s.attendance?.clockInAt,
+            minutesLate: s.attendance?.minutesLate || 0,
+        }))
+
+        return success(
+            data,
+            'On Duty Guards',
+            'Guards currently on duty',
+        )
+    }
+
+    async getAttendance(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) return error('Unauthorized')
+
+        const logs =
+            await this.prisma.guardAttendance.findMany({
+                where: {
+                    shift: {
+                        estateId: admin.estateId,
+                    },
+                },
+                include: {
+                    guard: true,
+                    shift: true,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            })
+
+        return success(
+            logs,
+            'Attendance Logs',
+            'Attendance retrieved successfully',
+        )
+    }
+
+    async addHandover(
+        userId: string,
+        note: string,
+    ) {
+        const guard =
+            await this.prisma.guard.findFirst({
+                where: { userId },
+            })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+            )
+        }
+
+        const shift =
+            await this.prisma.guardShift.findFirst({
+                where: {
+                    guardId: guard.id,
+                    status: 'ONGOING',
+                },
+            })
+
+        if (!shift) {
+            return error(
+                'Invalid Operation',
+                'No active shift found',
+            )
+        }
+
+        const attendance =
+            await this.prisma.guardAttendance.findUnique({
+                where: {
+                    shiftId: shift.id,
+                },
+            })
+
+        if (!attendance) {
+            return error(
+                'Invalid Operation',
+                'You must clock in before adding handover note',
+            )
+        }
+
+        await this.prisma.guardAttendance.update({
+            where: {
+                shiftId: shift.id,
+            },
+            data: {
+                handoverNotes: note,
+            },
+        })
+
+        return success(
+            null,
+            'Handover Saved',
+            'Handover note added successfully',
+        )
+    }
 
     private generateTempPassword() {
         return Math.random()

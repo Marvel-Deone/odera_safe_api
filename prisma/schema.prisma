@@ -18,7 +18,7 @@ enum GuardRole {
 }
 
 enum Role {
-  SUPERADMIN
+  SUPER_ADMIN
   ADMIN
   RESIDENT
   GUARD
@@ -75,18 +75,23 @@ enum LogCategory {
 // }
 
 model Estate {
-  id           String        @id @default(uuid())
-  name         String
-  address      String
-  totalHouses  Int
-  createdAt    DateTime      @default(now())
-  settings     Json?
-  residents    Resident[]
-  users        User[]
-  visitors     Visitor[]
-  activityLogs ActivityLog[]
-  guards       Guard[]
-  gateQueues   GateQueue[]
+  id                String             @id @default(uuid())
+  name              String
+  address           String
+  totalHouses       Int
+  createdAt         DateTime           @default(now())
+  settings          Json?
+  residents         Resident[]
+  users             User[]
+  visitors          Visitor[]
+  activityLogs      ActivityLog[]
+  guards            Guard[]
+  gateQueues        GateQueue[]
+  guardShifts       GuardShift[]
+  patrolCheckpoints PatrolCheckpoint[]
+  patrolScans       PatrolScan[]
+  shiftSwapRequests ShiftSwapRequest[]
+  guardSOSs         GuardSOS[]
 }
 
 model User {
@@ -238,7 +243,14 @@ model Guard {
   estate Estate @relation(fields: [estateId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
 
-  gateLogs GateLog[]
+  gateLogs          GateLog[]
+  guardShifts       GuardShift[]
+  guardAttendances  GuardAttendance[]
+  patrolScans       PatrolScan[]
+  shiftSwapRequests ShiftSwapRequest[]
+  SwapRequester     ShiftSwapRequest[] @relation("SwapRequester")
+  SwapRecipient     ShiftSwapRequest[] @relation("SwapRecipient")
+  guardSOSs         GuardSOS[]
 }
 
 model Visitor {
@@ -377,7 +389,7 @@ model GateQueue {
 
   status GateQueueStatus @default(WAITING)
 
-  scannedAt DateTime @default(now())
+  scannedAt   DateTime  @default(now())
   processedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -389,12 +401,266 @@ model GateQueue {
   @@unique([visitorId, status])
 }
 
+model GuardShift {
+  id       String @id @default(uuid())
+  guardId  String
+  estateId String
+
+  // Date this shift starts
+  shiftDate DateTime
+
+  // Shift configuration
+  shiftType ShiftType // DAY, NIGHT, STANDBY, REST
+  startTime DateTime?
+  endTime   DateTime?
+  zone      String?
+
+  // Status
+  status ShiftStatus @default(SCHEDULED)
+
+  // Optional notes
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
+  estate Estate @relation(fields: [estateId], references: [id])
+
+  attendance             GuardAttendance?
+  patrolScans            PatrolScan[]
+  requesterShiftRequests ShiftSwapRequest[] @relation("RequesterShift")
+  targetShiftRequests    ShiftSwapRequest[] @relation("TargetShift")
+  shiftSwapRequests      ShiftSwapRequest[]
+
+  @@index([guardId, shiftDate])
+  @@index([estateId, shiftDate])
+}
+
+model GuardAttendance {
+  id      String @id @default(uuid())
+  shiftId String @unique
+  guardId String
+
+  // Clock-in
+  clockInAt        DateTime?
+  clockInLatitude  Float?
+  clockInLongitude Float?
+  clockInPhotoUrl  String?
+
+  // Clock-out
+  clockOutAt        DateTime?
+  clockOutLatitude  Float?
+  clockOutLongitude Float?
+  clockOutPhotoUrl  String?
+
+  // Operational notes
+  handoverNotes String?
+
+  // Metrics
+  minutesLate      Int              @default(0)
+  minutesWorked    Int              @default(0)
+  overtimeMinutes  Int              @default(0)
+  attendanceStatus AttendanceStatus @default(PRESENT)
+
+  status AttendanceStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  shift GuardShift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  guard Guard      @relation(fields: [guardId], references: [id], onDelete: Cascade)
+
+  @@index([guardId, clockInAt])
+}
+
+model PatrolCheckpoint {
+  id       String @id @default(uuid())
+  estateId String
+
+  name        String
+  code        String  @unique // QR code payload
+  zone        String
+  description String?
+
+  latitude  Float?
+  longitude Float?
+
+  requiredFrequency Int? // e.g. every 2 hours
+  isActive          Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  estate Estate @relation(fields: [estateId], references: [id])
+
+  scans PatrolScan[]
+
+  @@index([estateId, zone])
+}
+
+model PatrolScan {
+  id           String  @id @default(uuid())
+  guardId      String
+  checkpointId String
+  shiftId      String?
+  estateId     String
+
+  scannedAt DateTime @default(now())
+
+  latitude  Float?
+  longitude Float?
+
+  // Validation
+  isValid          Boolean @default(true)
+  distanceFromSite Float? // meters
+  notes            String?
+
+  // Relations
+  guard      Guard            @relation(fields: [guardId], references: [id], onDelete: Cascade)
+  checkpoint PatrolCheckpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+  shift      GuardShift?      @relation(fields: [shiftId], references: [id])
+  estate     Estate           @relation(fields: [estateId], references: [id])
+
+  @@index([guardId, scannedAt])
+  @@index([checkpointId, scannedAt])
+}
+
+model ShiftSwapRequest {
+  id String @id @default(uuid())
+
+  requesterGuardId String
+  targetGuardId    String
+
+  requesterShiftId String
+  targetShiftId    String
+
+  estateId String
+
+  reason  ShiftSwapReason
+  details String?
+
+  status ShiftSwapStatus @default(PENDING)
+
+  reviewedBy String? // userId of Super-Guard/Admin
+  reviewedAt DateTime?
+  reviewNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  requester Guard @relation("SwapRequester", fields: [requesterGuardId], references: [id], onDelete: Cascade)
+
+  target Guard @relation("SwapRecipient", fields: [targetGuardId], references: [id], onDelete: Cascade)
+
+  requesterShift GuardShift @relation("RequesterShift", fields: [requesterShiftId], references: [id], onDelete: Cascade)
+
+  targetShift GuardShift @relation("TargetShift", fields: [targetShiftId], references: [id], onDelete: Cascade)
+
+  estate       Estate      @relation(fields: [estateId], references: [id])
+  guard        Guard?      @relation(fields: [guardId], references: [id])
+  guardId      String?
+  guardShift   GuardShift? @relation(fields: [guardShiftId], references: [id])
+  guardShiftId String?
+
+  @@index([requesterGuardId, status])
+  @@index([targetGuardId, status])
+}
+
+model GuardSOS {
+  id String @id @default(uuid())
+
+  guardId  String
+  estateId String
+
+  category GuardSOSCategory
+  zone     String?
+  message  String?
+
+  latitude  Float?
+  longitude Float?
+
+  status GuardSOSStatus @default(ACTIVE)
+
+  resolvedBy     String?
+  resolvedAt     DateTime?
+  resolutionNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
+  estate Estate @relation(fields: [estateId], references: [id])
+
+  @@index([guardId, createdAt])
+  @@index([status, createdAt])
+}
+
 enum GateQueueStatus {
   WAITING
   APPROVED
   DENIED
   COMPLETED
   PROCESSED
+}
+
+enum ShiftType {
+  DAY
+  NIGHT
+  STANDBY
+  REST
+}
+
+enum ShiftStatus {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  HALF_DAY
+  OFF_DUTY
+}
+
+enum ShiftSwapReason {
+  PERSONAL_EMERGENCY
+  MEDICAL
+  FAMILY
+  FATIGUE
+  OTHER
+}
+
+enum ShiftSwapStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum GuardSOSCategory {
+  INTRUDER
+  PHYSICAL_CONFRONTATION
+  ARMED_THREAT
+  SUSPECT_FLEEING
+  PERSONAL_INJURY
+  CIVIL_DISTURBANCE
+}
+
+enum GuardSOSStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+  CANCELLED
 }
 
 // VISITOR_SCAN_FAILED

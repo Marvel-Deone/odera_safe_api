@@ -102,6 +102,7 @@ import {
   Post,
   Body,
   UseGuards,
+  Req,
 } from '@nestjs/common'
 
 import {
@@ -110,7 +111,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 
-import { Role } from '@prisma/client'
+import { GuardRole, Role } from '@prisma/client'
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 
@@ -133,13 +134,7 @@ import { GuardService } from './guard.service'
 export class GuardController {
   constructor(
     private readonly guardsService: GuardService,
-  ) {}
-
-  /*
-|--------------------------------------------------------------------------
-| ADMIN ROUTES
-|--------------------------------------------------------------------------
-*/
+  ) { }
 
   @Post('admin/guards')
   @Roles(Role.ADMIN)
@@ -197,9 +192,7 @@ export class GuardController {
     'admin/guards/:guardId/suspend',
   )
   @Roles(Role.ADMIN)
-
   @HttpCode(HttpStatus.OK)
-
   @ApiOperation({
     summary: 'Suspend guard',
   })
@@ -237,12 +230,6 @@ export class GuardController {
     )
   }
 
-  /*
-|--------------------------------------------------------------------------
-| GUARD ROUTES
-|--------------------------------------------------------------------------
-*/
-
   @Get('guards/dashboard')
   @Roles(
     Role.GUARD,
@@ -257,6 +244,76 @@ export class GuardController {
   ) {
     return this.guardsService.getDashboard(
       user.id,
+    )
+  }
+
+  @Patch(
+    'admin/guards/:guardId',
+  )
+  @Roles(Role.ADMIN)
+
+  @HttpCode(HttpStatus.OK)
+
+  @ApiOperation({
+    summary: 'Update guard',
+  })
+  async updateGuard(
+    @CurrentUser() user: any,
+
+    @Param('guardId')
+    guardId: string,
+
+    @Body()
+    dto: any,
+  ) {
+    return this.guardsService.updateGuard(
+      user.id,
+      guardId,
+      dto,
+    )
+  }
+
+  // @Patch(
+  //   'admin/guards/:guardId/activate',
+  // )
+  // @Roles(Role.ADMIN)
+
+  // @HttpCode(HttpStatus.OK)
+
+  // @ApiOperation({
+  //   summary: 'Activate guard',
+  // })
+  // async activateGuard(
+  //   @CurrentUser() user: any,
+
+  //   @Param('guardId')
+  //   guardId: string,
+
+  //   @Body()
+  //   dto: any,
+  // ) {
+  //   return this.guardsService.updateGuard(
+  //     user.id,
+  //     guardId,
+  //     dto,
+  //   )
+  // }
+
+  @Patch(':id/promote')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Promote guard',
+  })
+  promoteGuard(
+    @Req() req,
+    @Param('id') guardId: string,
+    @Body() dto: { role?: GuardRole },
+  ) {
+    return this.guardsService.promoteGuard(
+      req.user.id,
+      guardId,
+      dto,
     )
   }
 
@@ -290,6 +347,67 @@ export class GuardController {
     @CurrentUser() user: any,
   ) {
     return this.guardsService.getGateQueue(
+      user.id,
+    )
+  }
+
+  @Post('schedule/generate')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+
+  @HttpCode(HttpStatus.OK)
+
+  @ApiOperation({
+    summary: 'Generate weekly schedule',
+  })
+  generateSchedule(@Req() req) {
+    return this.guardsService.generateWeeklySchedule(
+      req.user.id,
+    )
+  }
+
+  @Get('schedule')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+
+  @ApiOperation({
+    summary: 'Get weekly schedule',
+  })
+  getSchedule(@Req() req) {
+    return this.guardsService.getWeeklySchedule(
+      req.user.id,
+    )
+  }
+
+  @Post('guards/clock-in')
+  @Roles(Role.GUARD)
+  @ApiOperation({ summary: 'Clock In' })
+  clockIn(
+    @CurrentUser() user: any,
+    @Body() dto: any,
+  ) {
+    return this.guardsService.clockIn(
+      user.id,
+      dto,
+    )
+  }
+
+  @Post('guards/clock-out')
+  @Roles(Role.GUARD)
+  @ApiOperation({ summary: 'Clock Out' })
+  clockOut(
+    @CurrentUser() user: any,
+    @Body() dto: any,
+  ) {
+    return this.guardsService.clockOut(
+      user.id,
+      dto,
+    )
+  }
+
+  @Get('guards/attendance')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Attendance Logs' })
+  getAttendance(@CurrentUser() user: any) {
+    return this.guardsService.getAttendance(
       user.id,
     )
   }
