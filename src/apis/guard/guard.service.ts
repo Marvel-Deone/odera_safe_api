@@ -264,6 +264,18 @@ export class GuardService {
 
                 include: {
                     user: true,
+
+                    guardShifts: {
+                        where: {
+                            status: 'ONGOING',
+                        },
+
+                        take: 1,
+
+                        orderBy: {
+                            createdAt: 'desc',
+                        },
+                    },
                 },
 
                 orderBy: {
@@ -271,8 +283,13 @@ export class GuardService {
                 },
             })
 
+        const formattedGuards = guards.map((guard) => ({
+            ...guard,
+            currentShift: guard.guardShifts[0] || null,
+        }))
+
         return success(
-            guards,
+            formattedGuards,
             'Guards Retrieved',
             'Guards fetched successfully',
         )
