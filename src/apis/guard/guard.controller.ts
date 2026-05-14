@@ -351,7 +351,7 @@ export class GuardController {
     )
   }
 
-  @Post('schedule/generate')
+  @Post('admin/schedule/generate')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
 
   @HttpCode(HttpStatus.OK)
