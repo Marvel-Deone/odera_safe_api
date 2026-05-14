@@ -365,7 +365,7 @@ export class GuardController {
     )
   }
 
-  @Get('schedule')
+  @Get('admin/schedule')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
 
   @ApiOperation({
