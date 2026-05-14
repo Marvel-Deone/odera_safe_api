@@ -319,7 +319,7 @@ export class GuardController {
   }
 
   @Post('guards/assign-shift')
-  @Roles(Role.GUARD)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN, GuardRole.SUPER_GUARD as unknown as Role)
   @ApiOperation({ summary: 'Assign Shift' })
   assignShift(
     @CurrentUser() user: any,
