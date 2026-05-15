@@ -1420,33 +1420,123 @@ export class GuardService {
         )
     }
 
+    // async getAttendance(userId: string) {
+    //     const admin = await this.prisma.user.findFirst({
+    //         where: { id: userId },
+    //     })
+
+    //     if (!admin) return error('Unauthorized')
+
+    //     const logs =
+    //         await this.prisma.guardAttendance.findMany({
+    //             where: {
+    //                 shift: {
+    //                     estateId: admin.estateId,
+    //                 },
+    //             },
+    //             include: {
+    //                 guard: true,
+    //                 shift: true,
+    //             },
+    //             orderBy: {
+    //                 createdAt: 'desc',
+    //             },
+    //         })
+
+    //     return success(
+    //         logs,
+    //         'Attendance Logs',
+    //         'Attendance retrieved successfully',
+    //     )
+    // }
+
     async getAttendance(userId: string) {
         const admin = await this.prisma.user.findFirst({
-            where: { id: userId },
+            where: {
+                id: userId,
+            },
         })
 
-        if (!admin) return error('Unauthorized')
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin profile not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
 
-        const logs =
+        const attendance =
             await this.prisma.guardAttendance.findMany({
                 where: {
-                    shift: {
+                    guard: {
                         estateId: admin.estateId,
                     },
                 },
+
                 include: {
-                    guard: true,
-                    shift: true,
+                    guard: {
+                        select: {
+                            id: true,
+                            full_name: true,
+                            role: true,
+                            zone_assignment: true,
+                        },
+                    },
+
+                    shift: {
+                        select: {
+                            id: true,
+                            shiftDate: true,
+                            shiftType: true,
+                            startTime: true,
+                            endTime: true,
+                            status: true,
+                        },
+                    },
                 },
+
                 orderBy: {
                     createdAt: 'desc',
                 },
             })
 
+        const formatted = attendance.map((record) => ({
+            id: record.id,
+
+            guardId: record.guard.id,
+            guardName: record.guard.full_name,
+            guardRole: record.guard.role,
+            zone: record.guard.zone_assignment,
+
+            shiftDate: record.shift.shiftDate,
+            shiftType: record.shift.shiftType,
+            scheduledStart: record.shift.startTime,
+            scheduledEnd: record.shift.endTime,
+
+            clockInAt: record.clockInAt,
+            clockOutAt: record.clockOutAt,
+
+            minutesLate:
+                record.minutesLate ?? 0,
+
+            minutesWorked:
+                record.minutesWorked ?? 0,
+
+            attendanceStatus:
+                record.attendanceStatus ??
+                record.status,
+
+            handoverNotes:
+                record.handoverNotes,
+
+            createdAt: record.createdAt,
+        }))
+
         return success(
-            logs,
-            'Attendance Logs',
-            'Attendance retrieved successfully',
+            formatted,
+            'Attendance Logs Retrieved',
+            'Attendance logs fetched successfully',
+            HttpStatus.OK,
         )
     }
 

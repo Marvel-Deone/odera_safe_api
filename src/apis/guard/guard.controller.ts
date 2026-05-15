@@ -327,7 +327,7 @@ export class GuardController {
     )
   }
 
-  @Get('guards/attendance')
+  @Get('admin/attendance')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Attendance Logs' })
   getAttendance(@CurrentUser() user: any) {
