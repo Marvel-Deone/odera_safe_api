@@ -59,6 +59,95 @@ enum LogCategory {
   SYSTEM
 }
 
+enum GateQueueStatus {
+  WAITING
+  APPROVED
+  DENIED
+  COMPLETED
+  PROCESSED
+}
+
+enum ShiftType {
+  DAY
+  NIGHT
+  STANDBY
+  REST
+}
+
+enum ShiftStatus {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  HALF_DAY
+  OFF_DUTY
+}
+
+enum ShiftSwapReason {
+  PERSONAL_EMERGENCY
+  MEDICAL
+  FAMILY
+  FATIGUE
+  OTHER
+}
+
+enum ShiftSwapStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum GuardSOSCategory {
+  INTRUDER
+  PHYSICAL_CONFRONTATION
+  ARMED_THREAT
+  SUSPECT_FLEEING
+  PERSONAL_INJURY
+  CIVIL_DISTURBANCE
+}
+
+enum GuardSOSStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+  CANCELLED
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  ESCALATED
+}
+
+enum IncidentCategory {
+  SECURITY_BREACH
+  SUSPICIOUS_ACTIVITY
+  VISITOR_DISPUTE
+  EQUIPMENT_FAILURE
+  FIRE_HAZARD
+  MEDICAL_EMERGENCY
+  THEFT
+  VANDALISM
+  NOISE_COMPLAINT
+  OTHER
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -92,6 +181,7 @@ model Estate {
   patrolScans       PatrolScan[]
   shiftSwapRequests ShiftSwapRequest[]
   guardSOSs         GuardSOS[]
+  incidents         Incident[]
 }
 
 model User {
@@ -251,6 +341,7 @@ model Guard {
   SwapRequester     ShiftSwapRequest[] @relation("SwapRequester")
   SwapRecipient     ShiftSwapRequest[] @relation("SwapRecipient")
   guardSOSs         GuardSOS[]
+  incidents         Incident[]
 }
 
 model Visitor {
@@ -601,66 +692,31 @@ model GuardSOS {
   @@index([status, createdAt])
 }
 
-enum GateQueueStatus {
-  WAITING
-  APPROVED
-  DENIED
-  COMPLETED
-  PROCESSED
-}
+model Incident {
+  id       String @id @default(uuid())
+  estateId String
+  guardId  String
 
-enum ShiftType {
-  DAY
-  NIGHT
-  STANDBY
-  REST
-}
+  title       String
+  category    IncidentCategory
+  description String
+  severity    IncidentSeverity
 
-enum ShiftStatus {
-  SCHEDULED
-  ONGOING
-  COMPLETED
-  MISSED
-  CANCELLED
-}
+  photos     Json?
+  occurredAt DateTime @default(now())
 
-enum AttendanceStatus {
-  PRESENT
-  LATE
-  ABSENT
-  HALF_DAY
-  OFF_DUTY
-}
+  status     IncidentStatus @default(OPEN)
+  adminNotes String?
 
-enum ShiftSwapReason {
-  PERSONAL_EMERGENCY
-  MEDICAL
-  FAMILY
-  FATIGUE
-  OTHER
-}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-enum ShiftSwapStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  CANCELLED
-}
+  estate Estate @relation(fields: [estateId], references: [id])
+  guard  Guard  @relation(fields: [guardId], references: [id])
 
-enum GuardSOSCategory {
-  INTRUDER
-  PHYSICAL_CONFRONTATION
-  ARMED_THREAT
-  SUSPECT_FLEEING
-  PERSONAL_INJURY
-  CIVIL_DISTURBANCE
-}
-
-enum GuardSOSStatus {
-  ACTIVE
-  ACKNOWLEDGED
-  RESOLVED
-  CANCELLED
+  @@index([estateId])
+  @@index([guardId])
+  @@index([status])
 }
 
 // VISITOR_SCAN_FAILED

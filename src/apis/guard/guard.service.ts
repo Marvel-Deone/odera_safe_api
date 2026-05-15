@@ -6,6 +6,7 @@ import {
 import {
     GateAction,
     GuardRole,
+    IncidentStatus,
     LogCategory,
     Role,
     ShiftType,
@@ -20,6 +21,7 @@ import {
     error,
     success,
 } from '../../common/utils/response.util'
+import { CreateIncidentDto } from './dto/create-incident.dto'
 
 @Injectable()
 export class GuardService {
@@ -1420,36 +1422,6 @@ export class GuardService {
         )
     }
 
-    // async getAttendance(userId: string) {
-    //     const admin = await this.prisma.user.findFirst({
-    //         where: { id: userId },
-    //     })
-
-    //     if (!admin) return error('Unauthorized')
-
-    //     const logs =
-    //         await this.prisma.guardAttendance.findMany({
-    //             where: {
-    //                 shift: {
-    //                     estateId: admin.estateId,
-    //                 },
-    //             },
-    //             include: {
-    //                 guard: true,
-    //                 shift: true,
-    //             },
-    //             orderBy: {
-    //                 createdAt: 'desc',
-    //             },
-    //         })
-
-    //     return success(
-    //         logs,
-    //         'Attendance Logs',
-    //         'Attendance retrieved successfully',
-    //     )
-    // }
-
     async getAttendance(userId: string) {
         const admin = await this.prisma.user.findFirst({
             where: {
@@ -1621,5 +1593,235 @@ export class GuardService {
         return this.prisma.activityLog.create({
             data,
         })
+    }
+
+    async createIncident(
+        userId: string,
+        dto: CreateIncidentDto,
+    ) {
+        const guard = await this.prisma.guard.findFirst({
+            where: { userId },
+        })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const incident = await this.prisma.incident.create({
+            data: {
+                estateId: guard.estateId,
+                guardId: guard.id,
+                title: dto.title,
+                category: dto.category,
+                description: dto.description,
+                severity: dto.severity,
+                photos: dto.photos || [],
+                occurredAt: dto.occurredAt
+                    ? new Date(dto.occurredAt)
+                    : new Date(),
+            },
+            include: {
+                guard: true,
+            },
+        })
+
+        await this.createActivityLog({
+            estateId: guard.estateId,
+            category: LogCategory.SECURITY,
+            action: 'INCIDENT_REPORTED',
+            description: `Incident reported: ${incident.title}`,
+            actorId: userId,
+            actorRole: Role.GUARD,
+            metadata: {
+                incidentId: incident.id,
+                severity: incident.severity,
+                category: incident.category,
+            },
+        })
+
+        return success(
+            incident,
+            'Incident Reported',
+            'Incident submitted successfully',
+        )
+    }
+
+    // guard incident list
+    async getMyIncidents(userId: string) {
+        const guard = await this.prisma.guard.findFirst({
+            where: { userId },
+        })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const incidents = await this.prisma.incident.findMany({
+            where: {
+                guardId: guard.id,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        })
+
+        return success(
+            incidents,
+            'My Incidents',
+            'Incident history retrieved successfully',
+        )
+    }
+
+    // Admin incident list
+    async getAllIncidents(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const incidents = await this.prisma.incident.findMany({
+            where: {
+                estateId: admin.estateId,
+            },
+            include: {
+                guard: {
+                    select: {
+                        id: true,
+                        full_name: true,
+                        zone_assignment: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        })
+
+        return success(
+            incidents,
+            'Incidents Retrieved',
+            'Incident list fetched successfully',
+        )
+    }
+
+    async getIncidentById(
+        userId: string,
+        incidentId: string,
+    ) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const incident = await this.prisma.incident.findFirst({
+            where: {
+                id: incidentId,
+                estateId: admin.estateId,
+            },
+            include: {
+                guard: true,
+            },
+        })
+
+        if (!incident) {
+            return error(
+                'Not Found',
+                'Incident not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        return success(
+            incident,
+            'Incident Retrieved',
+            'Incident details fetched successfully',
+        )
+    }
+
+    async updateIncidentStatus(
+        userId: string,
+        incidentId: string,
+        dto: {
+            status: IncidentStatus
+            adminNotes?: string
+        },
+    ) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const existing = await this.prisma.incident.findFirst({
+            where: {
+                id: incidentId,
+                estateId: admin.estateId,
+            },
+        })
+
+        if (!existing) {
+            return error(
+                'Not Found',
+                'Incident not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const incident = await this.prisma.incident.update({
+            where: {
+                id: incidentId,
+            },
+            data: {
+                status: dto.status,
+                adminNotes: dto.adminNotes,
+            },
+        })
+
+        await this.createActivityLog({
+            estateId: admin.estateId,
+            category: LogCategory.SECURITY,
+            action: 'INCIDENT_UPDATED',
+            description: `Incident ${incident.title} marked ${dto.status}`,
+            actorId: userId,
+            actorRole: admin.role,
+            metadata: {
+                incidentId,
+                status: dto.status,
+            },
+        })
+
+        return success(
+            incident,
+            'Incident Updated',
+            'Incident status updated successfully',
+        )
     }
 }
