@@ -342,6 +342,7 @@ model Guard {
   SwapRecipient     ShiftSwapRequest[] @relation("SwapRecipient")
   guardSOSs         GuardSOS[]
   incidents         Incident[]
+  patrolAlerts      PatrolAlert[]
 }
 
 model Visitor {
@@ -572,7 +573,7 @@ model PatrolCheckpoint {
   estateId String
 
   name        String
-  code        String  @unique // QR code payload
+  qrCode      String  @unique // QR code payload
   zone        String
   description String?
 
@@ -588,7 +589,8 @@ model PatrolCheckpoint {
   // Relations
   estate Estate @relation(fields: [estateId], references: [id])
 
-  scans PatrolScan[]
+  scans        PatrolScan[]
+  patrolAlerts PatrolAlert[]
 
   @@index([estateId, zone])
 }
@@ -618,6 +620,21 @@ model PatrolScan {
 
   @@index([guardId, scannedAt])
   @@index([checkpointId, scannedAt])
+}
+
+model PatrolAlert {
+  id           String  @id @default(uuid())
+  estateId     String
+  checkpointId String?
+  guardId      String?
+  type         String
+  message      String
+  resolved     Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  checkpoint PatrolCheckpoint? @relation(fields: [checkpointId], references: [id])
+  guard      Guard?            @relation(fields: [guardId], references: [id])
 }
 
 model ShiftSwapRequest {

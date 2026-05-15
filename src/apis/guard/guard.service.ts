@@ -9,6 +9,7 @@ import {
     IncidentStatus,
     LogCategory,
     Role,
+    ShiftStatus,
     ShiftType,
     VisitorStatus,
 } from '@prisma/client'
@@ -1822,6 +1823,352 @@ export class GuardService {
             incident,
             'Incident Updated',
             'Incident status updated successfully',
+        )
+    }
+
+    async createPatrolCheckpoint(userId: string, dto: any) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error('Unauthorized', 'Admin not found', HttpStatus.NOT_FOUND)
+        }
+
+        const qrCode = `PATROL:${crypto.randomUUID()}`
+
+        const checkpoint = await this.prisma.patrolCheckpoint.create({
+            data: {
+                estateId: admin.estateId,
+                name: dto.name,
+                zone: dto.zone,
+                description: dto.description,
+                latitude: dto.latitude,
+                longitude: dto.longitude,
+                requiredFrequency: dto.requiredFrequency,
+                qrCode,
+            },
+        })
+
+        return success(
+            checkpoint,
+            'Checkpoint Created',
+            'Patrol checkpoint created successfully',
+        )
+    }
+
+    async getPatrolCheckpoints(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const checkpoints =
+            await this.prisma.patrolCheckpoint.findMany({
+                where: {
+                    estateId: admin.estateId,
+                },
+                include: {
+                    scans: {
+                        take: 1,
+                        orderBy: {
+                            scannedAt: 'desc',
+                        },
+                        include: {
+                            guard: {
+                                select: {
+                                    id: true,
+                                    full_name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            })
+
+        const formatted = checkpoints.map((checkpoint) => ({
+            ...checkpoint,
+            lastScan: checkpoint.scans[0] || null,
+        }))
+
+        return success(
+            formatted,
+            'Patrol Checkpoints',
+            'Patrol checkpoints fetched successfully',
+        )
+    }
+
+    async getPatrolCheckpointById(
+        userId: string,
+        checkpointId: string,
+    ) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const checkpoint =
+            await this.prisma.patrolCheckpoint.findFirst({
+                where: {
+                    id: checkpointId,
+                    estateId: admin.estateId,
+                },
+                include: {
+                    scans: {
+                        include: {
+                            guard: {
+                                select: {
+                                    id: true,
+                                    full_name: true,
+                                    zone_assignment: true,
+                                },
+                            },
+                        },
+                        orderBy: {
+                            scannedAt: 'desc',
+                        },
+                        take: 50,
+                    },
+                    patrolAlerts: {
+                        where: {
+                            resolved: false,
+                        },
+                        orderBy: {
+                            createdAt: 'desc',
+                        },
+                    },
+                },
+            })
+
+        if (!checkpoint) {
+            return error(
+                'Not Found',
+                'Checkpoint not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        return success(
+            checkpoint,
+            'Patrol Checkpoint',
+            'Checkpoint fetched successfully',
+        )
+    }
+
+    async scanPatrolCheckpoint(
+        userId: string,
+        dto: {
+            qrCode: string
+            latitude?: number
+            longitude?: number
+            notes?: string
+        },
+    ) {
+        const guard = await this.prisma.guard.findFirst({
+            where: { userId },
+        })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const checkpoint =
+            await this.prisma.patrolCheckpoint.findFirst({
+                where: {
+                    qrCode: dto.qrCode,
+                    estateId: guard.estateId,
+                    isActive: true,
+                },
+            })
+
+        if (!checkpoint) {
+            return error(
+                'Invalid QR Code',
+                'Checkpoint not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const activeShift =
+            await this.prisma.guardShift.findFirst({
+                where: {
+                    guardId: guard.id,
+                    status: ShiftStatus.ONGOING,
+                },
+            })
+
+        const scan = await this.prisma.patrolScan.create({
+            data: {
+                guardId: guard.id,
+                checkpointId: checkpoint.id,
+                shiftId: activeShift?.id,
+                estateId: guard.estateId,
+                latitude: dto.latitude,
+                longitude: dto.longitude,
+                notes: dto.notes,
+                isValid: true,
+            },
+            include: {
+                checkpoint: true,
+            },
+        })
+
+        return success(
+            scan,
+            'Checkpoint Scanned',
+            'Patrol scan recorded successfully',
+        )
+    }
+
+    async getMyPatrolLog(userId: string) {
+        const guard = await this.prisma.guard.findFirst({
+            where: { userId },
+        })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const scans = await this.prisma.patrolScan.findMany({
+            where: {
+                guardId: guard.id,
+            },
+            include: {
+                checkpoint: true,
+                shift: true,
+            },
+            orderBy: {
+                scannedAt: 'desc',
+            },
+            take: 100,
+        })
+
+        return success(
+            scans,
+            'Patrol Log',
+            'Patrol log fetched successfully',
+        )
+    }
+
+    async getPatrolScans(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const scans = await this.prisma.patrolScan.findMany({
+            where: {
+                estateId: admin.estateId,
+            },
+            include: {
+                guard: {
+                    select: {
+                        id: true,
+                        full_name: true,
+                        zone_assignment: true,
+                    },
+                },
+                checkpoint: {
+                    select: {
+                        id: true,
+                        name: true,
+                        zone: true,
+                    },
+                },
+                shift: {
+                    select: {
+                        id: true,
+                        shiftType: true,
+                        shiftDate: true,
+                    },
+                },
+            },
+            orderBy: {
+                scannedAt: 'desc',
+            },
+            take: 200,
+        })
+
+        return success(
+            scans,
+            'Patrol Scans',
+            'Patrol scans fetched successfully',
+        )
+    }
+
+    async getPatrolAlerts(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: { id: userId },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const alerts = await this.prisma.patrolAlert.findMany({
+            where: {
+                estateId: admin.estateId,
+            },
+            include: {
+                checkpoint: {
+                    select: {
+                        id: true,
+                        name: true,
+                        zone: true,
+                    },
+                },
+                guard: {
+                    select: {
+                        id: true,
+                        full_name: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        })
+
+        return success(
+            alerts,
+            'Patrol Alerts',
+            'Patrol alerts fetched successfully',
         )
     }
 }
