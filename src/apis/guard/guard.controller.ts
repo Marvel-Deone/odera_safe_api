@@ -336,6 +336,15 @@ export class GuardController {
     )
   }
 
+  @Get('admin/on-duty-guards')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'On Duty Guards' })
+  getOnDutyGuards(@CurrentUser() user: any) {
+    return this.guardsService.getOnDutyGuards(
+      user.id,
+    )
+  }
+
   @Post('guards/assign-shift')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN, GuardRole.SUPER_GUARD as unknown as Role)
   @ApiOperation({ summary: 'Assign Shift' })
