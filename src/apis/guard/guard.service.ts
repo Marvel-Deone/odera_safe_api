@@ -1828,107 +1828,6 @@ export class GuardService {
         )
     }
 
-    // async createPatrolCheckpoint(userId: string, dto: any) {
-    //     const admin = await this.prisma.user.findFirst({
-    //         where: { id: userId },
-    //     })
-
-    //     if (!admin) {
-    //         return error('Unauthorized', 'Admin not found', HttpStatus.NOT_FOUND)
-    //     }
-
-    //     const qrCode = `PATROL:${crypto.randomUUID()}`
-
-    //     const checkpoint = await this.prisma.patrolCheckpoint.create({
-    //         data: {
-    //             estateId: admin.estateId,
-    //             name: dto.name,
-    //             zone: dto.zone,
-    //             description: dto.description,
-    //             latitude: dto.latitude,
-    //             longitude: dto.longitude,
-    //             requiredFrequency: dto.requiredFrequency,
-    //             qrCode,
-    //         },
-    //     })
-
-    //     return success(
-    //         checkpoint,
-    //         'Checkpoint Created',
-    //         'Patrol checkpoint created successfully',
-    //     )
-    // }
-
-    // async createPatrolCheckpoint(
-    //     userId: string,
-    //     dto: any,
-    // ) {
-    //     const admin =
-    //         await this.prisma.user.findFirst({
-    //             where: { id: userId },
-    //         })
-
-    //     if (!admin) {
-    //         return error(
-    //             'Unauthorized',
-    //             'Admin not found',
-    //             HttpStatus.NOT_FOUND,
-    //         )
-    //     }
-
-    //     const qrPayload = {
-    //         type: 'PATROL_CHECKPOINT',
-    //         checkpointId: crypto.randomUUID(),
-    //     }
-
-    //     const encodedPayload =
-    //         Buffer.from(
-    //             JSON.stringify(qrPayload),
-    //         ).toString('base64')
-
-    //     // BEAUTIFUL QR
-    //     const qrCodeImage =
-    //         await QRCode.toDataURL(
-    //             encodedPayload,
-    //             {
-    //                 width: 800,
-    //                 margin: 2,
-
-    //                 color: {
-    //                     dark: '#000000',
-    //                     light: '#FFFFFF',
-    //                 },
-    //             },
-    //         )
-
-    //     const checkpoint =
-    //         await this.prisma.patrolCheckpoint.create({
-    //             data: {
-    //                 estateId: admin.estateId,
-
-    //                 name: dto.name,
-    //                 zone: dto.zone,
-    //                 description: dto.description,
-
-    //                 latitude: dto.latitude,
-    //                 longitude: dto.longitude,
-
-    //                 requiredFrequency:
-    //                     dto.requiredFrequency,
-
-    //                 qrCode: qrCodeImage,
-
-    //                 // qrCodeImage,
-    //             },
-    //         })
-
-    //     return success(
-    //         checkpoint,
-    //         'Checkpoint Created',
-    //         'Patrol checkpoint created successfully',
-    //     )
-    // }
-
     async createPatrolCheckpoint(
         userId: string,
         dto: any,
@@ -2122,75 +2021,6 @@ export class GuardService {
         )
     }
 
-    // async scanPatrolCheckpoint(
-    //     userId: string,
-    //     dto: {
-    //         qrCode: string
-    //         latitude?: number
-    //         longitude?: number
-    //         notes?: string
-    //     },
-    // ) {
-    //     const guard = await this.prisma.guard.findFirst({
-    //         where: { userId },
-    //     })
-
-    //     if (!guard) {
-    //         return error(
-    //             'Not Found',
-    //             'Guard not found',
-    //             HttpStatus.NOT_FOUND,
-    //         )
-    //     }
-
-    //     const checkpoint =
-    //         await this.prisma.patrolCheckpoint.findFirst({
-    //             where: {
-    //                 qrCode: dto.qrCode,
-    //                 estateId: guard.estateId,
-    //                 isActive: true,
-    //             },
-    //         })
-
-    //     if (!checkpoint) {
-    //         return error(
-    //             'Invalid QR Code',
-    //             'Checkpoint not found',
-    //             HttpStatus.NOT_FOUND,
-    //         )
-    //     }
-
-    //     const activeShift =
-    //         await this.prisma.guardShift.findFirst({
-    //             where: {
-    //                 guardId: guard.id,
-    //                 status: ShiftStatus.ONGOING,
-    //             },
-    //         })
-
-    //     const scan = await this.prisma.patrolScan.create({
-    //         data: {
-    //             guardId: guard.id,
-    //             checkpointId: checkpoint.id,
-    //             shiftId: activeShift?.id,
-    //             estateId: guard.estateId,
-    //             latitude: dto.latitude,
-    //             longitude: dto.longitude,
-    //             notes: dto.notes,
-    //             isValid: true,
-    //         },
-    //         include: {
-    //             checkpoint: true,
-    //         },
-    //     })
-
-    //     return success(
-    //         scan,
-    //         'Checkpoint Scanned',
-    //         'Patrol scan recorded successfully',
-    //     )
-    // }
-
     async scanPatrolCheckpoint(
         userId: string,
         dto: {
@@ -2280,6 +2110,18 @@ export class GuardService {
             },
             include: {
                 checkpoint: true,
+            },
+        })
+
+        await this.prisma.missedCheckpointAlert.updateMany({
+            where: {
+                checkpointId: checkpoint.id,
+                status: 'ACTIVE',
+            },
+
+            data: {
+                status: 'RESOLVED',
+                resolvedAt: new Date(),
             },
         })
 
@@ -2418,6 +2260,190 @@ export class GuardService {
             alerts,
             'Patrol Alerts',
             'Patrol alerts fetched successfully',
+        )
+    }
+
+    async getSecurityOverview(userId: string) {
+        const admin = await this.prisma.user.findFirst({
+            where: {
+                id: userId,
+            },
+        })
+
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const tomorrow = new Date(today)
+        tomorrow.setDate(tomorrow.getDate() + 1)
+
+        // ACTIVE MISSED ALERTS
+        const missedAlerts =
+            await this.prisma.missedCheckpointAlert.findMany({
+                where: {
+                    estateId: admin.estateId,
+                    status: 'ACTIVE',
+                },
+
+                include: {
+                    checkpoint: true,
+                },
+
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            })
+
+        //  TODAY SCANS
+        const todayScans =
+            await this.prisma.patrolScan.count({
+                where: {
+                    estateId: admin.estateId,
+
+                    scannedAt: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                },
+            })
+
+        //  ACTIVE SHIFTS
+        const activeShifts =
+            await this.prisma.guardShift.count({
+                where: {
+                    estateId: admin.estateId,
+                    status: ShiftStatus.ONGOING,
+                },
+            })
+
+        //  GUARDS ON PATROL
+        const guardsOnPatrol =
+            await this.prisma.guardShift.findMany({
+                where: {
+                    estateId: admin.estateId,
+                    status: ShiftStatus.ONGOING,
+                },
+
+                include: {
+                    guard: true,
+                },
+            })
+
+        //  TODAY PATROL SCANS
+        const scansToday =
+            await this.prisma.patrolScan.findMany({
+                where: {
+                    estateId: admin.estateId,
+
+                    scannedAt: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                },
+
+                include: {
+                    checkpoint: true,
+                    guard: true,
+                },
+
+                orderBy: {
+                    scannedAt: 'desc',
+                },
+
+                take: 10,
+            })
+
+        //  TOTAL CHECKPOINTS
+        const totalCheckpoints =
+            await this.prisma.patrolCheckpoint.count({
+                where: {
+                    estateId: admin.estateId,
+                    isActive: true,
+                },
+            })
+
+        //  CHECKPOINTS VISITED TODAY
+        const scannedCheckpointIds =
+            await this.prisma.patrolScan.findMany({
+                where: {
+                    estateId: admin.estateId,
+
+                    scannedAt: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                },
+
+                distinct: ['checkpointId'],
+
+                select: {
+                    checkpointId: true,
+                },
+            })
+
+        const patrolCompletionRate =
+            totalCheckpoints === 0
+                ? 0
+                : Math.round(
+                    (scannedCheckpointIds.length /
+                        totalCheckpoints) *
+                    100,
+                )
+
+        //  OVERDUE ZONES
+        const overdueZones =
+            missedAlerts.map((alert) => {
+                const expectedAt = new Date(alert.expectedAt)
+
+                const minsOverdue = Math.floor(
+                    (Date.now() -
+                        expectedAt.getTime()) /
+                    60000,
+                )
+
+                return {
+                    id: alert.id,
+                    checkpointId: alert.checkpointId,
+                    zone: alert.checkpoint.zone,
+                    checkpoint: alert.checkpoint.name,
+                    overdueMinutes: minsOverdue,
+                    expectedAt: alert.expectedAt,
+                }
+            })
+
+        //  RECENT PATROL ACTIVITY
+        const recentPatrolActivity =
+            scansToday.map((scan) => ({
+                id: scan.id,
+                guardName: scan.guard.full_name,
+                checkpoint: scan.checkpoint.name,
+                zone: scan.checkpoint.zone,
+                scannedAt: scan.scannedAt,
+            }))
+
+        return success(
+            {
+                stats: {
+                    missedCheckpoints: missedAlerts.length,
+                    patrolCompletionRate,
+                    guardsOnPatrol: guardsOnPatrol.length,
+                    todayScans,
+                    activeShifts,
+                },
+                overdueZones,
+                missedAlerts,
+                recentPatrolActivity,
+            },
+
+            'Security Overview Retrieved',
+            'Dashboard security overview fetched successfully',
         )
     }
 }

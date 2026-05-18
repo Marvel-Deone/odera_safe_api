@@ -148,6 +148,11 @@ enum IncidentCategory {
   OTHER
 }
 
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -333,16 +338,17 @@ model Guard {
   estate Estate @relation(fields: [estateId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
 
-  gateLogs          GateLog[]
-  guardShifts       GuardShift[]
-  guardAttendances  GuardAttendance[]
-  patrolScans       PatrolScan[]
-  shiftSwapRequests ShiftSwapRequest[]
-  SwapRequester     ShiftSwapRequest[] @relation("SwapRequester")
-  SwapRecipient     ShiftSwapRequest[] @relation("SwapRecipient")
-  guardSOSs         GuardSOS[]
-  incidents         Incident[]
-  patrolAlerts      PatrolAlert[]
+  gateLogs               GateLog[]
+  guardShifts            GuardShift[]
+  guardAttendances       GuardAttendance[]
+  patrolScans            PatrolScan[]
+  shiftSwapRequests      ShiftSwapRequest[]
+  SwapRequester          ShiftSwapRequest[]      @relation("SwapRequester")
+  SwapRecipient          ShiftSwapRequest[]      @relation("SwapRecipient")
+  guardSOSs              GuardSOS[]
+  incidents              Incident[]
+  patrolAlerts           PatrolAlert[]
+  missedCheckpointAlerts MissedCheckpointAlert[]
 }
 
 model Visitor {
@@ -580,7 +586,7 @@ model PatrolCheckpoint {
   latitude  Float?
   longitude Float?
 
-  requiredFrequency Int? // e.g. every 2 hours
+  requiredFrequency Int // e.g. every 2 hours
   isActive          Boolean @default(true)
 
   createdAt DateTime @default(now())
@@ -589,8 +595,9 @@ model PatrolCheckpoint {
   // Relations
   estate Estate @relation(fields: [estateId], references: [id])
 
-  scans        PatrolScan[]
-  patrolAlerts PatrolAlert[]
+  scans                  PatrolScan[]
+  patrolAlerts           PatrolAlert[]
+  missedCheckpointAlerts MissedCheckpointAlert[]
 
   @@index([estateId, zone])
 }
@@ -734,6 +741,25 @@ model Incident {
   @@index([estateId])
   @@index([guardId])
   @@index([status])
+}
+
+model MissedCheckpointAlert {
+  id String @id @default(cuid())
+
+  estateId String
+
+  checkpointId String
+  checkpoint   PatrolCheckpoint @relation(fields: [checkpointId], references: [id])
+
+  guardId String?
+  guard   Guard?  @relation(fields: [guardId], references: [id])
+
+  expectedAt DateTime
+  resolvedAt DateTime?
+
+  status AlertStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
 }
 
 // VISITOR_SCAN_FAILED

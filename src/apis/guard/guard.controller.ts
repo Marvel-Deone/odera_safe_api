@@ -395,85 +395,96 @@ export class GuardController {
     )
   }
   @Post('admin/patrol-checkpoints')
-@Roles(Role.ADMIN, Role.SUPER_ADMIN)
-@ApiOperation({ summary: 'Create patrol checkpoint' })
-createPatrolCheckpoint(
-  @CurrentUser() user: any,
-  @Body() dto: any,
-) {
-  return this.guardsService.createPatrolCheckpoint(
-    user.id,
-    dto,
-  )
-}
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Create patrol checkpoint' })
+  createPatrolCheckpoint(
+    @CurrentUser() user: any,
+    @Body() dto: any,
+  ) {
+    return this.guardsService.createPatrolCheckpoint(
+      user.id,
+      dto,
+    )
+  }
 
-@Get('admin/patrol-checkpoints')
-@Roles(Role.ADMIN, Role.SUPER_ADMIN)
-@ApiOperation({ summary: 'Get patrol checkpoints' })
-getPatrolCheckpoints(
-  @CurrentUser() user: any,
-) {
-  return this.guardsService.getPatrolCheckpoints(
-    user.id,
-  )
-}
+  @Get('admin/patrol-checkpoints')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Get patrol checkpoints' })
+  getPatrolCheckpoints(
+    @CurrentUser() user: any,
+  ) {
+    return this.guardsService.getPatrolCheckpoints(
+      user.id,
+    )
+  }
 
-@Get('admin/patrol-checkpoints/:id')
-@Roles(Role.ADMIN, Role.SUPER_ADMIN)
-@ApiOperation({ summary: 'Get patrol checkpoint details' })
-getPatrolCheckpointById(
-  @CurrentUser() user: any,
-  @Param('id') checkpointId: string,
-) {
-  return this.guardsService.getPatrolCheckpointById(
-    user.id,
-    checkpointId,
-  )
-}
+  @Get('admin/patrol-checkpoints/:id')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Get patrol checkpoint details' })
+  getPatrolCheckpointById(
+    @CurrentUser() user: any,
+    @Param('id') checkpointId: string,
+  ) {
+    return this.guardsService.getPatrolCheckpointById(
+      user.id,
+      checkpointId,
+    )
+  }
 
-@Post('guards/patrol-scans')
-@Roles(Role.GUARD, Role.ADMIN)
-@ApiOperation({ summary: 'Scan patrol checkpoint' })
-scanPatrolCheckpoint(
-  @CurrentUser() user: any,
-  @Body() dto: any,
-) {
-  return this.guardsService.scanPatrolCheckpoint(
-    user.id,
-    dto,
-  )
-}
+  @Post('guards/patrol-scans')
+  @Roles(Role.GUARD, Role.ADMIN)
+  @ApiOperation({ summary: 'Scan patrol checkpoint' })
+  scanPatrolCheckpoint(
+    @CurrentUser() user: any,
+    @Body() dto: any,
+  ) {
+    return this.guardsService.scanPatrolCheckpoint(
+      user.id,
+      dto,
+    )
+  }
 
-@Get('guards/patrol-log')
-@Roles(Role.GUARD)
-@ApiOperation({ summary: 'Get guard patrol log' })
-getMyPatrolLog(
-  @CurrentUser() user: any,
-) {
-  return this.guardsService.getMyPatrolLog(
-    user.id,
-  )
-}
+  @Get('guards/patrol-log')
+  @Roles(Role.GUARD)
+  @ApiOperation({ summary: 'Get guard patrol log' })
+  getMyPatrolLog(
+    @CurrentUser() user: any,
+  ) {
+    return this.guardsService.getMyPatrolLog(
+      user.id,
+    )
+  }
 
-@Get('admin/patrol-scans')
-@Roles(Role.ADMIN, Role.SUPER_ADMIN)
-@ApiOperation({ summary: 'Get all patrol scans' })
-getPatrolScans(
-  @CurrentUser() user: any,
-) {
-  return this.guardsService.getPatrolScans(
-    user.id,
-  )
-}
+  @Get('admin/patrol-scans')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Get all patrol scans' })
+  getPatrolScans(
+    @CurrentUser() user: any,
+  ) {
+    return this.guardsService.getPatrolScans(
+      user.id,
+    )
+  }
 
-@Get('admin/patrol-alerts')
-@Roles(Role.ADMIN, Role.SUPER_ADMIN)
-@ApiOperation({ summary: 'Get patrol alerts' })
-getPatrolAlerts(
-  @CurrentUser() user: any,
-) {
-  return this.guardsService.getPatrolAlerts(
-    user.id,
-  )
-}
+  @Get('admin/patrol-alerts')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Get patrol alerts' })
+  getPatrolAlerts(
+    @CurrentUser() user: any,
+  ) {
+    return this.guardsService.getPatrolAlerts(
+      user.id,
+    )
+  }
+
+  @Get('admin/dashboard/security-overview')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Get security overview' })
+  getSecurityOverview(
+    @Req() req,
+  ) {
+    return this.guardsService.getSecurityOverview(
+      req.user.id,
+    )
+  }
 }
