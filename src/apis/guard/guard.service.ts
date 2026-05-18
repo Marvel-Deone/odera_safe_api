@@ -1859,6 +1859,76 @@ export class GuardService {
     //     )
     // }
 
+    // async createPatrolCheckpoint(
+    //     userId: string,
+    //     dto: any,
+    // ) {
+    //     const admin =
+    //         await this.prisma.user.findFirst({
+    //             where: { id: userId },
+    //         })
+
+    //     if (!admin) {
+    //         return error(
+    //             'Unauthorized',
+    //             'Admin not found',
+    //             HttpStatus.NOT_FOUND,
+    //         )
+    //     }
+
+    //     const qrPayload = {
+    //         type: 'PATROL_CHECKPOINT',
+    //         checkpointId: crypto.randomUUID(),
+    //     }
+
+    //     const encodedPayload =
+    //         Buffer.from(
+    //             JSON.stringify(qrPayload),
+    //         ).toString('base64')
+
+    //     // BEAUTIFUL QR
+    //     const qrCodeImage =
+    //         await QRCode.toDataURL(
+    //             encodedPayload,
+    //             {
+    //                 width: 800,
+    //                 margin: 2,
+
+    //                 color: {
+    //                     dark: '#000000',
+    //                     light: '#FFFFFF',
+    //                 },
+    //             },
+    //         )
+
+    //     const checkpoint =
+    //         await this.prisma.patrolCheckpoint.create({
+    //             data: {
+    //                 estateId: admin.estateId,
+
+    //                 name: dto.name,
+    //                 zone: dto.zone,
+    //                 description: dto.description,
+
+    //                 latitude: dto.latitude,
+    //                 longitude: dto.longitude,
+
+    //                 requiredFrequency:
+    //                     dto.requiredFrequency,
+
+    //                 qrCode: qrCodeImage,
+
+    //                 // qrCodeImage,
+    //             },
+    //         })
+
+    //     return success(
+    //         checkpoint,
+    //         'Checkpoint Created',
+    //         'Patrol checkpoint created successfully',
+    //     )
+    // }
+
     async createPatrolCheckpoint(
         userId: string,
         dto: any,
@@ -1876,31 +1946,6 @@ export class GuardService {
             )
         }
 
-        const qrPayload = {
-            type: 'PATROL_CHECKPOINT',
-            checkpointId: crypto.randomUUID(),
-        }
-
-        const encodedPayload =
-            Buffer.from(
-                JSON.stringify(qrPayload),
-            ).toString('base64')
-
-        // BEAUTIFUL QR
-        const qrCodeImage =
-            await QRCode.toDataURL(
-                encodedPayload,
-                {
-                    width: 800,
-                    margin: 2,
-
-                    color: {
-                        dark: '#000000',
-                        light: '#FFFFFF',
-                    },
-                },
-            )
-
         const checkpoint =
             await this.prisma.patrolCheckpoint.create({
                 data: {
@@ -1916,14 +1961,47 @@ export class GuardService {
                     requiredFrequency:
                         dto.requiredFrequency,
 
-                    qrCode: qrCodeImage,
+                    qrCode: '',
+                },
+            })
 
-                    // qrCodeImage,
+        const qrPayload = {
+            type: 'PATROL_CHECKPOINT',
+            checkpointId: checkpoint.id,
+        }
+
+        const encodedPayload =
+            Buffer.from(
+                JSON.stringify(qrPayload),
+            ).toString('base64')
+
+        const qrCodeImage =
+            await QRCode.toDataURL(
+                encodedPayload,
+                {
+                    width: 800,
+                    margin: 2,
+
+                    color: {
+                        dark: '#000000',
+                        light: '#FFFFFF',
+                    },
+                },
+            )
+
+        const updatedCheckpoint =
+            await this.prisma.patrolCheckpoint.update({
+                where: {
+                    id: checkpoint.id,
+                },
+
+                data: {
+                    qrCode: qrCodeImage,
                 },
             })
 
         return success(
-            checkpoint,
+            updatedCheckpoint,
             'Checkpoint Created',
             'Patrol checkpoint created successfully',
         )
@@ -2150,6 +2228,9 @@ export class GuardService {
                 HttpStatus.BAD_REQUEST,
             )
         }
+
+        console.log('decodedCHeckpoint:', decoded, 'checkpointguard:', guard);
+
 
         const { checkpointId } = decoded
 
