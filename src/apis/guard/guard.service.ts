@@ -1860,74 +1860,74 @@ export class GuardService {
     // }
 
     async createPatrolCheckpoint(
-  userId: string,
-  dto: any,
-) {
-  const admin =
-    await this.prisma.user.findFirst({
-      where: { id: userId },
-    })
+        userId: string,
+        dto: any,
+    ) {
+        const admin =
+            await this.prisma.user.findFirst({
+                where: { id: userId },
+            })
 
-  if (!admin) {
-    return error(
-      'Unauthorized',
-      'Admin not found',
-      HttpStatus.NOT_FOUND,
-    )
-  }
+        if (!admin) {
+            return error(
+                'Unauthorized',
+                'Admin not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
 
-  const qrPayload = {
-    type: 'PATROL_CHECKPOINT',
-    checkpointId: crypto.randomUUID(),
-  }
+        const qrPayload = {
+            type: 'PATROL_CHECKPOINT',
+            checkpointId: crypto.randomUUID(),
+        }
 
-  const encodedPayload =
-    Buffer.from(
-      JSON.stringify(qrPayload),
-    ).toString('base64')
+        const encodedPayload =
+            Buffer.from(
+                JSON.stringify(qrPayload),
+            ).toString('base64')
 
-  // BEAUTIFUL QR
-  const qrCodeImage =
-    await QRCode.toDataURL(
-      encodedPayload,
-      {
-        width: 800,
-        margin: 2,
+        // BEAUTIFUL QR
+        const qrCodeImage =
+            await QRCode.toDataURL(
+                encodedPayload,
+                {
+                    width: 800,
+                    margin: 2,
 
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
-      },
-    )
+                    color: {
+                        dark: '#000000',
+                        light: '#FFFFFF',
+                    },
+                },
+            )
 
-  const checkpoint =
-    await this.prisma.patrolCheckpoint.create({
-      data: {
-        estateId: admin.estateId,
+        const checkpoint =
+            await this.prisma.patrolCheckpoint.create({
+                data: {
+                    estateId: admin.estateId,
 
-        name: dto.name,
-        zone: dto.zone,
-        description: dto.description,
+                    name: dto.name,
+                    zone: dto.zone,
+                    description: dto.description,
 
-        latitude: dto.latitude,
-        longitude: dto.longitude,
+                    latitude: dto.latitude,
+                    longitude: dto.longitude,
 
-        requiredFrequency:
-          dto.requiredFrequency,
+                    requiredFrequency:
+                        dto.requiredFrequency,
 
-        qrCode: qrCodeImage,
+                    qrCode: qrCodeImage,
 
-        // qrCodeImage,
-      },
-    })
+                    // qrCodeImage,
+                },
+            })
 
-  return success(
-    checkpoint,
-    'Checkpoint Created',
-    'Patrol checkpoint created successfully',
-  )
-}
+        return success(
+            checkpoint,
+            'Checkpoint Created',
+            'Patrol checkpoint created successfully',
+        )
+    }
 
     async getPatrolCheckpoints(userId: string) {
         const admin = await this.prisma.user.findFirst({
@@ -2044,6 +2044,75 @@ export class GuardService {
         )
     }
 
+    // async scanPatrolCheckpoint(
+    //     userId: string,
+    //     dto: {
+    //         qrCode: string
+    //         latitude?: number
+    //         longitude?: number
+    //         notes?: string
+    //     },
+    // ) {
+    //     const guard = await this.prisma.guard.findFirst({
+    //         where: { userId },
+    //     })
+
+    //     if (!guard) {
+    //         return error(
+    //             'Not Found',
+    //             'Guard not found',
+    //             HttpStatus.NOT_FOUND,
+    //         )
+    //     }
+
+    //     const checkpoint =
+    //         await this.prisma.patrolCheckpoint.findFirst({
+    //             where: {
+    //                 qrCode: dto.qrCode,
+    //                 estateId: guard.estateId,
+    //                 isActive: true,
+    //             },
+    //         })
+
+    //     if (!checkpoint) {
+    //         return error(
+    //             'Invalid QR Code',
+    //             'Checkpoint not found',
+    //             HttpStatus.NOT_FOUND,
+    //         )
+    //     }
+
+    //     const activeShift =
+    //         await this.prisma.guardShift.findFirst({
+    //             where: {
+    //                 guardId: guard.id,
+    //                 status: ShiftStatus.ONGOING,
+    //             },
+    //         })
+
+    //     const scan = await this.prisma.patrolScan.create({
+    //         data: {
+    //             guardId: guard.id,
+    //             checkpointId: checkpoint.id,
+    //             shiftId: activeShift?.id,
+    //             estateId: guard.estateId,
+    //             latitude: dto.latitude,
+    //             longitude: dto.longitude,
+    //             notes: dto.notes,
+    //             isValid: true,
+    //         },
+    //         include: {
+    //             checkpoint: true,
+    //         },
+    //     })
+
+    //     return success(
+    //         scan,
+    //         'Checkpoint Scanned',
+    //         'Patrol scan recorded successfully',
+    //     )
+    // }
+
     async scanPatrolCheckpoint(
         userId: string,
         dto: {
@@ -2065,10 +2134,37 @@ export class GuardService {
             )
         }
 
+        let decoded
+
+        try {
+            const json = Buffer.from(
+                dto.qrCode,
+                'base64',
+            ).toString('utf-8')
+
+            decoded = JSON.parse(json)
+        } catch {
+            return error(
+                'Invalid QR',
+                'Malformed checkpoint QR code',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
+        const { checkpointId } = decoded
+
+        if (!checkpointId) {
+            return error(
+                'Invalid QR',
+                'Checkpoint ID missing',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+
         const checkpoint =
             await this.prisma.patrolCheckpoint.findFirst({
                 where: {
-                    qrCode: dto.qrCode,
+                    id: checkpointId,
                     estateId: guard.estateId,
                     isActive: true,
                 },

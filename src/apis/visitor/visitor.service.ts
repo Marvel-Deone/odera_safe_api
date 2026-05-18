@@ -534,7 +534,7 @@ export class VisitorService {
         )
     }
 
-    //   guard: qr scan
+    // guard: qr scan
     async scanQR(
         qrData: string,
         guardId: string,

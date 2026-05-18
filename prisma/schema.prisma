@@ -573,7 +573,7 @@ model PatrolCheckpoint {
   estateId String
 
   name        String
-  qrCode      String  @unique // QR code payload
+  qrCode      String?
   zone        String
   description String?
 
