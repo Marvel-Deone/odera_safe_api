@@ -50,7 +50,6 @@ export class ShiftSwapController {
         )
     }
 
-    // Guard/Admin view requests
     @Get()
     @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.GUARD)
     @ApiOperation({
@@ -60,6 +59,20 @@ export class ShiftSwapController {
         @CurrentUser() user: any,
     ) {
         return this.shiftSwapService.getSwapRequests(
+            user.id,
+        )
+    }
+
+    // Guard/Admin view requests
+    @Get('admin/shift-swaps')
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.GUARD)
+    @ApiOperation({
+        summary: 'Get all shift swap requests',
+    })
+    getAllSwapRequests(
+        @CurrentUser() user: any,
+    ) {
+        return this.shiftSwapService.getAllSwapRequests(
             user.id,
         )
     }

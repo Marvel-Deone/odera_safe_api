@@ -2056,9 +2056,6 @@ export class GuardService {
             )
         }
 
-        console.log('decodedCHeckpoint:', decoded, 'checkpointguard:', guard);
-
-
         const { checkpointId } = decoded
 
         if (!checkpointId) {

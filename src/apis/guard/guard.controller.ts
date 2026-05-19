@@ -62,7 +62,7 @@ export class GuardController {
   }
 
   @Get('admin/guards')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.GUARD)
   @ApiOperation({
     summary: 'Get guards',
   })

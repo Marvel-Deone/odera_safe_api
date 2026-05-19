@@ -161,7 +161,7 @@ export class ShiftSwapService {
     )
   }
 
-  async getSwapRequests(userId: string) {
+  async getAllSwapRequests(userId: string) {
     const user =
       await this.prisma.user.findFirst({
         where: { id: userId },
@@ -179,6 +179,54 @@ export class ShiftSwapService {
       await this.prisma.shiftSwapRequest.findMany({
         where: {
           estateId: user.estateId,
+        },
+
+        include: {
+          requester: {
+            select: {
+              id: true,
+              full_name: true,
+            },
+          },
+          target: {
+            select: {
+              id: true,
+              full_name: true,
+            },
+          },
+          requesterShift: true,
+          targetShift: true,
+        },
+
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+
+    return success(
+      swaps,
+      'Shift Swap Requests',
+      'Shift swap requests fetched successfully',
+    )
+  }
+
+  async getSwapRequests(userId: string) {
+    const guard = await this.prisma.guard.findFirst({
+            where: { userId },
+        })
+
+        if (!guard) {
+            return error(
+                'Not Found',
+                'Guard not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+    const swaps =
+      await this.prisma.shiftSwapRequest.findMany({
+        where: {
+          requesterGuardId: guard.id,
         },
 
         include: {
