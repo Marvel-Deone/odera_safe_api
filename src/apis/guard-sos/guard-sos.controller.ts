@@ -47,6 +47,20 @@ export class GuardSosController {
         )
     }
 
+    @Get()
+    @Roles(Role.GUARD)
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Get guard SOS alerts',
+    })
+    getGuardSOSAlerts(
+        @CurrentUser() user: any,
+    ) {
+        return this.guardSosService.getGuardSOSAlerts(
+            user.id,
+        )
+    }
+
     @Patch(':id/cancel')
     @Roles(Role.GUARD)
     @HttpCode(HttpStatus.OK)
@@ -73,10 +87,10 @@ export class GuardSosController {
     @ApiOperation({
         summary: 'Get all SOS alerts',
     })
-    getGuardSOSAlerts(
+    getAllGuardSOSAlerts(
         @CurrentUser() user: any,
     ) {
-        return this.guardSosService.getGuardSOSAlerts(
+        return this.guardSosService.getAllGuardSOSAlerts(
             user.id,
         )
     }
