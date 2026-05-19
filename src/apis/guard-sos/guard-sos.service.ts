@@ -68,6 +68,65 @@ export class GuardSosService {
         )
     }
 
+    // async getGuardSOSAlerts(userId: string) {
+    //     const admin = await this.prisma.user.findFirst({
+    //         where: { id: userId },
+    //     })
+
+    //     if (!admin) {
+    //         return error(
+    //             'Unauthorized',
+    //             'Admin not found',
+    //             HttpStatus.NOT_FOUND,
+    //         )
+    //     }
+
+    //     const alerts = await this.prisma.guardSOS.findMany({
+    //         where: {
+    //             estateId: admin.estateId,
+    //         },
+    //         include: {
+    //             guard: {
+    //                 select: {
+    //                     id: true,
+    //                     // full_name: true,
+    //                     // phone_number: true,
+    //                     // zone_assignment: true,
+    //                 },
+    //             },
+    //         },
+    //         orderBy: {
+    //             createdAt: 'desc',
+    //         },
+    //     })
+
+    //     const guard =
+    //         await this.prisma.guard.findFirst({
+    //             where: {
+    //                 id: alerts.guard.id,
+    //                 estateId:
+    //                     admin.estateId,
+    //             },
+
+    //             include: {
+    //                 user: true,
+    //             },
+    //         })
+
+    //     return success(
+    //         {
+    //             alerts,
+    //             guard: {
+    //                 id: guard?.id,
+    //                 full_name: guard?.user.full_name,
+    //                 phone_number: guard?.user.phone_number,
+    //                 zone_assignment: guard?.zone_assignment,
+    //             }
+    //         },
+    //         'SOS Alerts',
+    //         'SOS alerts fetched successfully',
+    //     )
+    // }
     async getGuardSOSAlerts(userId: string) {
         const admin = await this.prisma.user.findFirst({
             where: { id: userId },
@@ -90,8 +149,9 @@ export class GuardSosService {
                     select: {
                         id: true,
                         full_name: true,
-                        phone_number: true,
+                        phone: true,
                         zone_assignment: true,
+                        // employee_id: true,
                     },
                 },
             },
@@ -106,7 +166,6 @@ export class GuardSosService {
             'SOS alerts fetched successfully',
         )
     }
-
     async getGuardSOSById(
         userId: string,
         sosId: string,
@@ -133,9 +192,9 @@ export class GuardSosService {
                     select: {
                         id: true,
                         full_name: true,
-                        phone_number: true,
+                        phone: true,
                         zone_assignment: true,
-                        employee_id: true,
+                        // employee_id: true,
                     },
                 },
             },
