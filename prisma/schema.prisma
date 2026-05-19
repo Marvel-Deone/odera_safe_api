@@ -682,6 +682,7 @@ model ShiftSwapRequest {
   guardShift   GuardShift? @relation(fields: [guardShiftId], references: [id])
   guardShiftId String?
 
+  @@index([estateId, status])
   @@index([requesterGuardId, status])
   @@index([targetGuardId, status])
 }

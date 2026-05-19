@@ -7,6 +7,32 @@ export class SmsService {
         private configService: ConfigService,
     ) { }
 
+    async sendSms(phone: string, message: string) {
+        const deviceId = process.env.TEXTBEE_DEVICE_ID;
+        const apiKey = process.env.TEXTBEE_API_KEY;
+
+        // try {
+        //     const response = await axios.post(
+        //         `https://api.textbee.dev/api/v1/gateway/devices/${deviceId}/send-sms`,
+        //         {
+        //             recipients: [phone],
+        //             message,
+        //         },
+        //         {
+        //             headers: {
+        //                 'x-api-key': apiKey,
+        //                 'Content-Type': 'application/json',
+        //             },
+        //         },
+        //     );
+
+        //     return response.data;
+        // } catch (error) {
+        //     console.error(error.response?.data || error.message);
+        //     throw error;
+        // }
+    }
+
     async sendTrackingLink({
         phone,
         visitorName,

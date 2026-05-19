@@ -18,6 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { PatrolMonitoringModule } from './apis/patrol-monitoring/patrol-monitoring.module';
 import { PatrolModule } from './apis/patrol/patrol.module';
 import { GuardSosModule } from './apis/guard-sos/guard-sos.module';
+import { ShiftSwapModule } from './apis/shift-swap/shift-swap.module';
 
 @Module({
   imports: [
@@ -43,7 +44,8 @@ import { GuardSosModule } from './apis/guard-sos/guard-sos.module';
     SmsModule,
     PatrolMonitoringModule,
     PatrolModule,
-    GuardSosModule
+    GuardSosModule,
+    ShiftSwapModule
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],
