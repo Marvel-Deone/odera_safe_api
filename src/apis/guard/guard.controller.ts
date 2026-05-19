@@ -45,9 +45,7 @@ export class GuardController {
 
   @Post('admin/guards')
   @Roles(Role.ADMIN)
-
   @HttpCode(HttpStatus.OK)
-
   @ApiOperation({
     summary: 'Create guard',
   })
@@ -65,7 +63,6 @@ export class GuardController {
 
   @Get('admin/guards')
   @Roles(Role.ADMIN)
-
   @ApiOperation({
     summary: 'Get guards',
   })
@@ -79,7 +76,6 @@ export class GuardController {
 
   @Get('admin/guards/:guardId')
   @Roles(Role.ADMIN)
-
   @ApiOperation({
     summary: 'Get guard by ID',
   })
@@ -119,9 +115,7 @@ export class GuardController {
     'admin/guards/:guardId/activate',
   )
   @Roles(Role.ADMIN)
-
   @HttpCode(HttpStatus.OK)
-
   @ApiOperation({
     summary: 'Activate guard',
   })
@@ -484,6 +478,16 @@ export class GuardController {
     @Req() req,
   ) {
     return this.guardsService.getSecurityOverview(
+      req.user.id,
+    )
+  }
+
+  @Get('guards/patrol-dashboard')
+  @Roles(Role.GUARD)
+  getGuardPatrolDashboard(
+    @Req() req,
+  ) {
+    return this.guardsService.getGuardPatrolDashboard(
       req.user.id,
     )
   }

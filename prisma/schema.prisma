@@ -701,6 +701,9 @@ model GuardSOS {
 
   status GuardSOSStatus @default(ACTIVE)
 
+  acknowledgedAt DateTime?
+  acknowledgedBy String?
+
   resolvedBy     String?
   resolvedAt     DateTime?
   resolutionNote String?

@@ -17,6 +17,7 @@ import { SmsModule } from './apis/sms/sms.module';
 import { ScheduleModule } from '@nestjs/schedule'
 import { PatrolMonitoringModule } from './apis/patrol-monitoring/patrol-monitoring.module';
 import { PatrolModule } from './apis/patrol/patrol.module';
+import { GuardSosModule } from './apis/guard-sos/guard-sos.module';
 
 @Module({
   imports: [
@@ -41,7 +42,8 @@ import { PatrolModule } from './apis/patrol/patrol.module';
     TrackingModule,
     SmsModule,
     PatrolMonitoringModule,
-    PatrolModule
+    PatrolModule,
+    GuardSosModule
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

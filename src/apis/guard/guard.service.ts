@@ -28,9 +28,7 @@ import { CreateIncidentDto } from './dto/create-incident.dto'
 
 @Injectable()
 export class GuardService {
-    constructor(
-        private prisma: PrismaService,
-    ) { }
+    constructor(private prisma: PrismaService,) { }
 
     async createGuard(
         userId: string,
@@ -2446,4 +2444,165 @@ export class GuardService {
             'Dashboard security overview fetched successfully',
         )
     }
+
+    async getGuardPatrolDashboard(userId: string) {
+    const guard = await this.prisma.guard.findFirst({
+        where: { userId },
+    })
+
+    if (!guard) {
+        return error(
+            'Not Found',
+            'Guard not found',
+            HttpStatus.NOT_FOUND,
+        )
+    }
+
+    const checkpoints =
+        await this.prisma.patrolCheckpoint.findMany({
+            where: {
+                estateId: guard.estateId,
+                isActive: true,
+            },
+
+            include: {
+                scans: {
+                    where: {
+                        guardId: guard.id,
+                    },
+
+                    orderBy: {
+                        scannedAt: 'desc',
+                    },
+
+                    take: 1,
+                },
+            },
+        })
+
+    const activeAlerts =
+        await this.prisma.missedCheckpointAlert.findMany({
+            where: {
+                estateId: guard.estateId,
+                status: 'ACTIVE',
+            },
+
+            include: {
+                checkpoint: true,
+            },
+        })
+
+    const formattedCheckpoints =
+        checkpoints.map((checkpoint, index) => {
+            const latestScan =
+                checkpoint.scans[0]
+
+            const hasAlert =
+                activeAlerts.find(
+                    (a) =>
+                        a.checkpointId ===
+                        checkpoint.id,
+                )
+
+            let status = 'upcoming'
+
+            if (hasAlert) {
+                status = 'missed'
+            } else if (latestScan) {
+                status = 'completed'
+            }
+
+            return {
+                id: checkpoint.id,
+                name: checkpoint.name,
+
+                status,
+
+                scheduledTime:
+                    checkpoint.requiredFrequency,
+
+                scannedAt:
+                    latestScan?.scannedAt || null,
+
+                overdueMinutes:
+                    hasAlert
+                        ? Math.floor(
+                            (Date.now() -
+                                new Date(
+                                    hasAlert.expectedAt,
+                                ).getTime()) /
+                            60000,
+                        )
+                        : null,
+            }
+        })
+
+    const completed =
+        formattedCheckpoints.filter(
+            (c) => c.status === 'completed',
+        ).length
+
+    const missed =
+        formattedCheckpoints.filter(
+            (c) => c.status === 'missed',
+        ).length
+
+    const completionRate =
+        checkpoints.length === 0
+            ? 0
+            : Math.round(
+                (completed /
+                    checkpoints.length) *
+                100,
+            )
+
+    const score =
+        Math.max(
+            0,
+            completionRate - missed * 5,
+        )
+
+    const patrolWarning =
+        activeAlerts.length > 0
+            ? {
+                checkpoint:
+                    activeAlerts[0].checkpoint.name,
+
+                overdueMinutes:
+                    Math.floor(
+                        (Date.now() -
+                            new Date(
+                                activeAlerts[0].expectedAt,
+                            ).getTime()) /
+                        60000,
+                    ),
+            }
+            : null
+
+    return success(
+        {
+            patrolWarning,
+
+            checkpoints:
+                formattedCheckpoints,
+
+            performance: {
+                score,
+                completionRate,
+                completed,
+                missed,
+
+                label:
+                    score >= 90
+                        ? 'Top Performer'
+                        : score >= 70
+                            ? 'Good Standing'
+                            : 'Needs Attention',
+            },
+        },
+
+        'Guard Patrol Dashboard',
+        'Guard patrol dashboard fetched successfully',
+    )
+}
 }

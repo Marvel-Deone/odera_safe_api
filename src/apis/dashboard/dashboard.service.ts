@@ -49,7 +49,7 @@ export class DashboardService {
       },
     })
 
-    // ⚠️ You don't have "online" tracking yet
+    // there's no "online" tracking yet
     // so for now we fake it as total guards
     const guardsOnline = await this.prisma.user.count({
       where: {
