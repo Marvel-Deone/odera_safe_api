@@ -269,11 +269,11 @@ export class GuardService {
                     user: true,
 
                     guardShifts: {
-                        where: {
-                            status: 'ONGOING',
-                        },
+                        // where: {
+                        //     status: 'ONGOING',
+                        // },
 
-                        take: 1,
+                        // take: 1,
 
                         orderBy: {
                             createdAt: 'desc',

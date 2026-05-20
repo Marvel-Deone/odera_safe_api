@@ -64,7 +64,7 @@ export class ShiftSwapController {
     }
 
     // Guard/Admin view requests
-    @Get('admin/shift-swaps')
+    @Get('admin')
     @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.GUARD)
     @ApiOperation({
         summary: 'Get all shift swap requests',
