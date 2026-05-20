@@ -169,24 +169,25 @@ enum AlertStatus {
 // }
 
 model Estate {
-  id                String             @id @default(uuid())
-  name              String
-  address           String
-  totalHouses       Int
-  createdAt         DateTime           @default(now())
-  settings          Json?
-  residents         Resident[]
-  users             User[]
-  visitors          Visitor[]
-  activityLogs      ActivityLog[]
-  guards            Guard[]
-  gateQueues        GateQueue[]
-  guardShifts       GuardShift[]
-  patrolCheckpoints PatrolCheckpoint[]
-  patrolScans       PatrolScan[]
-  shiftSwapRequests ShiftSwapRequest[]
-  guardSOSs         GuardSOS[]
-  incidents         Incident[]
+  id                        String                     @id @default(uuid())
+  name                      String
+  address                   String
+  totalHouses               Int
+  createdAt                 DateTime                   @default(now())
+  settings                  Json?
+  residents                 Resident[]
+  users                     User[]
+  visitors                  Visitor[]
+  activityLogs              ActivityLog[]
+  guards                    Guard[]
+  gateQueues                GateQueue[]
+  guardShifts               GuardShift[]
+  patrolCheckpoints         PatrolCheckpoint[]
+  patrolScans               PatrolScan[]
+  shiftSwapRequests         ShiftSwapRequest[]
+  guardSOSs                 GuardSOS[]
+  incidents                 Incident[]
+  guardPerformanceSnapshots GuardPerformanceSnapshot[]
 }
 
 model User {
@@ -338,17 +339,18 @@ model Guard {
   estate Estate @relation(fields: [estateId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
 
-  gateLogs               GateLog[]
-  guardShifts            GuardShift[]
-  guardAttendances       GuardAttendance[]
-  patrolScans            PatrolScan[]
-  shiftSwapRequests      ShiftSwapRequest[]
-  SwapRequester          ShiftSwapRequest[]      @relation("SwapRequester")
-  SwapRecipient          ShiftSwapRequest[]      @relation("SwapRecipient")
-  guardSOSs              GuardSOS[]
-  incidents              Incident[]
-  patrolAlerts           PatrolAlert[]
-  missedCheckpointAlerts MissedCheckpointAlert[]
+  gateLogs                  GateLog[]
+  guardShifts               GuardShift[]
+  guardAttendances          GuardAttendance[]
+  patrolScans               PatrolScan[]
+  shiftSwapRequests         ShiftSwapRequest[]
+  SwapRequester             ShiftSwapRequest[]         @relation("SwapRequester")
+  SwapRecipient             ShiftSwapRequest[]         @relation("SwapRecipient")
+  guardSOSs                 GuardSOS[]
+  incidents                 Incident[]
+  patrolAlerts              PatrolAlert[]
+  missedCheckpointAlerts    MissedCheckpointAlert[]
+  guardPerformanceSnapshots GuardPerformanceSnapshot[]
 }
 
 model Visitor {
@@ -764,6 +766,38 @@ model MissedCheckpointAlert {
   status AlertStatus @default(ACTIVE)
 
   createdAt DateTime @default(now())
+}
+
+model GuardPerformanceSnapshot {
+  id String @id @default(uuid())
+
+  guardId  String
+  estateId String
+
+  periodStart DateTime
+  periodEnd   DateTime
+
+  attendanceScore Float @default(0)
+  patrolScore     Float @default(0)
+  sosScore        Float @default(0)
+  incidentScore   Float @default(0)
+  swapScore       Float @default(0)
+  penaltyScore    Float @default(0)
+
+  totalScore Float @default(0)
+  rank       Int?
+
+  badge String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
+  estate Estate @relation(fields: [estateId], references: [id])
+
+  @@index([guardId, periodStart])
+  @@index([estateId, periodStart])
+  @@index([totalScore])
 }
 
 // VISITOR_SCAN_FAILED
