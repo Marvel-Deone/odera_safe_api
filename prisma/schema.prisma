@@ -188,6 +188,7 @@ model Estate {
   guardSOSs                 GuardSOS[]
   incidents                 Incident[]
   guardPerformanceSnapshots GuardPerformanceSnapshot[]
+  guardLocations            GuardLocation[]
 }
 
 model User {
@@ -351,6 +352,7 @@ model Guard {
   patrolAlerts              PatrolAlert[]
   missedCheckpointAlerts    MissedCheckpointAlert[]
   guardPerformanceSnapshots GuardPerformanceSnapshot[]
+  locations            GuardLocation[]
 }
 
 model Visitor {
@@ -798,6 +800,29 @@ model GuardPerformanceSnapshot {
   @@index([guardId, periodStart])
   @@index([estateId, periodStart])
   @@index([totalScore])
+}
+
+model GuardLocation {
+  id String @id @default(uuid())
+
+  guardId  String
+  estateId String
+
+  latitude  Float
+  longitude Float
+
+  speed   Float?
+  heading Float?
+
+  batteryLevel Int?
+
+  recordedAt DateTime @default(now())
+
+  guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
+  estate Estate @relation(fields: [estateId], references: [id])
+
+  @@index([guardId, recordedAt])
+  @@index([estateId, recordedAt])
 }
 
 // VISITOR_SCAN_FAILED

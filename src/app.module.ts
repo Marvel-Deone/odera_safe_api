@@ -20,6 +20,7 @@ import { PatrolModule } from './apis/patrol/patrol.module';
 import { GuardSosModule } from './apis/guard-sos/guard-sos.module';
 import { ShiftSwapModule } from './apis/shift-swap/shift-swap.module';
 import { PerformanceModule } from './apis/performance/performance.module';
+import { GuardLocationModule } from './apis/guard-location/guard-location.module';
 
 @Module({
   imports: [
@@ -47,7 +48,8 @@ import { PerformanceModule } from './apis/performance/performance.module';
     PatrolModule,
     GuardSosModule,
     ShiftSwapModule,
-    PerformanceModule
+    PerformanceModule,
+    GuardLocationModule
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],
