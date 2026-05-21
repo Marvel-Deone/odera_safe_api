@@ -5,9 +5,13 @@ import {
   Param,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common'
 import { PerformanceService } from './performance.service'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+// import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
 
+@UseGuards(JwtAuthGuard)
 @Controller('performance')
 export class PerformanceController {
   constructor(
@@ -24,10 +28,8 @@ export class PerformanceController {
       periodEnd: string
     },
   ) {
-    const user = req.user
-
     return this.performanceService.generateForAdmin(
-      user.id,
+      req.user.id,
       new Date(body.periodStart),
       new Date(body.periodEnd),
     )

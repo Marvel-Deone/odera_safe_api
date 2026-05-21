@@ -78,6 +78,8 @@ export class PerformanceService {
 
             snapshots.push({
                 guardId: guard.id,
+                guardName: guard.full_name,
+                guardZone: guard.zone_assignment,
                 estateId,
                 periodStart,
                 periodEnd,
