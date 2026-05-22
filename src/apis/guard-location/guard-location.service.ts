@@ -66,24 +66,63 @@ export class GuardLocationService {
         },
       })
 
+    const checkpoints =
+      await this.prisma.patrolCheckpoint.findMany({
+        where: {
+          estateId: guard.estateId,
+          isActive: true,
+        },
+      })
+
+    let nextCheckpoint: {
+      id: string
+      name: string
+      latitude: number | null
+      longitude: number | null
+    } | null = null
+
+    if (checkpoints.length > 0) {
+      let closest = checkpoints[0]
+      let shortestDistance = Infinity
+
+      checkpoints.forEach((checkpoint) => {
+        const latDiff =
+          Number(location.latitude) -
+          Number(checkpoint.latitude)
+
+        const lngDiff =
+          Number(location.longitude) -
+          Number(checkpoint.longitude)
+
+        const distance = Math.sqrt(
+          latDiff * latDiff +
+          lngDiff * lngDiff,
+        )
+
+        if (distance < shortestDistance) {
+          shortestDistance = distance
+          closest = checkpoint
+        }
+      })
+
+      nextCheckpoint = {
+        id: closest.id,
+        name: closest.name,
+        latitude: closest.latitude,
+        longitude: closest.longitude,
+      }
+    }
+
     this.guardLocationGateway.broadcastLocationUpdate({
       guardId: guard.id,
       guardName: guard.full_name,
       zone: guard.zone_assignment,
 
-      // location: {
-      //   latitude: location.latitude,
-      //   longitude: location.longitude,
-      //   speed: location.speed,
-      //   heading: location.heading,
-      //   batteryLevel:
-      //     location.batteryLevel,
-      //   recordedAt:
-      //     location.recordedAt,
-      // },
       currentLocation: location,
 
       trail: [location],
+
+      nextCheckpoint,
     })
 
     return success(
@@ -134,26 +173,92 @@ export class GuardLocationService {
         },
       })
 
+    const checkpoints =
+      await this.prisma.patrolCheckpoint.findMany({
+        where: {
+          estateId: user.estateId,
+          isActive: true,
+        },
+      })
+
     const liveLocations =
       guards
         .filter(
           (g) =>
             g.locations.length > 0,
         )
-        .map((g) => ({
-          guardId: g.id,
-          guardName: g.full_name,
-          zone: g.zone_assignment,
-          // locations: g.locations[0],
-          currentLocation: g.locations[0],
+        // .map((g) => ({
+        //   guardId: g.id,
+        //   guardName: g.full_name,
+        //   zone: g.zone_assignment,
+        //   // locations: g.locations[0],
+        //   currentLocation: g.locations[0],
 
-          trail:
-            g.locations.map((l) => ({
+        //   trail:
+        //     g.locations.map((l) => ({
+        //       latitude: l.latitude,
+        //       longitude: l.longitude,
+        //       recordedAt: l.recordedAt,
+        //     })),
+        // }))
+        .map((g) => {
+          const currentLocation = g.locations[0]
+
+          let nextCheckpoint: {
+            id: string
+            name: string
+            latitude: number | null
+            longitude: number | null
+          } | null = null
+
+          if (checkpoints.length > 0) {
+            let closest = checkpoints[0]
+            let shortestDistance = Infinity
+
+            checkpoints.forEach((checkpoint) => {
+              const latDiff =
+                Number(currentLocation.latitude) -
+                Number(checkpoint.latitude)
+
+              const lngDiff =
+                Number(currentLocation.longitude) -
+                Number(checkpoint.longitude)
+
+              const distance = Math.sqrt(
+                latDiff * latDiff +
+                lngDiff * lngDiff,
+              )
+
+              if (distance < shortestDistance) {
+                shortestDistance = distance
+                closest = checkpoint
+              }
+            })
+
+            nextCheckpoint = {
+              id: closest.id,
+              name: closest.name,
+              latitude: closest.latitude,
+              longitude: closest.longitude,
+            }
+          }
+
+          return {
+            guardId: g.id,
+            guardName: g.full_name,
+            zone: g.zone_assignment,
+
+            currentLocation,
+
+            nextCheckpoint,
+
+            trail: g.locations.map((l) => ({
               latitude: l.latitude,
               longitude: l.longitude,
               recordedAt: l.recordedAt,
             })),
-        }))
+          }
+        })
 
     return success(
       liveLocations,
