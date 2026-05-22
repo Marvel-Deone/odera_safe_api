@@ -2,6 +2,7 @@
 import {
   HttpStatus,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common'
 
 import { PrismaService } from '../../database/prisma/prisma.service'
@@ -90,6 +91,13 @@ export class GuardLocationService {
   async getLiveLocations(
     userId: string,
   ) {
+    console.log('userId:', userId);
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User not authenticated',
+      )
+    }
+
     const user =
       await this.prisma.user.findUnique({
         where: {

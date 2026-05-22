@@ -17,7 +17,7 @@ import { Roles } from '../auth/decorators/roles.decorator'
 import { GuardRole, Role } from '@prisma/client'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 
-@ApiTags('Guards')
+@ApiTags('Performance')
 @ApiBearerAuth()
 
 @UseGuards(
