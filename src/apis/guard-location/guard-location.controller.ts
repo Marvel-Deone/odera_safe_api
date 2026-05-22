@@ -30,7 +30,7 @@ export class GuardLocationController {
     ) { }
 
     @Post()
-    @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.GUARD, GuardRole.SUPER_GUARD as unknown as Role)
     @ApiOperation({
         summary: 'Update guard location (for guards) or get guard location (for admins)',
     })
