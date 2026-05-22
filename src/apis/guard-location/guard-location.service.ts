@@ -71,16 +71,19 @@ export class GuardLocationService {
       guardName: guard.full_name,
       zone: guard.zone_assignment,
 
-      location: {
-        latitude: location.latitude,
-        longitude: location.longitude,
-        speed: location.speed,
-        heading: location.heading,
-        batteryLevel:
-          location.batteryLevel,
-        recordedAt:
-          location.recordedAt,
-      },
+      // location: {
+      //   latitude: location.latitude,
+      //   longitude: location.longitude,
+      //   speed: location.speed,
+      //   heading: location.heading,
+      //   batteryLevel:
+      //     location.batteryLevel,
+      //   recordedAt:
+      //     location.recordedAt,
+      // },
+      currentLocation: location,
+
+      trail: [location],
     })
 
     return success(
@@ -126,7 +129,7 @@ export class GuardLocationService {
               recordedAt: 'desc',
             },
 
-            take: 1,
+            take: 20,
           },
         },
       })
@@ -141,7 +144,15 @@ export class GuardLocationService {
           guardId: g.id,
           guardName: g.full_name,
           zone: g.zone_assignment,
-          locations: g.locations[0],
+          // locations: g.locations[0],
+          currentLocation: g.locations[0],
+
+          trail:
+            g.locations.map((l) => ({
+              latitude: l.latitude,
+              longitude: l.longitude,
+              recordedAt: l.recordedAt,
+            })),
         }))
 
     return success(
