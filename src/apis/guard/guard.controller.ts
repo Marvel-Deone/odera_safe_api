@@ -17,7 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 
-import { GuardRole, IncidentStatus, Role } from '@prisma/client'
+import { GuardRole, Role } from '@prisma/client'
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 
@@ -27,7 +27,7 @@ import { Roles } from '../auth/decorators/roles.decorator'
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 import { GuardService } from './guard.service'
-import { CreateIncidentDto } from './dto/create-incident.dto'
+import { CreateGuardDto } from './dto/guard.dto'
 
 @ApiTags('Guards')
 @ApiBearerAuth()
@@ -53,7 +53,7 @@ export class GuardController {
     @CurrentUser() user: any,
 
     @Body()
-    dto: any,
+    dto: CreateGuardDto,
   ) {
     return this.guardsService.createGuard(
       user.id,
@@ -327,67 +327,67 @@ export class GuardController {
     )
   }
 
-  @Post('guards/incidents')
-  @Roles(Role.GUARD)
-  createIncident(
-    @CurrentUser() user: any,
-    @Body() dto: CreateIncidentDto,
-  ) {
-    return this.guardsService.createIncident(
-      user.id,
-      dto,
-    )
-  }
+  // @Post('guards/incidents')
+  // @Roles(Role.GUARD)
+  // createIncident(
+  //   @CurrentUser() user: any,
+  //   @Body() dto: CreateIncidentDto,
+  // ) {
+  //   return this.guardsService.createIncident(
+  //     user.id,
+  //     dto,
+  //   )
+  // }
 
-  @Get('guards/incidents')
-  @Roles(Role.GUARD)
-  getMyIncidents(
-    @CurrentUser() user: any,
-  ) {
-    return this.guardsService.getMyIncidents(
-      user.id,
-    )
-  }
+  // @Get('guards/incidents')
+  // @Roles(Role.GUARD)
+  // getMyIncidents(
+  //   @CurrentUser() user: any,
+  // ) {
+  //   return this.guardsService.getMyIncidents(
+  //     user.id,
+  //   )
+  // }
 
-  @Get('admin/incidents')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  getAllIncidents(
-    @CurrentUser() user: any,
-  ) {
-    return this.guardsService.getAllIncidents(
-      user.id,
-    )
-  }
+  // @Get('admin/incidents')
+  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  // getAllIncidents(
+  //   @CurrentUser() user: any,
+  // ) {
+  //   return this.guardsService.getAllIncidents(
+  //     user.id,
+  //   )
+  // }
 
-  @Get('admin/incidents/:id')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  getIncidentById(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
-    return this.guardsService.getIncidentById(
-      user.id,
-      id,
-    )
-  }
+  // @Get('admin/incidents/:id')
+  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  // getIncidentById(
+  //   @CurrentUser() user: any,
+  //   @Param('id') id: string,
+  // ) {
+  //   return this.guardsService.getIncidentById(
+  //     user.id,
+  //     id,
+  //   )
+  // }
 
-  @Patch('admin/incidents/:id')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  updateIncidentStatus(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-    @Body()
-    dto: {
-      status: IncidentStatus
-      adminNotes?: string
-    },
-  ) {
-    return this.guardsService.updateIncidentStatus(
-      user.id,
-      id,
-      dto,
-    )
-  }
+  // @Patch('admin/incidents/:id')
+  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  // updateIncidentStatus(
+  //   @CurrentUser() user: any,
+  //   @Param('id') id: string,
+  //   @Body()
+  //   dto: {
+  //     status: IncidentStatus
+  //     adminNotes?: string
+  //   },
+  // ) {
+  //   return this.guardsService.updateIncidentStatus(
+  //     user.id,
+  //     id,
+  //     dto,
+  //   )
+  // }
   @Post('admin/patrol-checkpoints')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Create patrol checkpoint' })

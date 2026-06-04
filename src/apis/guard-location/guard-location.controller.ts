@@ -31,7 +31,7 @@ export class GuardLocationController {
 
     @Post()
     @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.GUARD, GuardRole.SUPER_GUARD as unknown as Role)
-    @ApiOperation({
+    @ApiOperation({ 
         summary: 'Update guard location (for guards) or get guard location (for admins)',
     })
     async createLocation(
@@ -40,8 +40,6 @@ export class GuardLocationController {
         @Body()
         dto: CreateGuardLocationDto,
     ) {
-        console.log('controllerUser:', user);
-
         return this.guardLocationService.createLocation(
             user.id,
             dto,
@@ -56,7 +54,6 @@ export class GuardLocationController {
     async getLiveLocations(
         @CurrentUser() user: any,
     ) {
-        console.log('controllerUser:', user);
         return this.guardLocationService.getLiveLocations(
             user.id,
         )

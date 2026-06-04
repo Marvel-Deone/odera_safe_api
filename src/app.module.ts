@@ -21,6 +21,8 @@ import { GuardSosModule } from './apis/guard-sos/guard-sos.module';
 import { ShiftSwapModule } from './apis/shift-swap/shift-swap.module';
 import { PerformanceModule } from './apis/performance/performance.module';
 import { GuardLocationModule } from './apis/guard-location/guard-location.module';
+import { MaintenanceTicketModule } from './apis/maintenance-ticket/maintenance-ticket.module';
+import { IncidentModule } from './apis/incident/incident.module';
 
 @Module({
   imports: [
@@ -49,7 +51,9 @@ import { GuardLocationModule } from './apis/guard-location/guard-location.module
     GuardSosModule,
     ShiftSwapModule,
     PerformanceModule,
-    GuardLocationModule
+    GuardLocationModule,
+    MaintenanceTicketModule,
+    IncidentModule
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

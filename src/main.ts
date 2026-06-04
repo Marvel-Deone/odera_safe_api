@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 // async function bootstrap() {
@@ -29,7 +29,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 //   await app.listen(6000);
 
-//   console.log("App runing at Port 6000")
 // }
 // bootstrap();
 
@@ -49,6 +48,13 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  )
+
   const config = new DocumentBuilder()
     .setTitle('DD-SAFE API')
     .setDescription('Backend API for DDSafe')
@@ -60,8 +66,6 @@ async function bootstrap() {
 
   SwaggerModule.setup('_dds8/docs', app, document);
 
-  // await app.listen(4000);
-  // await app.listen(4000, '0.0.0.0');
   await app.listen(process.env.PORT ?? 4000);
 
   console.log(await app.getUrl());

@@ -25,6 +25,7 @@ import {
     success,
 } from '../../common/utils/response.util'
 import { CreateIncidentDto } from './dto/create-incident.dto'
+import { CreateGuardDto } from './dto/guard.dto'
 
 @Injectable()
 export class GuardService {
@@ -32,10 +33,9 @@ export class GuardService {
 
     async createGuard(
         userId: string,
-        dto: any,
+        dto: CreateGuardDto,
     ) {
         const admin =
-            // await this.prisma.admin.findFirst({
             await this.prisma.user.findFirst({
                 where: {
                     id: userId,
@@ -74,170 +74,356 @@ export class GuardService {
                 10,
             )
 
-        const user =
-            await this.prisma.user.create({
-                data: {
-                    email: dto.email,
-                    password:
-                        hashedPassword,
-                    role: Role.GUARD,
-                    first_login: true,
-                    estateId: admin.estateId,
+        // const user =
+        //     await this.prisma.user.create({
+        //         data: {
+        //             email: dto.email,
+        //             password:
+        //                 hashedPassword,
+        //             role: Role.GUARD,
+        //             first_login: true,
+        //             estateId: admin.estateId,
+        //         },
+        //     })
+
+        // const guard =
+        //     await this.prisma.guard.create({
+        //         data: {
+        // userId: user.id,
+        // estateId:
+        //     admin.estateId,
+
+        // role: dto.role,
+
+        // full_name:
+        //     dto.full_name,
+
+        // phone: dto.phone,
+
+        // email: dto.email,
+
+        // zone_assignment:
+        //     dto.zone_assignment,
+
+        // shift_pattern:
+        //     dto.shift_pattern,
+
+        // duty_cycle:
+        //     dto.duty_cycle,
+
+        // resumption_date:
+        //     dto.resumption_date
+        //         ? new Date(
+        //             dto.resumption_date,
+        //         )
+        //         : null,
+
+        // government_id_type:
+        //     dto.government_id_type,
+
+        // government_id_no:
+        //     dto.government_id_no,
+
+        // nin: dto.nin,
+
+        // height:
+        //     dto.height,
+
+        // build:
+        //     dto.build,
+
+        // distinguishing_marks:
+        //     dto.distinguishing_marks,
+
+        // nok_name:
+        //     dto.nok_name,
+
+        // nok_phone:
+        //     dto.nok_phone,
+
+        // nok_relationship:
+        //     dto.nok_relationship,
+
+        // guarantor_name:
+        //     dto.guarantor_name,
+
+        // guarantor_phone:
+        //     dto.guarantor_phone,
+
+        // guarantor_occupation:
+        //     dto.guarantor_occupation,
+
+        // guarantor_work_address:
+        //     dto.guarantor_work_address,
+
+        // guarantor_nin:
+        //     dto.guarantor_nin,
+
+        // guarantor_relationship:
+        //     dto.guarantor_relationship,
+
+        // salary_band:
+        //     dto.salary_band,
+
+        // bank_name:
+        //     dto.bank_name,
+
+        // account_number:
+        //     dto.account_number,
+
+        // account_name:
+        //     dto.account_name,
+
+        // first_aid:
+        //     dto.first_aid ??
+        //     false,
+
+        // fire_safety:
+        //     dto.fire_safety ??
+        //     false,
+
+        // qr_gate_ops:
+        //     dto.qr_gate_ops ??
+        //     false,
+
+        // biometric_capture:
+        //     dto.biometric_capture ??
+        //     false,
+
+        // crisis_response:
+        //     dto.crisis_response ??
+        //     false,
+
+        // female_screening:
+        //     dto.female_screening ??
+        //     false,
+
+        // self_defence:
+        //     dto.self_defence ??
+        //     false,
+
+        // cctv_operation:
+        //     dto.cctv_operation ??
+        //     false,
+        //         },
+        //     })
+
+        // await this.createActivityLog({
+        //     estateId:
+        //         admin.estateId,
+
+        //     category:
+        //         LogCategory.SECURITY,
+
+        //     action: 'GUARD_CREATED',
+
+        //     description: `Guard profile created for ${guard.full_name}`,
+
+        //     actorId: userId,
+
+        //     actorRole:
+        //         Role.ADMIN,
+
+        //     metadata: {
+        //         guardId: guard.id,
+        //     },
+        // })
+
+        // return success(
+        //     {
+        //         guard,
+        //         temporaryPassword:
+        //             tempPassword,
+        //     },
+        //     'Guard Created',
+        //     'Guard created successfully',
+        // )
+        let guard
+        try {
+            const result =
+                await this.prisma.$transaction(
+                    async (tx) => {
+                        const user =
+                            await tx.user.create({
+                                data: {
+                                    email: dto.email,
+                                    password:
+                                        hashedPassword,
+                                    role: Role.GUARD,
+                                    first_login: true,
+                                    estateId:
+                                        admin.estateId,
+                                },
+                            })
+
+                        guard =
+                            await tx.guard.create({
+                                data: {
+                                    userId: user.id,
+                                    estateId:
+                                        admin.estateId,
+
+                                    role: dto.role,
+
+                                    full_name:
+                                        dto.full_name,
+
+                                    phone: dto.phone,
+
+                                    email: dto.email,
+
+                                    zone_assignment:
+                                        dto.zone_assignment,
+
+                                    shift_pattern:
+                                        dto.shift_pattern,
+
+                                    duty_cycle:
+                                        dto.duty_cycle,
+
+                                    resumption_date:
+                                        dto.resumption_date
+                                            ? new Date(
+                                                dto.resumption_date,
+                                            )
+                                            : null,
+
+                                    government_id_type:
+                                        dto.government_id_type,
+
+                                    government_id_no:
+                                        dto.government_id_no,
+
+                                    nin: dto.nin,
+
+                                    height:
+                                        dto.height,
+
+                                    build:
+                                        dto.build,
+
+                                    distinguishing_marks:
+                                        dto.distinguishing_marks,
+
+                                    nok_name:
+                                        dto.nok_name,
+
+                                    nok_phone:
+                                        dto.nok_phone,
+
+                                    nok_relationship:
+                                        dto.nok_relationship,
+
+                                    guarantor_name:
+                                        dto.guarantor_name,
+
+                                    guarantor_phone:
+                                        dto.guarantor_phone,
+
+                                    guarantor_occupation:
+                                        dto.guarantor_occupation,
+
+                                    guarantor_work_address:
+                                        dto.guarantor_work_address,
+
+                                    guarantor_nin:
+                                        dto.guarantor_nin,
+
+                                    guarantor_relationship:
+                                        dto.guarantor_relationship,
+
+                                    salary_band:
+                                        dto.salary_band,
+
+                                    bank_name:
+                                        dto.bank_name,
+
+                                    account_number:
+                                        dto.account_number,
+
+                                    account_name:
+                                        dto.account_name,
+
+                                    first_aid:
+                                        dto.first_aid ??
+                                        false,
+
+                                    fire_safety:
+                                        dto.fire_safety ??
+                                        false,
+
+                                    qr_gate_ops:
+                                        dto.qr_gate_ops ??
+                                        false,
+
+                                    biometric_capture:
+                                        dto.biometric_capture ??
+                                        false,
+
+                                    crisis_response:
+                                        dto.crisis_response ??
+                                        false,
+
+                                    female_screening:
+                                        dto.female_screening ??
+                                        false,
+
+                                    self_defence:
+                                        dto.self_defence ??
+                                        false,
+
+                                    cctv_operation:
+                                        dto.cctv_operation ??
+                                        false,
+                                },
+                            })
+
+                        return {
+                            user,
+                            guard,
+                        }
+                    },
+                )
+
+            await this.createActivityLog({
+                estateId:
+                    admin.estateId,
+
+                category:
+                    LogCategory.SECURITY,
+
+                action: 'GUARD_CREATED',
+
+                description: `Guard profile created for ${guard.full_name}`,
+
+                actorId: userId,
+
+                actorRole:
+                    Role.ADMIN,
+
+                metadata: {
+                    guardId: guard.id,
                 },
             })
 
-        const guard =
-            await this.prisma.guard.create({
-                data: {
-                    userId: user.id,
-                    estateId:
-                        admin.estateId,
-
-                    role: dto.role,
-
-                    full_name:
-                        dto.full_name,
-
-                    phone: dto.phone,
-
-                    email: dto.email,
-
-                    zone_assignment:
-                        dto.zone_assignment,
-
-                    shift_pattern:
-                        dto.shift_pattern,
-
-                    duty_cycle:
-                        dto.duty_cycle,
-
-                    resumption_date:
-                        dto.resumption_date
-                            ? new Date(
-                                dto.resumption_date,
-                            )
-                            : null,
-
-                    government_id_type:
-                        dto.government_id_type,
-
-                    government_id_no:
-                        dto.government_id_no,
-
-                    nin: dto.nin,
-
-                    height:
-                        dto.height,
-
-                    build:
-                        dto.build,
-
-                    distinguishing_marks:
-                        dto.distinguishing_marks,
-
-                    nok_name:
-                        dto.nok_name,
-
-                    nok_phone:
-                        dto.nok_phone,
-
-                    nok_relationship:
-                        dto.nok_relationship,
-
-                    guarantor_name:
-                        dto.guarantor_name,
-
-                    guarantor_phone:
-                        dto.guarantor_phone,
-
-                    guarantor_occupation:
-                        dto.guarantor_occupation,
-
-                    guarantor_work_address:
-                        dto.guarantor_work_address,
-
-                    guarantor_nin:
-                        dto.guarantor_nin,
-
-                    guarantor_relationship:
-                        dto.guarantor_relationship,
-
-                    salary_band:
-                        dto.salary_band,
-
-                    bank_name:
-                        dto.bank_name,
-
-                    account_number:
-                        dto.account_number,
-
-                    account_name:
-                        dto.account_name,
-
-                    first_aid:
-                        dto.first_aid ??
-                        false,
-
-                    fire_safety:
-                        dto.fire_safety ??
-                        false,
-
-                    qr_gate_ops:
-                        dto.qr_gate_ops ??
-                        false,
-
-                    biometric_capture:
-                        dto.biometric_capture ??
-                        false,
-
-                    crisis_response:
-                        dto.crisis_response ??
-                        false,
-
-                    female_screening:
-                        dto.female_screening ??
-                        false,
-
-                    self_defence:
-                        dto.self_defence ??
-                        false,
-
-                    cctv_operation:
-                        dto.cctv_operation ??
-                        false,
+            return success(
+                {
+                    guard: result.guard,
+                    temporaryPassword:
+                        tempPassword,
                 },
-            })
+                'Guard Created',
+                'Guard created successfully',
+            )
+        } catch (err: any) {
+            console.log('GuardcreationErr:', err)
 
-        await this.createActivityLog({
-            estateId:
-                admin.estateId,
-
-            category:
-                LogCategory.SECURITY,
-
-            action: 'GUARD_CREATED',
-
-            description: `Guard profile created for ${guard.full_name}`,
-
-            actorId: userId,
-
-            actorRole:
-                Role.ADMIN,
-
-            metadata: {
-                guardId: guard.id,
-            },
-        })
-
-        return success(
-            {
-                guard,
-                temporaryPassword:
-                    tempPassword,
-            },
-            'Guard Created',
-            'Guard created successfully',
-        )
+            return error(
+                'Creation Failed',
+                'Unable to create guard profile',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
     }
 
     async getGuards(
@@ -1593,236 +1779,6 @@ export class GuardService {
         return this.prisma.activityLog.create({
             data,
         })
-    }
-
-    async createIncident(
-        userId: string,
-        dto: CreateIncidentDto,
-    ) {
-        const guard = await this.prisma.guard.findFirst({
-            where: { userId },
-        })
-
-        if (!guard) {
-            return error(
-                'Not Found',
-                'Guard not found',
-                HttpStatus.NOT_FOUND,
-            )
-        }
-
-        const incident = await this.prisma.incident.create({
-            data: {
-                estateId: guard.estateId,
-                guardId: guard.id,
-                title: dto.title,
-                category: dto.category,
-                description: dto.description,
-                severity: dto.severity,
-                photos: dto.photos || [],
-                occurredAt: dto.occurredAt
-                    ? new Date(dto.occurredAt)
-                    : new Date(),
-            },
-            include: {
-                guard: true,
-            },
-        })
-
-        await this.createActivityLog({
-            estateId: guard.estateId,
-            category: LogCategory.SECURITY,
-            action: 'INCIDENT_REPORTED',
-            description: `Incident reported: ${incident.title}`,
-            actorId: userId,
-            actorRole: Role.GUARD,
-            metadata: {
-                incidentId: incident.id,
-                severity: incident.severity,
-                category: incident.category,
-            },
-        })
-
-        return success(
-            incident,
-            'Incident Reported',
-            'Incident submitted successfully',
-        )
-    }
-
-    // guard incident list
-    async getMyIncidents(userId: string) {
-        const guard = await this.prisma.guard.findFirst({
-            where: { userId },
-        })
-
-        if (!guard) {
-            return error(
-                'Not Found',
-                'Guard not found',
-                HttpStatus.NOT_FOUND,
-            )
-        }
-
-        const incidents = await this.prisma.incident.findMany({
-            where: {
-                guardId: guard.id,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        })
-
-        return success(
-            incidents,
-            'My Incidents',
-            'Incident history retrieved successfully',
-        )
-    }
-
-    // Admin incident list
-    async getAllIncidents(userId: string) {
-        const admin = await this.prisma.user.findFirst({
-            where: { id: userId },
-        })
-
-        if (!admin) {
-            return error(
-                'Unauthorized',
-                'Admin not found',
-                HttpStatus.NOT_FOUND,
-            )
-        }
-
-        const incidents = await this.prisma.incident.findMany({
-            where: {
-                estateId: admin.estateId,
-            },
-            include: {
-                guard: {
-                    select: {
-                        id: true,
-                        full_name: true,
-                        zone_assignment: true,
-                    },
-                },
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        })
-
-        return success(
-            incidents,
-            'Incidents Retrieved',
-            'Incident list fetched successfully',
-        )
-    }
-
-    async getIncidentById(
-        userId: string,
-        incidentId: string,
-    ) {
-        const admin = await this.prisma.user.findFirst({
-            where: { id: userId },
-        })
-
-        if (!admin) {
-            return error(
-                'Unauthorized',
-                'Admin not found',
-                HttpStatus.NOT_FOUND,
-            )
-        }
-
-        const incident = await this.prisma.incident.findFirst({
-            where: {
-                id: incidentId,
-                estateId: admin.estateId,
-            },
-            include: {
-                guard: true,
-            },
-        })
-
-        if (!incident) {
-            return error(
-                'Not Found',
-                'Incident not found',
-                HttpStatus.NOT_FOUND,
-            )
-        }
-
-        return success(
-            incident,
-            'Incident Retrieved',
-            'Incident details fetched successfully',
-        )
-    }
-
-    async updateIncidentStatus(
-        userId: string,
-        incidentId: string,
-        dto: {
-            status: IncidentStatus
-            adminNotes?: string
-        },
-    ) {
-        const admin = await this.prisma.user.findFirst({
-            where: { id: userId },
-        })
-
-        if (!admin) {
-            return error(
-                'Unauthorized',
-                'Admin not found',
-                HttpStatus.NOT_FOUND,
-            )
-        }
-
-        const existing = await this.prisma.incident.findFirst({
-            where: {
-                id: incidentId,
-                estateId: admin.estateId,
-            },
-        })
-
-        if (!existing) {
-            return error(
-                'Not Found',
-                'Incident not found',
-                HttpStatus.NOT_FOUND,
-            )
-        }
-
-        const incident = await this.prisma.incident.update({
-            where: {
-                id: incidentId,
-            },
-            data: {
-                status: dto.status,
-                adminNotes: dto.adminNotes,
-            },
-        })
-
-        await this.createActivityLog({
-            estateId: admin.estateId,
-            category: LogCategory.SECURITY,
-            action: 'INCIDENT_UPDATED',
-            description: `Incident ${incident.title} marked ${dto.status}`,
-            actorId: userId,
-            actorRole: admin.role,
-            metadata: {
-                incidentId,
-                status: dto.status,
-            },
-        })
-
-        return success(
-            incident,
-            'Incident Updated',
-            'Incident status updated successfully',
-        )
     }
 
     async createPatrolCheckpoint(

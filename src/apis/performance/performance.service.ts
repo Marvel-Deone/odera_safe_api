@@ -403,7 +403,7 @@ export class PerformanceService {
         const incidents =
             await this.prisma.incident.count({
                 where: {
-                    guardId,
+                    reportedByGuardId: guardId,
                     createdAt: {
                         gte: periodStart,
                         lte: periodEnd,

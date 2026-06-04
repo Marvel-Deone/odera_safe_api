@@ -15,7 +15,7 @@ async function main() {
   let estate = await prisma.estate.findFirst();
 
   if (!estate) {
-    await prisma.estate.create({
+   estate = await prisma.estate.create({
       data: {
         name: "Odera Residential Estate",
         address: "Lekki Phase 2, Lagos",
@@ -36,8 +36,6 @@ async function main() {
     console.log("Estate created")
   }
 
-  if (!estate) throw new Error("Estate creation failed");
-
   // Create Super Admin
   const existingAdmin = await prisma.user.findFirst({
     where: { role: Role.ADMIN }
@@ -48,12 +46,7 @@ async function main() {
 
     await prisma.user.create({
       data: {
-        // first_name: "Super",
-        // last_name: "Admin",
         email: "admin@oderasafe.com",
-        // phone: "08000000000",
-        // dob: "1990-01-01",
-        // gender: "MALE",
         password: hashedPassword,
         role: Role.ADMIN,
         first_login: true,
