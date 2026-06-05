@@ -4,6 +4,7 @@ import {
     IsEnum,
     IsOptional,
     IsString,
+    IsUUID,
 } from 'class-validator'
 
 import { IncidentCategory, IncidentSeverity, TicketPriority } from '@prisma/client'
@@ -110,6 +111,7 @@ export class AssignIncidentDto {
     @ApiProperty({
         example: '9876543289756gf6dd55',
     })
+    @IsUUID()
     assignedToId!: string
 }
 
@@ -130,11 +132,11 @@ export class CompleteIncidentDto {
     materialsUsed?: string
 
     @ApiProperty({
-        example: '45',
+        example: 'Less than 1 hour',
     })
     @IsOptional()
     @IsString()
-    timeTaken?: number
+    timeTaken?: string
 
     @ApiProperty({
         example: 'Replaced damaged pipe and restored water supply',

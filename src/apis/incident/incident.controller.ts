@@ -55,7 +55,7 @@ export class IncidentController {
         )
     }
 
-    @Roles(Role.ADMIN, Role.SUPER_ADMIN, GuardRole.GUARD, GuardRole.SUPER_GUARD as unknown as Role)
+    @Roles(Role.RESIDENT)
     @ApiOperation({
         summary: 'Get resident tickets',
     })

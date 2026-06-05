@@ -780,7 +780,7 @@ model Incident {
   status     IncidentStatus @default(OPEN)
   adminNotes String?
   materialsUsed String?
-  timeTaken Int?
+  timeTaken String?
 
 
   createdAt DateTime @default(now())

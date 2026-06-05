@@ -384,8 +384,6 @@ export class IncidentService {
         incidentId: string,
         dto: AssignIncidentDto,
     ) {
-        console.log('Assigning incident');
-        
         const incident =
             await this.prisma.incident.update({
                 where: {
@@ -405,9 +403,6 @@ export class IncidentService {
                 },
             })
 
-
-            console.log('incident assigned:', incident);
-            
         this.incientGateway.emitIncidentAssigned(
             incident,
         )
@@ -480,7 +475,7 @@ export class IncidentService {
     ) {
         const incident =
             await this.prisma.incident.update({
-                where: {id},
+                where: { id },
 
                 data: {
                     status: IncidentStatus.RESOLVED,
