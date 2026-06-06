@@ -51,6 +51,6 @@ export class ResetPinDto {
     example: '1234',
   })
   @IsString()
-  @Length(4, 4)
+  @Length(4, 6)
   newPin!: string
 }

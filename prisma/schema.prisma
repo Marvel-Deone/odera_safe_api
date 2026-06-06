@@ -186,6 +186,11 @@ enum AnnouncementAudience {
   ADMINS
 }
 
+enum ChatRoomType {
+  BLOCK
+  BROADCAST
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -224,6 +229,7 @@ model Estate {
   guardLocations            GuardLocation[]
   // maintenanceTickets        MaintenanceTicket[]
   announcements             Announcement[]
+  chatRooms                 ChatRoom[]
 }
 
 model User {
@@ -244,6 +250,7 @@ model User {
   announcements        Announcement[]
   announcementComments AnnouncementComment[]
   announcementLikes    AnnouncementLike[]
+  chatMessages         ChatMessage[]
 }
 
 model Resident {
@@ -955,6 +962,55 @@ model AnnouncementLike {
   user         User         @relation(fields: [userId], references: [id])
 
   @@unique([announcementId, userId])
+}
+
+model ChatRoom {
+  id String @id @default(uuid())
+
+  estateId String
+
+  name String
+  type ChatRoomType
+
+  block String?
+
+  createdAt DateTime @default(now())
+
+  estate Estate @relation(fields: [estateId], references: [id])
+
+  messages ChatMessage[]
+
+  @@index([estateId, block])
+}
+
+model ChatMessage {
+  id String @id @default(uuid())
+
+  roomId   String
+  senderId String
+
+  message String
+
+  createdAt DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  sender User @relation(fields: [senderId], references: [id])
+
+  @@index([roomId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+model ChatReadReceipt {
+  id String @id @default(uuid())
+
+  userId String
+  roomId String
+
+  lastReadAt DateTime
+
+  @@unique([userId, roomId])
 }
 
 // VISITOR_SCAN_FAILED

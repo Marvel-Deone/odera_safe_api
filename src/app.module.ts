@@ -23,6 +23,7 @@ import { PerformanceModule } from './apis/performance/performance.module';
 import { GuardLocationModule } from './apis/guard-location/guard-location.module';
 import { IncidentModule } from './apis/incident/incident.module';
 import { AnnouncementModule } from './apis/announcement/announcement.module';
+import { ChatModule } from './apis/chat/chat.module';
 
 @Module({
   imports: [
@@ -53,7 +54,8 @@ import { AnnouncementModule } from './apis/announcement/announcement.module';
     PerformanceModule,
     GuardLocationModule,
     IncidentModule,
-    AnnouncementModule
+    AnnouncementModule,
+    ChatModule
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

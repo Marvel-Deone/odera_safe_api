@@ -15,7 +15,7 @@ async function main() {
   let estate = await prisma.estate.findFirst();
 
   if (!estate) {
-   estate = await prisma.estate.create({
+    estate = await prisma.estate.create({
       data: {
         name: "Odera Residential Estate",
         address: "Lekki Phase 2, Lagos",
@@ -34,6 +34,51 @@ async function main() {
       }
     })
     console.log("Estate created")
+  }
+
+  const existingRooms =
+    await prisma.chatRoom.count({
+      where: {
+        estateId: estate.id,
+      },
+    })
+
+  if (existingRooms === 0) {
+    await prisma.chatRoom.createMany({
+      data: [
+        {
+          estateId: estate.id,
+          name: 'Block A',
+          block: 'A',
+          type: 'BLOCK',
+        },
+        {
+          estateId: estate.id,
+          name: 'Block B',
+          block: 'B',
+          type: 'BLOCK',
+        },
+        {
+          estateId: estate.id,
+          name: 'Block C',
+          block: 'C',
+          type: 'BLOCK',
+        },
+        {
+          estateId: estate.id,
+          name: 'Block D',
+          block: 'D',
+          type: 'BLOCK',
+        },
+        {
+          estateId: estate.id,
+          name: 'Broadcast',
+          type: 'BROADCAST',
+        },
+      ],
+    })
+
+    console.log('Chat rooms created')
   }
 
   // Create Super Admin
