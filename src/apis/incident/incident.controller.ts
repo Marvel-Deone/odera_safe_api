@@ -10,13 +10,10 @@ import { CreateIncidentDto, AssignIncidentDto, CompleteIncidentDto, RateIncident
 
 @ApiTags('Incidents')
 @ApiBearerAuth()
-
 @UseGuards(
     JwtAuthGuard,
     RolesGuard,
 )
-
-
 @Controller('incidents')
 export class IncidentController {
     constructor(

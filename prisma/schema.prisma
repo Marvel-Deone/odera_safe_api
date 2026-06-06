@@ -151,18 +151,6 @@ enum IncidentCategory {
   OTHER
 }
 
-// enum IncidentCategory {
-//   SECURITY
-//   MAINTENANCE
-//   ACCESS_CONTROL
-//   COMMUNITY
-//   DELIVERY
-//   PARKING
-//   FACILITY
-//   EMERGENCY
-//   OTHER
-// }
-
 enum AlertStatus {
   ACTIVE
   RESOLVED
@@ -181,6 +169,21 @@ enum TicketStatus {
   RESOLVED
   OVERDUE
   BREACHED
+}
+
+enum AnnouncementCategory {
+  OFFICIAL
+  SECURITY
+  COMMUNITY
+  MAINTENANCE
+  FINANCE
+}
+
+enum AnnouncementAudience {
+  ALL
+  RESIDENTS
+  GUARDS
+  ADMINS
 }
 
 // model EstateSettings {
@@ -220,6 +223,7 @@ model Estate {
   guardPerformanceSnapshots GuardPerformanceSnapshot[]
   guardLocations            GuardLocation[]
   // maintenanceTickets        MaintenanceTicket[]
+  announcements             Announcement[]
 }
 
 model User {
@@ -231,12 +235,15 @@ model User {
   first_login Boolean  @default(true)
   createdAt   DateTime @default(now())
 
-  estateId          String
-  estate            Estate     @relation(fields: [estateId], references: [id])
-  resident          Resident?
-  gateLogs          GateLog[]
-  guard             Guard?
-  assignedIncidents Incident[] @relation("AssignedIncidentUser")
+  estateId             String
+  estate               Estate                @relation(fields: [estateId], references: [id])
+  resident             Resident?
+  gateLogs             GateLog[]
+  guard                Guard?
+  assignedIncidents    Incident[]            @relation("AssignedIncidentUser")
+  announcements        Announcement[]
+  announcementComments AnnouncementComment[]
+  announcementLikes    AnnouncementLike[]
 }
 
 model Resident {
@@ -777,11 +784,10 @@ model Incident {
   photos     Json?
   occurredAt DateTime @default(now())
 
-  status     IncidentStatus @default(OPEN)
-  adminNotes String?
+  status        IncidentStatus @default(OPEN)
+  adminNotes    String?
   materialsUsed String?
-  timeTaken String?
-
+  timeTaken     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -890,41 +896,65 @@ model GuardLocation {
   @@index([estateId, recordedAt])
 }
 
-// model MaintenanceTicket {
-//   id String @id @default(uuid())
+model Announcement {
+  id String @id @default(uuid())
 
-//   residentId String
-//   estateId   String
+  estateId String
+  authorId String
 
-//   title       String
-//   description String
+  title String
+  body  String
 
-//   priority TicketPriority
-//   status   TicketStatus   @default(OPEN)
+  category AnnouncementCategory
+  audience AnnouncementAudience
 
-//   location String
+  isPinned Boolean @default(false)
+  sendSms  Boolean @default(false)
 
-//   beforePhoto String?
-//   afterPhoto  String?
+  likesCount    Int @default(0)
+  commentsCount Int @default(0)
 
-//   assignedToId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-//   slaDeadline DateTime?
+  estate Estate @relation(fields: [estateId], references: [id])
+  author User   @relation(fields: [authorId], references: [id])
 
-//   startedAt   DateTime?
-//   completedAt DateTime?
+  comments AnnouncementComment[]
+  likes    AnnouncementLike[]
 
-//   residentRating Int?
-//   completionNote String?
+  @@index([estateId])
+  @@index([createdAt])
+}
 
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
+model AnnouncementComment {
+  id String @id @default(uuid())
 
-//   resident Resident @relation(fields: [residentId], references: [id])
+  announcementId String
+  userId         String
 
-//   assignedTo Guard? @relation(fields: [assignedToId], references: [id])
+  comment String
 
-//   estate Estate @relation(fields: [estateId], references: [id])
-// }
+  createdAt DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([announcementId])
+}
+
+model AnnouncementLike {
+  id String @id @default(uuid())
+
+  announcementId String
+  userId         String
+
+  createdAt DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@unique([announcementId, userId])
+}
 
 // VISITOR_SCAN_FAILED
