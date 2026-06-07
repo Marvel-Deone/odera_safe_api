@@ -23,6 +23,8 @@ export class ChatService {
                 },
             })
 
+            console.log('user:', user, 'resident', user?.resident?.block)
+
         if (
             user?.role === Role.ADMIN ||
             user?.role === Role.SUPER_ADMIN
