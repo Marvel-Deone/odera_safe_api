@@ -1,56 +1,60 @@
 import {
-  ConnectedSocket,
-  MessageBody,
-  OnGatewayConnection,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
+    ConnectedSocket,
+    MessageBody,
+    OnGatewayConnection,
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer,
 } from '@nestjs/websockets'
 
 import { Server, Socket } from 'socket.io'
 
 @WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
+    cors: {
+        origin: '*',
+    },
 })
 export class ChatGateway
-  implements OnGatewayConnection
-{
-  @WebSocketServer()
-  server!: Server
+    implements OnGatewayConnection {
+    @WebSocketServer()
+    server!: Server
 
-  handleConnection(
-    client: Socket,
-  ) {
-    console.log(
-      'Chat connected:',
-      client.id,
+    handleConnection(
+        client: Socket,
+    ) {
+        console.log(
+            'Chat connected:',
+            client.id,
+        )
+    }
+
+    @SubscribeMessage(
+        'join-room',
     )
-  }
+    handleJoinRoom(
+        @MessageBody()
+        roomId: string,
 
-  @SubscribeMessage(
-    'join-room',
-  )
-  handleJoinRoom(
-    @MessageBody()
-    roomId: string,
+        @ConnectedSocket()
+        client: Socket,
+    ) {
+        console.log(
+            `Client ${client.id} joined room ${roomId}`,
+        )
+        client.join(roomId)
+    }
 
-    @ConnectedSocket()
-    client: Socket,
-  ) {
-    client.join(roomId)
-  }
+    emitMessage(
+        roomId: string,
+        message: any,
+    ) {
+        console.log('Emitting to room:', roomId)
 
-  emitMessage(
-    roomId: string,
-    message: any,
-  ) {
-    this.server
-      .to(roomId)
-      .emit(
-        'new-message',
-        message,
-      )
-  }
+        this.server
+            .to(roomId)
+            .emit(
+                'new-message',
+                message,
+            )
+    }
 }
