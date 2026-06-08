@@ -24,6 +24,7 @@ import { GuardLocationModule } from './apis/guard-location/guard-location.module
 import { IncidentModule } from './apis/incident/incident.module';
 import { AnnouncementModule } from './apis/announcement/announcement.module';
 import { ChatModule } from './apis/chat/chat.module';
+import { PollModule } from './apis/poll/poll.module';
 
 @Module({
   imports: [
@@ -55,7 +56,8 @@ import { ChatModule } from './apis/chat/chat.module';
     GuardLocationModule,
     IncidentModule,
     AnnouncementModule,
-    ChatModule
+    ChatModule,
+    PollModule
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

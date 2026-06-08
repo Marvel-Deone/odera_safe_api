@@ -12,7 +12,7 @@ export class ChatService {
         private readonly chatGateway: ChatGateway,
     ) { }
     async getRooms(userId: string) {
-        const user =
+        const user =    
             await this.prisma.user.findUnique({
                 where: {
                     id: userId,

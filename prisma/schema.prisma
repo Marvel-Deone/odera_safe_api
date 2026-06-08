@@ -191,6 +191,11 @@ enum ChatRoomType {
   BROADCAST
 }
 
+enum PollAudience {
+  ALL_RESIDENTS
+  LEVY_CLEARED_ONLY
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -230,6 +235,7 @@ model Estate {
   // maintenanceTickets        MaintenanceTicket[]
   announcements             Announcement[]
   chatRooms                 ChatRoom[]
+  polls                     Poll[]
 }
 
 model User {
@@ -251,6 +257,8 @@ model User {
   announcementComments AnnouncementComment[]
   announcementLikes    AnnouncementLike[]
   chatMessages         ChatMessage[]
+  polls                Poll[]
+  pollVotes            PollVote[]
 }
 
 model Resident {
@@ -307,6 +315,8 @@ model Resident {
   ndprConsentIdentity       Boolean
   ndprConsentThirdParty     Boolean
   ndprConsentGivenAt        DateTime?
+
+  levyCleared Boolean @default(false)
 
   approvedAt DateTime?
   rejectedAt DateTime?
@@ -1011,6 +1021,66 @@ model ChatReadReceipt {
   lastReadAt DateTime
 
   @@unique([userId, roomId])
+}
+
+model Poll {
+  id String @id @default(uuid())
+
+  estateId    String
+  createdById String
+
+  question String
+
+  audience PollAudience @default(ALL_RESIDENTS)
+  isClosed Boolean @default(false)
+
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  options PollOption[]
+  votes   PollVote[]
+
+  @@index([estateId])
+}
+
+model PollOption {
+  id String @id @default(uuid())
+
+  pollId String
+
+  text String
+
+  poll Poll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  votes PollVote[]
+
+  @@index([pollId])
+}
+
+model PollVote {
+  id String @id @default(uuid())
+
+  pollId   String
+  optionId String
+
+  userId String
+
+  createdAt DateTime @default(now())
+
+  poll Poll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([pollId, userId])
+  @@index([pollId])
+  @@index([userId])
 }
 
 // VISITOR_SCAN_FAILED
