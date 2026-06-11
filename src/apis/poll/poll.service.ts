@@ -115,8 +115,9 @@ export class PollService {
                     audience:
                         dto.audience,
 
-                    expiresAt:
-                        dto.expiresAt,
+                    expiresAt: dto.expiresAt
+                        ? new Date(dto.expiresAt)
+                        : null,
 
                     estateId:
                         user.estateId,
@@ -357,9 +358,9 @@ export class PollService {
         }
 
         const userVote = poll.votes.find(
-                vote =>
-                    vote.userId === userId,
-            )
+            vote =>
+                vote.userId === userId,
+        )
 
         return success(
             this.mapPollResponse(
