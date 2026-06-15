@@ -236,6 +236,7 @@ model Estate {
   announcements             Announcement[]
   chatRooms                 ChatRoom[]
   polls                     Poll[]
+  committees                Committee[]
 }
 
 model User {
@@ -259,6 +260,7 @@ model User {
   chatMessages         ChatMessage[]
   polls                Poll[]
   pollVotes            PollVote[]
+  committeeMembers     CommitteeMember[]
 }
 
 model Resident {
@@ -1032,7 +1034,7 @@ model Poll {
   question String
 
   audience PollAudience @default(ALL_RESIDENTS)
-  isClosed Boolean @default(false)
+  isClosed Boolean      @default(false)
 
   expiresAt DateTime?
 
@@ -1081,6 +1083,29 @@ model PollVote {
   @@unique([pollId, userId])
   @@index([pollId])
   @@index([userId])
+}
+
+model Committee {
+  id          String   @id @default(uuid())
+  estateId    String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  estate  Estate            @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  members CommitteeMember[]
+}
+
+model CommitteeMember {
+  id          String   @id @default(uuid())
+  committeeId String
+  userId      String
+  createdAt   DateTime @default(now())
+
+  committee Committee @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@unique([committeeId, userId])
 }
 
 // VISITOR_SCAN_FAILED
