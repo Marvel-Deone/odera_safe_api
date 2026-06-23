@@ -229,8 +229,8 @@ export class FinanceService {
         residentId: resident.id,
       },
     )
-    console.log('[Payment Transaction]:', 'payment');
-    console.log('[PaymentData]:', 'payment.data');
+    console.log('[Payment Transaction]:', payment);
+    console.log('[PaymentData]:', payment.data);
 
     return success(
       payment.data,
