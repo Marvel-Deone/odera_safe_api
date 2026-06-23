@@ -255,14 +255,10 @@ export class ResidentService {
                 resident.phone,
             )
 
-        console.log('paystackCustomer:', paystackCustomer);
-
         const dedicatedAccount =
             await this.paystack.createDedicatedVirtualAccount(
                 paystackCustomer.data.customer_code,
             )
-
-        console.log('DedicatedAccount:', dedicatedAccount)
 
         const result =
             await this.prisma.$transaction(

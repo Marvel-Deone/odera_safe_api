@@ -24,7 +24,7 @@ export class FinanceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly paystack: PaystackService,
-  ) {}
+  ) { }
 
   private reference(prefix: string) {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
@@ -163,7 +163,7 @@ export class FinanceService {
           this.toNumber(assignment.amount) - this.toNumber(assignment.paidAmount),
         status:
           assignment.status !== LevyStatus.PAID &&
-          assignment.levy.dueDate < new Date()
+            assignment.levy.dueDate < new Date()
             ? LevyStatus.OVERDUE
             : assignment.status,
       })),
@@ -595,6 +595,7 @@ export class FinanceService {
 
   async handlePaystackWebhook(rawBody: Buffer | string, signature: string | undefined, body: any) {
     const payload = rawBody || JSON.stringify(body)
+    console.log('Calling paystack webhook');
 
     if (!this.paystack.verifyWebhookSignature(payload, signature)) {
       return error('Invalid Signature', 'Paystack webhook signature is invalid', HttpStatus.UNAUTHORIZED)
@@ -679,6 +680,7 @@ export class FinanceService {
           await this.updateResidentLevyCleared(tx, assignment.residentId)
         }
       }
+      console.log('Transaction update:', updatedTransaction);
 
       return updatedTransaction
     })
