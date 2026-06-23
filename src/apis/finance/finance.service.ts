@@ -485,18 +485,26 @@ export class FinanceService {
     const fee = Number((this.toNumber(withdrawal.amount) * this.withdrawalFeeRate).toFixed(2))
     const netAmount = Number((this.toNumber(withdrawal.amount) - fee).toFixed(2))
 
-    if (bankCode) {
-      const recipient = await this.paystack.createTransferRecipient(
-        withdrawal.accountName,
-        withdrawal.accountNumber,
-        bankCode,
-      )
+    try {
+      if (bankCode) {
+        const recipient = await this.paystack.createTransferRecipient(
+          withdrawal.accountName,
+          withdrawal.accountNumber,
+          bankCode,
+        )
 
-      await this.paystack.initiateTransfer(
-        netAmount,
-        recipient.data.recipient_code,
-        this.reference('transfer'),
-        'OderaSafe wallet withdrawal',
+        await this.paystack.initiateTransfer(
+          netAmount,
+          recipient.data.recipient_code,
+          this.reference('transfer'),
+          'OderaSafe wallet withdrawal',
+        )
+      }
+    } catch (err: any) {
+      return error(
+        'Transfer Failed',
+        err?.message || 'Cannot resolve account',
+        HttpStatus.BAD_REQUEST,
       )
     }
 
