@@ -202,9 +202,10 @@ export class FinanceService {
   }
 
   async initializeWalletFunding(userId: string, dto: FundWalletDto) {
+    console.log('Funding intialized');
     const { user, resident, wallet } = await this.getResidentWallet(userId)
     const reference = this.reference('wallet')
-
+    console.log('Funding intialized');
     await this.prisma.walletTransaction.create({
       data: {
         walletId: wallet.id,
@@ -216,6 +217,8 @@ export class FinanceService {
       },
     })
 
+    console.log('[WalletTraction]:', 'creating wallet transaction');
+
     const payment = await this.paystack.initializeTransaction(
       resident.email || user.email,
       dto.amount,
@@ -226,6 +229,8 @@ export class FinanceService {
         residentId: resident.id,
       },
     )
+    console.log('[Payment Transaction]:', 'payment');
+    console.log('[PaymentData]:', 'payment.data');
 
     return success(
       payment.data,
