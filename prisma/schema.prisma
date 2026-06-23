@@ -42,6 +42,13 @@ enum ResidentStatus {
   ACTIVE
 }
 
+enum KycStatus {
+  NOT_SUBMITTED
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
 enum GateAction {
   CHECK_IN
   CHECK_OUT
@@ -196,6 +203,38 @@ enum PollAudience {
   LEVY_CLEARED_ONLY
 }
 
+enum LevyStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+}
+
+enum WalletTransactionType {
+  FUNDING
+  LEVY_PAYMENT
+  WITHDRAWAL
+  REFUND
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum ResidentReviewAction {
+  APPROVE
+  REJECT
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -237,6 +276,7 @@ model Estate {
   chatRooms                 ChatRoom[]
   polls                     Poll[]
   committees                Committee[]
+  levies                    Levy[]
 }
 
 model User {
@@ -261,6 +301,8 @@ model User {
   polls                Poll[]
   pollVotes            PollVote[]
   committeeMembers     CommitteeMember[]
+  createdLevies        Levy[]
+  approvedWithdrawals  WithdrawalRequest[]   @relation("WithdrawalApprover")
 }
 
 model Resident {
@@ -268,26 +310,29 @@ model Resident {
 
   first_name String
   last_name  String
-  email      String @unique
+  email      String  @unique
   phone      String
-  dob        String
-  gender     String
+  dob        String?
+  gender     String?
   estateId   String
 
   userId String? @unique
 
-  status ResidentStatus @default(PENDING)
+  status          ResidentStatus @default(PENDING)
+  kycStatus       KycStatus      @default(NOT_SUBMITTED)
+  rejectionReason String?
 
   house_no        String
   block           String
-  home_address    String
-  state_of_origin String
-  lga             String
+  home_address    String?
+  state_of_origin String?
+  lga             String?
 
-  id_type           String
-  id_no             String
-  id_document_front String
-  id_document_back  String
+  id_type           String?
+  id_no             String?
+  id_document_front String?
+  id_document_back  String?
+  nin               String?
   bvn               String?
   alternate_phone   String?
 
@@ -296,40 +341,44 @@ model Resident {
   next_of_kin_email        String?
   next_of_kin_relationship String?
 
-  guarantor_name                 String
-  guarantor_occupation           String
-  guarantor_work_address         String
-  guarantor_id_no                String
-  guarantor_id_relationship      String
-  signed_guarantor_letter_upload String
+  guarantor_name                 String?
+  guarantor_occupation           String?
+  guarantor_work_address         String?
+  guarantor_id_no                String?
+  guarantor_id_relationship      String?
+  signed_guarantor_letter_upload String?
 
-  vehicle_plate_no String
-  vehicle_make     String
+  vehicle_plate_no String?
+  vehicle_make     String?
   vehicle_color    String?
 
-  proof_of_address_upload String
-  passport                String
-  tenancy_ownership_doc   String
+  proof_of_address_upload String?
+  passport                String?
+  tenancy_ownership_doc   String?
 
   wallet_pin String?
 
-  ndprConsentDataProcessing Boolean
-  ndprConsentIdentity       Boolean
-  ndprConsentThirdParty     Boolean
+  ndprConsentDataProcessing Boolean   @default(false)
+  ndprConsentIdentity       Boolean   @default(false)
+  ndprConsentThirdParty     Boolean   @default(false)
   ndprConsentGivenAt        DateTime?
 
   levyCleared Boolean @default(false)
+  profileDeclaration Boolean @default(false)
 
   approvedAt DateTime?
   rejectedAt DateTime?
 
   createdAt DateTime @default(now())
 
-  estate    Estate     @relation(fields: [estateId], references: [id])
-  user      User?      @relation(fields: [userId], references: [id])
-  visitors  Visitor[]
+  estate             Estate              @relation(fields: [estateId], references: [id])
+  user               User?               @relation(fields: [userId], references: [id])
+  visitors           Visitor[]
   // maintenanceTickets MaintenanceTicket[]
-  incidents Incident[]
+  incidents          Incident[]
+  wallet             Wallet?
+  levyAssignments    LevyAssignment[]
+  withdrawalRequests WithdrawalRequest[]
 }
 
 model Guard {
@@ -1107,5 +1156,141 @@ model CommitteeMember {
 
   @@unique([committeeId, userId])
 }
+
+model Levy {
+  id String @id @default(uuid())
+
+  estateId    String
+  createdById String
+
+  title       String
+  description String?
+
+  amount Decimal
+
+  dueDate DateTime
+
+  createdAt DateTime @default(now())
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  assignments LevyAssignment[]
+
+  @@index([estateId])
+}
+
+model LevyAssignment {
+  id String @id @default(uuid())
+
+  levyId     String
+  residentId String
+
+  amount Decimal
+
+  status LevyStatus @default(PENDING)
+
+  paidAmount Decimal @default(0)
+
+  paidAt DateTime?
+
+  levy Levy @relation(fields: [levyId], references: [id], onDelete: Cascade)
+
+  resident           Resident            @relation(fields: [residentId], references: [id])
+  walletTransactions WalletTransaction[]
+
+  @@unique([levyId, residentId])
+  @@index([residentId])
+}
+
+model Wallet {
+  id String @id @default(uuid())
+
+  residentId String @unique
+
+  balance Decimal @default(0)
+
+  paystackCustomerCode String?
+
+  virtualAccountNumber String?
+  virtualAccountName   String?
+  virtualBankName      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resident Resident @relation(fields: [residentId], references: [id])
+
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id String @id @default(uuid())
+
+  walletId String
+
+  type   WalletTransactionType
+  status WalletTransactionStatus
+
+  amount Decimal
+
+  levyAssignmentId String?
+
+  reference String? @unique
+
+  description String?
+
+  createdAt DateTime @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  levyAssignment LevyAssignment? @relation(fields: [levyAssignmentId], references: [id])
+
+  @@index([walletId])
+}
+
+model WithdrawalRequest {
+  id String @id @default(uuid())
+
+  residentId String
+
+  amount Decimal
+
+  bankName      String
+  accountName   String
+  accountNumber String
+
+  status WithdrawalStatus @default(PENDING)
+
+  rejectionReason String?
+
+  approvedById String?
+
+  createdAt DateTime @default(now())
+
+  approvedAt DateTime?
+  paidAt     DateTime?
+
+  resident Resident @relation(fields: [residentId], references: [id])
+
+  approvedBy User? @relation("WithdrawalApprover", fields: [approvedById], references: [id])
+
+  @@index([residentId])
+  @@index([status])
+}
+
+// model SmsLog {
+//   id String @id @default(uuid())
+
+//   phone   String
+//   message String
+
+//   status SmsStatus
+
+//   providerResponse Json?
+
+//   createdAt DateTime @default(now())
+// }
 
 // VISITOR_SCAN_FAILED

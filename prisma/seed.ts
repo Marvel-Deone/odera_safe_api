@@ -83,7 +83,7 @@ async function main() {
 
   // Create Super Admin
   const existingAdmin = await prisma.user.findFirst({
-    where: { role: Role.ADMIN }
+    where: { role: Role.SUPER_ADMIN }
   })
 
   if (!existingAdmin) {
@@ -93,7 +93,7 @@ async function main() {
       data: {
         email: "admin@oderasafe.com",
         password: hashedPassword,
-        role: Role.ADMIN,
+        role: Role.SUPER_ADMIN,
         first_login: true,
         estateId: estate.id,
       }

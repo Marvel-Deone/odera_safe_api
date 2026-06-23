@@ -1,0 +1,30 @@
+-- CreateEnum
+CREATE TYPE "KycStatus" AS ENUM ('NOT_SUBMITTED', 'PENDING', 'COMPLETED', 'REJECTED');
+
+-- AlterTable
+ALTER TABLE "Resident" ADD COLUMN     "kycStatus" "KycStatus" NOT NULL DEFAULT 'NOT_SUBMITTED',
+ADD COLUMN     "nin" TEXT,
+ADD COLUMN     "rejectionReason" TEXT,
+ALTER COLUMN "dob" DROP NOT NULL,
+ALTER COLUMN "gender" DROP NOT NULL,
+ALTER COLUMN "home_address" DROP NOT NULL,
+ALTER COLUMN "state_of_origin" DROP NOT NULL,
+ALTER COLUMN "lga" DROP NOT NULL,
+ALTER COLUMN "id_type" DROP NOT NULL,
+ALTER COLUMN "id_no" DROP NOT NULL,
+ALTER COLUMN "id_document_front" DROP NOT NULL,
+ALTER COLUMN "id_document_back" DROP NOT NULL,
+ALTER COLUMN "guarantor_name" DROP NOT NULL,
+ALTER COLUMN "guarantor_occupation" DROP NOT NULL,
+ALTER COLUMN "guarantor_work_address" DROP NOT NULL,
+ALTER COLUMN "guarantor_id_no" DROP NOT NULL,
+ALTER COLUMN "guarantor_id_relationship" DROP NOT NULL,
+ALTER COLUMN "signed_guarantor_letter_upload" DROP NOT NULL,
+ALTER COLUMN "vehicle_plate_no" DROP NOT NULL,
+ALTER COLUMN "vehicle_make" DROP NOT NULL,
+ALTER COLUMN "proof_of_address_upload" DROP NOT NULL,
+ALTER COLUMN "passport" DROP NOT NULL,
+ALTER COLUMN "tenancy_ownership_doc" DROP NOT NULL,
+ALTER COLUMN "ndprConsentDataProcessing" SET DEFAULT false,
+ALTER COLUMN "ndprConsentIdentity" SET DEFAULT false,
+ALTER COLUMN "ndprConsentThirdParty" SET DEFAULT false;

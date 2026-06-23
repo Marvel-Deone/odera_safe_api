@@ -26,6 +26,7 @@ import { AnnouncementModule } from './apis/announcement/announcement.module';
 import { ChatModule } from './apis/chat/chat.module';
 import { PollModule } from './apis/poll/poll.module';
 import { CommitteeModule } from './apis/committee/committee.module';
+import { FinanceModule } from './apis/finance/finance.module';
 
 @Module({
   imports: [
@@ -59,7 +60,8 @@ import { CommitteeModule } from './apis/committee/committee.module';
     AnnouncementModule,
     ChatModule,
     PollModule,
-    CommitteeModule
+    CommitteeModule,
+    FinanceModule
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],
