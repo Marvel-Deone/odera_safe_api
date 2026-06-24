@@ -282,6 +282,7 @@ export class VisitorController {
     @Roles(
         Role.GUARD,
         Role.ADMIN,
+        Role.SUPER_ADMIN,
     )
 
     @HttpCode(HttpStatus.OK)

@@ -212,7 +212,7 @@ export class ResidentController {
 
   //  ADMIN - CREATE RESIDENT
   @Post()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Create resident',
@@ -250,7 +250,7 @@ export class ResidentController {
 
   // ADMIN - REVIEW KYC
   @Patch(':residentId/review')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Approve or reject resident KYC',
@@ -273,7 +273,7 @@ export class ResidentController {
 
   //  ADMIN - ALL RESIDENTS
   @Get()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Fetch all residents',
@@ -284,7 +284,7 @@ export class ResidentController {
 
   // ADMIN - SINGLE RESIDENT
   @Get(':residentId')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Fetch resident by ID',

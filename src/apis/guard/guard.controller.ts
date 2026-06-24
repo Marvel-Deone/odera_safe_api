@@ -44,7 +44,7 @@ export class GuardController {
   ) { }
 
   @Post('admin/guards')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Create guard',
@@ -75,7 +75,7 @@ export class GuardController {
   }
 
   @Get('admin/guards/:guardId')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({
     summary: 'Get guard by ID',
   })
@@ -94,7 +94,7 @@ export class GuardController {
   @Patch(
     'admin/guards/:guardId/suspend',
   )
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Suspend guard',
@@ -114,7 +114,7 @@ export class GuardController {
   @Patch(
     'admin/guards/:guardId/activate',
   )
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Activate guard',
@@ -135,6 +135,7 @@ export class GuardController {
   @Roles(
     Role.GUARD,
     Role.ADMIN,
+    Role.SUPER_ADMIN,
   )
 
   @ApiOperation({
@@ -169,7 +170,7 @@ export class GuardController {
   @Patch(
     'admin/guards/:guardId',
   )
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
 
   @HttpCode(HttpStatus.OK)
 
@@ -214,6 +215,7 @@ export class GuardController {
   @Roles(
     Role.GUARD,
     Role.ADMIN,
+    Role.SUPER_ADMIN,
   )
 
   @ApiOperation({
@@ -231,6 +233,7 @@ export class GuardController {
   @Roles(
     Role.GUARD,
     Role.ADMIN,
+    Role.SUPER_ADMIN,
   )
 
   @ApiOperation({
@@ -426,7 +429,7 @@ export class GuardController {
   }
 
   @Post('guards/patrol-scans')
-  @Roles(Role.GUARD, Role.ADMIN)
+  @Roles(Role.GUARD, Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Scan patrol checkpoint' })
   scanPatrolCheckpoint(
     @CurrentUser() user: any,

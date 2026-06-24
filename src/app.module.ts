@@ -27,6 +27,7 @@ import { ChatModule } from './apis/chat/chat.module';
 import { PollModule } from './apis/poll/poll.module';
 import { CommitteeModule } from './apis/committee/committee.module';
 import { FinanceModule } from './apis/finance/finance.module';
+import { UsersModule } from './apis/users/users.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { FinanceModule } from './apis/finance/finance.module';
     ResidentModule,
     DatabaseModule,
     AuthModule,
+    UsersModule,
     VisitorModule,
     DashboardModule,
     GuardModule,
@@ -61,7 +63,7 @@ import { FinanceModule } from './apis/finance/finance.module';
     ChatModule,
     PollModule,
     CommitteeModule,
-    FinanceModule
+    FinanceModule,
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

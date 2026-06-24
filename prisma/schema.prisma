@@ -235,6 +235,39 @@ enum ResidentReviewAction {
   REJECT
 }
 
+enum ShortletStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}
+
+enum BookingStatus {
+  PENDING
+  ACTIVE
+  CHECKED_IN
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+enum AccessType {
+  ENTRY
+  EXIT
+}
+
+enum VehicleStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
+enum AccessDirection {
+  ENTRY
+  EXIT
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -363,7 +396,7 @@ model Resident {
   ndprConsentThirdParty     Boolean   @default(false)
   ndprConsentGivenAt        DateTime?
 
-  levyCleared Boolean @default(false)
+  levyCleared        Boolean @default(false)
   profileDeclaration Boolean @default(false)
 
   approvedAt DateTime?
@@ -379,6 +412,8 @@ model Resident {
   wallet             Wallet?
   levyAssignments    LevyAssignment[]
   withdrawalRequests WithdrawalRequest[]
+  shortletProperties ShortletProperty[]
+  vehicles           Vehicle[]
 }
 
 model Guard {
@@ -1278,6 +1313,123 @@ model WithdrawalRequest {
 
   @@index([residentId])
   @@index([status])
+}
+
+model ShortletProperty {
+  id         String @id @default(uuid())
+  residentId String
+
+  platform   String
+  listingUrl String
+
+  bedrooms  Int
+  maxGuests Int
+
+  annualFeePaid      Boolean   @default(false)
+  annualFeeExpiresAt DateTime?
+
+  regulationsAccepted Boolean
+
+  status ShortletStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resident Resident @relation(fields: [residentId], references: [id])
+
+  bookings ShortletBooking[]
+}
+
+model ShortletBooking {
+  id String @id @default(uuid())
+
+  propertyId String
+
+  guestName   String
+  guestPhone  String
+  nationality String
+
+  guestCount Int
+
+  platform String
+
+  checkInDate  DateTime
+  checkOutDate DateTime
+
+  qrCode  String?
+  smsCode String
+
+  biometricRequired Boolean @default(false)
+
+  status BookingStatus
+
+  createdAt DateTime @default(now())
+
+  property ShortletProperty @relation(fields: [propertyId], references: [id])
+
+  logs ShortletAccessLog[]
+}
+
+model ShortletAccessLog {
+  id String @id @default(uuid())
+
+  bookingId String
+
+  type AccessType
+  // ENTRY | EXIT
+
+  gateId String?
+
+  createdAt DateTime @default(now())
+
+  booking ShortletBooking @relation(fields: [bookingId], references: [id])
+}
+
+model Vehicle {
+  id String @id @default(uuid())
+
+  residentId String
+
+  plateNumber String @unique
+
+  vehicleType String
+
+  make  String
+  model String?
+
+  color String
+  year  Int
+
+  registrationDocUrl String
+  vehiclePhotoUrl    String
+
+  status VehicleStatus
+
+  approvedAt   DateTime?
+  approvedById String?
+
+  createdAt DateTime @default(now())
+
+  resident Resident @relation(fields: [residentId], references: [id])
+
+  logs VehicleAccessLog[]
+}
+
+model VehicleAccessLog {
+  id String @id @default(uuid())
+
+  vehicleId String
+
+  plateNumber String
+
+  gateName String
+
+  direction AccessDirection
+  // ENTRY | EXIT
+
+  capturedAt DateTime @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
 }
 
 // model SmsLog {

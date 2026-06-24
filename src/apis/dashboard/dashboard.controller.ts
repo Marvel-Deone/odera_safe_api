@@ -11,7 +11,7 @@ export class DashboardController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   async getDashboard() {
     return this.dashboardService.getAdminDashboard()
   }
