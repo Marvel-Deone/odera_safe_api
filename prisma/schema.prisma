@@ -213,6 +213,8 @@ enum LevyStatus {
 enum WalletTransactionType {
   FUNDING
   LEVY_PAYMENT
+  VEHICLE_REGISTRATION
+  HEAVY_VEHICLE_PASS
   WITHDRAWAL
   REFUND
 }
@@ -260,12 +262,31 @@ enum VehicleStatus {
   PENDING
   ACTIVE
   REJECTED
+  PAYMENT_FAILED
   SUSPENDED
 }
 
 enum AccessDirection {
   ENTRY
   EXIT
+}
+
+enum HeavyVehicleRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum PaymentOption {
+  PAY_NOW
+  PAY_ON_ARRIVAL
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
 }
 
 // model EstateSettings {
@@ -310,6 +331,9 @@ model Estate {
   polls                     Poll[]
   committees                Committee[]
   levies                    Levy[]
+  estateSettings            EstateSettings?
+  streets                   EstateStreet[]
+  heavyVehicleCategories    HeavyVehicleCategory[]
 }
 
 model User {
@@ -321,21 +345,23 @@ model User {
   first_login Boolean  @default(true)
   createdAt   DateTime @default(now())
 
-  estateId             String
-  estate               Estate                @relation(fields: [estateId], references: [id])
-  resident             Resident?
-  gateLogs             GateLog[]
-  guard                Guard?
-  assignedIncidents    Incident[]            @relation("AssignedIncidentUser")
-  announcements        Announcement[]
-  announcementComments AnnouncementComment[]
-  announcementLikes    AnnouncementLike[]
-  chatMessages         ChatMessage[]
-  polls                Poll[]
-  pollVotes            PollVote[]
-  committeeMembers     CommitteeMember[]
-  createdLevies        Levy[]
-  approvedWithdrawals  WithdrawalRequest[]   @relation("WithdrawalApprover")
+  estateId              String
+  estate                Estate                @relation(fields: [estateId], references: [id])
+  resident              Resident?
+  gateLogs              GateLog[]
+  guard                 Guard?
+  assignedIncidents     Incident[]            @relation("AssignedIncidentUser")
+  announcements         Announcement[]
+  announcementComments  AnnouncementComment[]
+  announcementLikes     AnnouncementLike[]
+  chatMessages          ChatMessage[]
+  polls                 Poll[]
+  pollVotes             PollVote[]
+  committeeMembers      CommitteeMember[]
+  createdLevies         Levy[]
+  approvedWithdrawals   WithdrawalRequest[]   @relation("WithdrawalApprover")
+  approvedVehicles      Vehicle[]             @relation("VehicleApprover")
+  approvedHeavyVehicles HeavyVehiclePass[]    @relation("HeavyVehicleApprover")
 }
 
 model Resident {
@@ -414,6 +440,47 @@ model Resident {
   withdrawalRequests WithdrawalRequest[]
   shortletProperties ShortletProperty[]
   vehicles           Vehicle[]
+  heavyVehiclePasses HeavyVehiclePass[]
+}
+
+model EstateStreet {
+  id        String   @id @default(uuid())
+  estateId  String
+  name      String
+  createdAt DateTime @default(now())
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+
+  @@unique([estateId, name])
+  @@index([estateId])
+}
+
+model EstateSettings {
+  id                     String   @id @default(uuid())
+  estateId               String   @unique
+  freeVehicleLimit       Int      @default(1)
+  vehicleRegistrationFee Decimal  @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+}
+
+model HeavyVehicleCategory {
+  id          String   @id @default(uuid())
+  estateId    String
+  name        String
+  description String?
+  amount      Decimal
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  estate Estate             @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  passes HeavyVehiclePass[]
+
+  @@unique([estateId, name])
+  @@index([estateId, active])
 }
 
 model Guard {
@@ -1405,12 +1472,15 @@ model Vehicle {
 
   status VehicleStatus
 
-  approvedAt   DateTime?
-  approvedById String?
+  approvedAt      DateTime?
+  approvedById    String?
+  rejectionReason String?
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  resident Resident @relation(fields: [residentId], references: [id])
+  resident   Resident @relation(fields: [residentId], references: [id])
+  approvedBy User?    @relation("VehicleApprover", fields: [approvedById], references: [id])
 
   logs VehicleAccessLog[]
 }
@@ -1430,6 +1500,56 @@ model VehicleAccessLog {
   capturedAt DateTime @default(now())
 
   vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+
+  @@index([vehicleId, capturedAt])
+  @@index([plateNumber])
+}
+
+model HeavyVehiclePass {
+  id                     String @id @default(uuid())
+  residentId             String
+  heavyVehicleCategoryId String
+
+  driverName         String
+  driverPhone        String
+  plateNumber        String
+  vehicleDescription String
+
+  entryDate DateTime
+  exitDate  DateTime
+
+  paymentOption PaymentOption
+  amount        Decimal
+  status        HeavyVehicleRequestStatus @default(PENDING)
+  paymentStatus PaymentStatus             @default(PENDING)
+
+  approvedById    String?
+  approvedAt      DateTime?
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resident             Resident                @relation(fields: [residentId], references: [id])
+  heavyVehicleCategory HeavyVehicleCategory    @relation(fields: [heavyVehicleCategoryId], references: [id])
+  approvedBy           User?                   @relation("HeavyVehicleApprover", fields: [approvedById], references: [id])
+  logs                 HeavyVehicleAccessLog[]
+
+  @@index([residentId, status])
+  @@index([heavyVehicleCategoryId])
+  @@index([plateNumber])
+}
+
+model HeavyVehicleAccessLog {
+  id                 String          @id @default(uuid())
+  heavyVehiclePassId String
+  gateName           String
+  direction          AccessDirection
+  capturedAt         DateTime        @default(now())
+
+  heavyVehiclePass HeavyVehiclePass @relation(fields: [heavyVehiclePassId], references: [id])
+
+  @@index([heavyVehiclePassId, capturedAt])
 }
 
 // model SmsLog {

@@ -28,6 +28,9 @@ import { PollModule } from './apis/poll/poll.module';
 import { CommitteeModule } from './apis/committee/committee.module';
 import { FinanceModule } from './apis/finance/finance.module';
 import { UsersModule } from './apis/users/users.module';
+import { VehicleModule } from './apis/vehicle/vehicle.module';
+import { EstateConfigModule } from './apis/estate-config/estate-config.module';
+import { HeavyVehicleModule } from './apis/heavy-vehicle/heavy-vehicle.module';
 
 @Module({
   imports: [
@@ -64,6 +67,9 @@ import { UsersModule } from './apis/users/users.module';
     PollModule,
     CommitteeModule,
     FinanceModule,
+    VehicleModule,
+    EstateConfigModule,
+    HeavyVehicleModule,
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

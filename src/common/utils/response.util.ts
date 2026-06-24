@@ -43,7 +43,7 @@ export const error = <T = any>(
     title = 'error',
     message = 'Request failed',
     code = HttpStatus.BAD_REQUEST,
-    data = null,
+    data: T | null = null,
 ): ApiResponse<T> => {
     const res = response('error', title, message, code, data)
     throw new HttpException(res, code)
