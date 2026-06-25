@@ -261,7 +261,7 @@ export class VehicleService {
       })
 
       const fee = this.toNumber(settings.vehicleRegistrationFee)
-      const shouldCharge = activeVehicleCount >= settings.freeVehicleLimit && fee > 0
+      const shouldCharge = activeVehicleCount > settings.freeVehicleLimit && fee > 0
 
       if (shouldCharge) {
         const wallet =

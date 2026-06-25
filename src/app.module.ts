@@ -31,6 +31,7 @@ import { UsersModule } from './apis/users/users.module';
 import { VehicleModule } from './apis/vehicle/vehicle.module';
 import { EstateConfigModule } from './apis/estate-config/estate-config.module';
 import { HeavyVehicleModule } from './apis/heavy-vehicle/heavy-vehicle.module';
+import { ShortletModule } from './apis/shortlet/shortlet.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { HeavyVehicleModule } from './apis/heavy-vehicle/heavy-vehicle.module';
     VehicleModule,
     EstateConfigModule,
     HeavyVehicleModule,
+    ShortletModule,
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

@@ -215,6 +215,7 @@ enum WalletTransactionType {
   LEVY_PAYMENT
   VEHICLE_REGISTRATION
   HEAVY_VEHICLE_PASS
+  SHORTLET_REGISTRATION
   WITHDRAWAL
   REFUND
 }
@@ -238,6 +239,7 @@ enum ResidentReviewAction {
 }
 
 enum ShortletStatus {
+  INACTIVE
   PENDING
   ACTIVE
   SUSPENDED
@@ -332,6 +334,7 @@ model Estate {
   committees                Committee[]
   levies                    Levy[]
   estateSettings            EstateSettings?
+  shortletSettings          ShortletSettings?
   streets                   EstateStreet[]
   heavyVehicleCategories    HeavyVehicleCategory[]
 }
@@ -362,6 +365,7 @@ model User {
   approvedWithdrawals   WithdrawalRequest[]   @relation("WithdrawalApprover")
   approvedVehicles      Vehicle[]             @relation("VehicleApprover")
   approvedHeavyVehicles HeavyVehiclePass[]    @relation("HeavyVehicleApprover")
+  shortletAccessLogs    ShortletAccessLog[]   @relation("ShortletAccessVerifier")
 }
 
 model Resident {
@@ -481,6 +485,16 @@ model HeavyVehicleCategory {
 
   @@unique([estateId, name])
   @@index([estateId, active])
+}
+
+model ShortletSettings {
+  id                    String   @id @default(uuid())
+  estateId              String   @unique
+  annualRegistrationFee Decimal  @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
 }
 
 model Guard {
@@ -1392,12 +1406,16 @@ model ShortletProperty {
   bedrooms  Int
   maxGuests Int
 
-  annualFeePaid      Boolean   @default(false)
+  annualFeePaid      Boolean       @default(false)
   annualFeeExpiresAt DateTime?
+  annualFeeAmount    Decimal       @default(0)
+  paidAt             DateTime?
+  expiresAt          DateTime?
+  paymentStatus      PaymentStatus @default(PENDING)
 
   regulationsAccepted Boolean
 
-  status ShortletStatus
+  status ShortletStatus @default(INACTIVE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1405,6 +1423,8 @@ model ShortletProperty {
   resident Resident @relation(fields: [residentId], references: [id])
 
   bookings ShortletBooking[]
+
+  @@index([residentId, status])
 }
 
 model ShortletBooking {
@@ -1423,33 +1443,46 @@ model ShortletBooking {
   checkInDate  DateTime
   checkOutDate DateTime
 
-  qrCode  String?
-  smsCode String
+  qrCode    String?
+  qrPayload String? @unique
+  smsCode   String  @unique
 
   biometricRequired Boolean @default(false)
 
-  status BookingStatus
+  status BookingStatus @default(ACTIVE)
 
   createdAt DateTime @default(now())
 
   property ShortletProperty @relation(fields: [propertyId], references: [id])
 
   logs ShortletAccessLog[]
+
+  @@index([propertyId, status])
+  @@index([smsCode])
+  @@index([qrPayload])
 }
 
 model ShortletAccessLog {
   id String @id @default(uuid())
 
-  bookingId String
+  bookingId String?
 
   type AccessType
   // ENTRY | EXIT
 
-  gateId String?
+  gateId       String?
+  gateName     String?
+  verifiedById String?
+  deniedReason String?
+  allowed      Boolean @default(true)
 
   createdAt DateTime @default(now())
 
-  booking ShortletBooking @relation(fields: [bookingId], references: [id])
+  booking    ShortletBooking? @relation(fields: [bookingId], references: [id])
+  verifiedBy User?            @relation("ShortletAccessVerifier", fields: [verifiedById], references: [id])
+
+  @@index([bookingId, createdAt])
+  @@index([verifiedById])
 }
 
 model Vehicle {

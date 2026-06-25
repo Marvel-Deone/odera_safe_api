@@ -19,7 +19,7 @@ import {
 
 @Injectable()
 export class HeavyVehicleService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private reference(prefix: string) {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
@@ -146,7 +146,12 @@ export class HeavyVehicleService {
 
       if (dto.paymentOption === PaymentOption.PAY_NOW) {
         paymentResult = await this.chargePassWallet(tx, resident.id, amount, plateNumber)
-        paymentStatus = paymentResult.paid ? PaymentStatus.PAID : PaymentStatus.FAILED
+
+        if (!paymentResult.paid) {
+          throw new Error('INSUFFICIENT_BALANCE')
+        }
+
+        paymentStatus = PaymentStatus.PAID
       }
 
       const pass = await tx.heavyVehiclePass.create({
@@ -187,18 +192,25 @@ export class HeavyVehicleService {
         })
       }
 
-      if (dto.paymentOption === PaymentOption.PAY_NOW && paymentStatus === PaymentStatus.FAILED) {
-        await this.log(tx, {
-          estateId: resident.estateId,
-          action: 'HEAVY_VEHICLE_PAYMENT_FAILED',
-          description: 'Heavy vehicle pass payment failed due to insufficient wallet balance',
-          actorId: user.id,
-          actorRole: Role.RESIDENT,
-          metadata: { passId: pass.id, residentId: resident.id, amount },
-        })
-      }
-
       return pass
+    }).catch((err) => {
+      console.error('Heavy Vehicle Pass Creation Error:', err)
+
+      switch (err.message) {
+        case 'INSUFFICIENT_BALANCE':
+          return error(
+            'Insufficient Balance',
+            `Wallet balance is below ₦${amount}`,
+            HttpStatus.BAD_REQUEST,
+          )
+
+        default:
+          return error(
+            'Pass Request Failed',
+            'An unexpected error occurred while creating the pass request',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          )
+      }
     })
 
     return success(result, 'Heavy Vehicle Pass Requested', 'Heavy vehicle pass request submitted')

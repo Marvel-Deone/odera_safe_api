@@ -417,11 +417,23 @@ export class FinanceService {
 
       return { withdrawal, transaction, fee, netAmount }
     }).catch((err) => {
-      if (err.message === 'INSUFFICIENT_BALANCE') {
-        error('Insufficient Balance', 'Wallet balance is too low for this withdrawal', HttpStatus.BAD_REQUEST)
-      }
+      console.error('Withdrawal Request Error:', err)
 
-      throw err
+      switch (err.message) {
+        case 'INSUFFICIENT_BALANCE':
+          return error(
+            'Insufficient Balance',
+            `Wallet balance is too low for this withdrawal`,
+            HttpStatus.BAD_REQUEST,
+          )
+
+        default:
+          return error(
+            'Withdrawal Request Failed',
+            'Unable to process withdrawal request at this time',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          )
+      }
     })
 
     return success(
