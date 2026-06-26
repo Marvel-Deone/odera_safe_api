@@ -12,7 +12,7 @@ type PaystackResponse<T = any> = {
 export class PaystackService {
   private readonly baseUrl = 'https://api.paystack.co'
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(private readonly config: ConfigService) { }
 
   private get secretKey() {
     return this.config.get<string>('PAYSTACK_SECRET_KEY')
@@ -163,5 +163,36 @@ export class PaystackService {
       .digest('hex')
 
     return hash === signature
+  }
+
+  async getBanks(
+    country = 'nigeria',
+    currency = 'NGN',
+  ) {
+    return this.request<
+      {
+        id: number
+        name: string
+        code: string
+        slug: string
+      }[]
+    >(
+      `/bank?country=${country}&currency=${currency}`,
+      'GET',
+    )
+  }
+
+  async resolveAccountNumber(
+    accountNumber: string,
+    bankCode: string,
+  ) {
+    return this.request<{
+      account_number: string
+      account_name: string
+      bank_id: number
+    }>(
+      `/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+      'GET',
+    )
   }
 }

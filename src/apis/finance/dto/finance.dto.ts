@@ -10,6 +10,16 @@ import {
 } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 
+export class ResolveAccountDto {
+  @ApiProperty({ example: '23450987650' })
+  @IsString()
+  accountNumber!: string
+
+  @ApiProperty({ example: '092622' })
+  @IsString()
+  bankCode!: string
+}
+
 export class CreateLevyDto {
   @ApiProperty({ example: 'Monthly Service Levy' })
   @IsString()

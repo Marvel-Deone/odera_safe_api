@@ -1,3 +1,1573 @@
+// // // This is your Prisma schema file,
+// // // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// // // Get a free hosted Postgres database in seconds: `npx create-db`
+
+// generator client {
+//   provider = "prisma-client-js"
+//   // output   = "../generated/prisma"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+// }
+
+// enum GuardRole {
+//   GUARD
+//   SUPER_GUARD
+// }
+
+// enum Role {
+//   SUPER_ADMIN
+//   ADMIN
+//   RESIDENT
+//   GUARD
+// }
+
+// enum VisitorStatus {
+//   PENDING
+//   APPROVED
+//   DENIED
+//   CHECKED_IN
+//   CHECKED_OUT
+//   REVOKED
+//   EXPIRED
+// }
+
+// enum ResidentStatus {
+//   PENDING
+//   UNDER_REVIEW
+//   APPROVED
+//   REJECTED
+//   ACTIVE
+// }
+
+// enum KycStatus {
+//   NOT_SUBMITTED
+//   PENDING
+//   COMPLETED
+//   REJECTED
+// }
+
+// enum GateAction {
+//   CHECK_IN
+//   CHECK_OUT
+//   DENY
+// }
+
+// enum LogCategory {
+//   VISITOR
+//   STAFF
+//   VEHICLE
+//   SECURITY
+//   WALLET
+//   MAINTENANCE
+//   COMMUNITY
+//   SYSTEM
+// }
+
+// enum GateQueueStatus {
+//   WAITING
+//   APPROVED
+//   DENIED
+//   COMPLETED
+//   PROCESSED
+// }
+
+// enum ShiftType {
+//   DAY
+//   NIGHT
+//   STANDBY
+//   REST
+// }
+
+// enum ShiftStatus {
+//   SCHEDULED
+//   ONGOING
+//   COMPLETED
+//   MISSED
+//   CANCELLED
+// }
+
+// enum AttendanceStatus {
+//   PRESENT
+//   LATE
+//   ABSENT
+//   HALF_DAY
+//   OFF_DUTY
+// }
+
+// enum ShiftSwapReason {
+//   PERSONAL_EMERGENCY
+//   MEDICAL
+//   FAMILY
+//   FATIGUE
+//   OTHER
+// }
+
+// enum ShiftSwapStatus {
+//   PENDING
+//   APPROVED
+//   REJECTED
+//   CANCELLED
+// }
+
+// enum GuardSOSCategory {
+//   INTRUDER
+//   PHYSICAL_CONFRONTATION
+//   ARMED_THREAT
+//   SUSPECT_FLEEING
+//   PERSONAL_INJURY
+//   CIVIL_DISTURBANCE
+// }
+
+// enum GuardSOSStatus {
+//   ACTIVE
+//   ACKNOWLEDGED
+//   RESOLVED
+//   CANCELLED
+// }
+
+// enum IncidentSeverity {
+//   LOW
+//   MEDIUM
+//   HIGH
+//   CRITICAL
+// }
+
+// enum IncidentStatus {
+//   OPEN
+//   UNDER_REVIEW
+//   ESCALATED
+//   ASSIGNED
+//   IN_PROGRESS
+//   RESOLVED
+//   OVERDUE
+//   BREACHED
+// }
+
+// enum IncidentCategory {
+//   SECURITY
+//   MAINTENANCE
+//   ACCESS_CONTROL
+//   COMMUNITY
+//   DELIVERY
+//   PARKING
+//   FACILITY
+//   EMERGENCY
+//   OTHER
+// }
+
+// enum AlertStatus {
+//   ACTIVE
+//   RESOLVED
+// }
+
+// enum TicketPriority {
+//   P1_CRITICAL
+//   P2_URGENT
+//   P3_ROUTINE
+// }
+
+// enum TicketStatus {
+//   OPEN
+//   ASSIGNED
+//   IN_PROGRESS
+//   RESOLVED
+//   OVERDUE
+//   BREACHED
+// }
+
+// enum AnnouncementCategory {
+//   OFFICIAL
+//   SECURITY
+//   COMMUNITY
+//   MAINTENANCE
+//   FINANCE
+// }
+
+// enum AnnouncementAudience {
+//   ALL
+//   RESIDENTS
+//   GUARDS
+//   ADMINS
+// }
+
+// enum ChatRoomType {
+//   BLOCK
+//   BROADCAST
+// }
+
+// enum PollAudience {
+//   ALL_RESIDENTS
+//   LEVY_CLEARED_ONLY
+// }
+
+// enum LevyStatus {
+//   PENDING
+//   PARTIALLY_PAID
+//   PAID
+//   OVERDUE
+// }
+
+// enum WalletTransactionType {
+//   FUNDING
+//   LEVY_PAYMENT
+//   VEHICLE_REGISTRATION
+//   HEAVY_VEHICLE_PASS
+//   WITHDRAWAL
+//   REFUND
+// }
+
+// enum WalletTransactionStatus {
+//   PENDING
+//   SUCCESS
+//   FAILED
+// }
+
+// enum WithdrawalStatus {
+//   PENDING
+//   APPROVED
+//   REJECTED
+//   PAID
+// }
+
+// enum ResidentReviewAction {
+//   APPROVE
+//   REJECT
+// }
+
+// enum ShortletStatus {
+//   PENDING
+//   ACTIVE
+//   SUSPENDED
+//   EXPIRED
+// }
+
+// enum BookingStatus {
+//   PENDING
+//   ACTIVE
+//   CHECKED_IN
+//   COMPLETED
+//   EXPIRED
+//   CANCELLED
+// }
+
+// enum AccessType {
+//   ENTRY
+//   EXIT
+// }
+
+// enum VehicleStatus {
+//   PENDING
+//   ACTIVE
+//   REJECTED
+//   PAYMENT_FAILED
+//   SUSPENDED
+// }
+
+// enum AccessDirection {
+//   ENTRY
+//   EXIT
+// }
+
+// enum HeavyVehicleRequestStatus {
+//   PENDING
+//   APPROVED
+//   REJECTED
+//   CANCELLED
+// }
+
+// enum PaymentOption {
+//   PAY_NOW
+//   PAY_ON_ARRIVAL
+// }
+
+// enum PaymentStatus {
+//   PENDING
+//   PAID
+//   FAILED
+// }
+
+// // model EstateSettings {
+// //   id               String  @id @default(uuid())
+// //   estateId         String  @unique
+// //   levyAmount       Int
+// //   currency         String
+// //   timezone         String
+// //   sosResponseSLA   Int
+
+// //   maintenanceP1    Int
+// //   maintenanceP2    Int
+// //   maintenanceP3    Int
+
+// //   estate Estate @relation(fields: [estateId], references: [id])
+// // }
+
+// model Estate {
+//   id                        String                     @id @default(uuid())
+//   name                      String
+//   address                   String
+//   totalHouses               Int
+//   createdAt                 DateTime                   @default(now())
+//   settings                  Json?
+//   residents                 Resident[]
+//   users                     User[]
+//   visitors                  Visitor[]
+//   activityLogs              ActivityLog[]
+//   guards                    Guard[]
+//   gateQueues                GateQueue[]
+//   guardShifts               GuardShift[]
+//   patrolCheckpoints         PatrolCheckpoint[]
+//   patrolScans               PatrolScan[]
+//   shiftSwapRequests         ShiftSwapRequest[]
+//   guardSOSs                 GuardSOS[]
+//   incidents                 Incident[]
+//   guardPerformanceSnapshots GuardPerformanceSnapshot[]
+//   guardLocations            GuardLocation[]
+//   // maintenanceTickets        MaintenanceTicket[]
+//   announcements             Announcement[]
+//   chatRooms                 ChatRoom[]
+//   polls                     Poll[]
+//   committees                Committee[]
+//   levies                    Levy[]
+//   estateSettings            EstateSettings?
+//   streets                   EstateStreet[]
+//   heavyVehicleCategories    HeavyVehicleCategory[]
+// }
+
+// model User {
+//   id String @id @default(uuid())
+
+//   email       String   @unique
+//   password    String
+//   role        Role
+//   first_login Boolean  @default(true)
+//   createdAt   DateTime @default(now())
+
+//   estateId              String
+//   estate                Estate                @relation(fields: [estateId], references: [id])
+//   resident              Resident?
+//   gateLogs              GateLog[]
+//   guard                 Guard?
+//   assignedIncidents     Incident[]            @relation("AssignedIncidentUser")
+//   announcements         Announcement[]
+//   announcementComments  AnnouncementComment[]
+//   announcementLikes     AnnouncementLike[]
+//   chatMessages          ChatMessage[]
+//   polls                 Poll[]
+//   pollVotes             PollVote[]
+//   committeeMembers      CommitteeMember[]
+//   createdLevies         Levy[]
+//   approvedWithdrawals   WithdrawalRequest[]   @relation("WithdrawalApprover")
+//   approvedVehicles      Vehicle[]             @relation("VehicleApprover")
+//   approvedHeavyVehicles HeavyVehiclePass[]    @relation("HeavyVehicleApprover")
+// }
+
+// model Resident {
+//   id String @id @default(uuid())
+
+//   first_name String
+//   last_name  String
+//   email      String  @unique
+//   phone      String
+//   dob        String?
+//   gender     String?
+//   estateId   String
+
+//   userId String? @unique
+
+//   status          ResidentStatus @default(PENDING)
+//   kycStatus       KycStatus      @default(NOT_SUBMITTED)
+//   rejectionReason String?
+
+//   house_no        String
+//   block           String
+//   home_address    String?
+//   state_of_origin String?
+//   lga             String?
+
+//   id_type           String?
+//   id_no             String?
+//   id_document_front String?
+//   id_document_back  String?
+//   nin               String?
+//   bvn               String?
+//   alternate_phone   String?
+
+//   next_of_kin_name         String?
+//   next_of_kin_phone        String?
+//   next_of_kin_email        String?
+//   next_of_kin_relationship String?
+
+//   guarantor_name                 String?
+//   guarantor_occupation           String?
+//   guarantor_work_address         String?
+//   guarantor_id_no                String?
+//   guarantor_id_relationship      String?
+//   signed_guarantor_letter_upload String?
+
+//   vehicle_plate_no String?
+//   vehicle_make     String?
+//   vehicle_color    String?
+
+//   proof_of_address_upload String?
+//   passport                String?
+//   tenancy_ownership_doc   String?
+
+//   wallet_pin String?
+
+//   ndprConsentDataProcessing Boolean   @default(false)
+//   ndprConsentIdentity       Boolean   @default(false)
+//   ndprConsentThirdParty     Boolean   @default(false)
+//   ndprConsentGivenAt        DateTime?
+
+//   levyCleared        Boolean @default(false)
+//   profileDeclaration Boolean @default(false)
+
+//   approvedAt DateTime?
+//   rejectedAt DateTime?
+
+//   createdAt DateTime @default(now())
+
+//   estate             Estate              @relation(fields: [estateId], references: [id])
+//   user               User?               @relation(fields: [userId], references: [id])
+//   visitors           Visitor[]
+//   // maintenanceTickets MaintenanceTicket[]
+//   incidents          Incident[]
+//   wallet             Wallet?
+//   levyAssignments    LevyAssignment[]
+//   withdrawalRequests WithdrawalRequest[]
+//   shortletProperties ShortletProperty[]
+//   vehicles           Vehicle[]
+//   heavyVehiclePasses HeavyVehiclePass[]
+// }
+
+// model EstateStreet {
+//   id        String   @id @default(uuid())
+//   estateId  String
+//   name      String
+//   createdAt DateTime @default(now())
+
+//   estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+
+//   @@unique([estateId, name])
+//   @@index([estateId])
+// }
+
+// model EstateSettings {
+//   id                     String   @id @default(uuid())
+//   estateId               String   @unique
+//   freeVehicleLimit       Int      @default(1)
+//   vehicleRegistrationFee Decimal  @default(0)
+//   createdAt              DateTime @default(now())
+//   updatedAt              DateTime @updatedAt
+
+//   estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+// }
+
+// model HeavyVehicleCategory {
+//   id          String   @id @default(uuid())
+//   estateId    String
+//   name        String
+//   description String?
+//   amount      Decimal
+//   active      Boolean  @default(true)
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   estate Estate             @relation(fields: [estateId], references: [id], onDelete: Cascade)
+//   passes HeavyVehiclePass[]
+
+//   @@unique([estateId, name])
+//   @@index([estateId, active])
+// }
+
+// model Guard {
+//   id       String @id @default(uuid())
+//   userId   String @unique
+//   estateId String
+
+//   role GuardRole
+
+//   full_name String
+//   phone     String
+//   email     String?
+
+//   zone_assignment String?
+//   shift_pattern   String?
+//   duty_cycle      String?
+
+//   resumption_date DateTime?
+
+//   // IDENTITY
+//   government_id_type String?
+//   government_id_no   String?
+//   nin                String?
+
+//   height               String?
+//   build                String?
+//   distinguishing_marks String?
+
+//   id_document_url String?
+
+//   // NEXT OF KIN
+//   nok_name         String?
+//   nok_phone        String?
+//   nok_relationship String?
+
+//   // GUARANTOR
+//   guarantor_name         String?
+//   guarantor_phone        String?
+//   guarantor_occupation   String?
+//   guarantor_work_address String?
+//   guarantor_nin          String?
+//   guarantor_relationship String?
+//   guarantor_letter_url   String?
+
+//   // CERTIFICATIONS
+//   first_aid         Boolean @default(false)
+//   fire_safety       Boolean @default(false)
+//   qr_gate_ops       Boolean @default(false)
+//   biometric_capture Boolean @default(false)
+//   crisis_response   Boolean @default(false)
+//   female_screening  Boolean @default(false)
+//   self_defence      Boolean @default(false)
+//   cctv_operation    Boolean @default(false)
+
+//   // PAYROLL
+//   salary_band    String?
+//   bank_name      String?
+//   account_number String?
+//   account_name   String?
+
+//   passport_photo_url String?
+
+//   is_active Boolean @default(true)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   estate Estate @relation(fields: [estateId], references: [id])
+//   user   User   @relation(fields: [userId], references: [id])
+
+//   assignedIncidents Incident[] @relation("AssignedIncidentGuard")
+//   reportedIncidents Incident[] @relation("ReportedIncidents")
+
+//   gateLogs                  GateLog[]
+//   guardShifts               GuardShift[]
+//   guardAttendances          GuardAttendance[]
+//   patrolScans               PatrolScan[]
+//   shiftSwapRequests         ShiftSwapRequest[]
+//   SwapRequester             ShiftSwapRequest[]         @relation("SwapRequester")
+//   SwapRecipient             ShiftSwapRequest[]         @relation("SwapRecipient")
+//   guardSOSs                 GuardSOS[]
+//   patrolAlerts              PatrolAlert[]
+//   missedCheckpointAlerts    MissedCheckpointAlert[]
+//   guardPerformanceSnapshots GuardPerformanceSnapshot[]
+//   locations                 GuardLocation[]
+//   // maintenanceTickets        MaintenanceTicket[]
+// }
+
+// model Visitor {
+//   id String @id @default(uuid())
+
+//   estateId   String
+//   residentId String
+
+//   name     String
+//   phone    String?
+//   purpose  String?
+//   plate_no String?
+
+//   visit_date DateTime @default(now())
+
+//   // PASS CONTROL
+//   total_entries     Int
+//   remaining_entries Int
+
+//   status VisitorStatus @default(PENDING)
+
+//   // PASS SECURITY
+//   passCode  String   @unique
+//   qr_code   String?
+//   sms_code  String   @unique
+//   expiresAt DateTime
+
+//   // GPS LOCK (for your future feature)
+//   gps_lat Float?
+//   gps_lng Float?
+
+//   // BIOMETRIC FLAG
+//   biometric_enabled  Boolean @default(false)
+//   biometric_fee_paid Boolean @default(false)
+
+//   // TRACKING
+//   checkedInAt  DateTime?
+//   checkedOutAt DateTime?
+
+//   createdAt DateTime @default(now())
+
+//   estate   Estate   @relation(fields: [estateId], references: [id])
+//   resident Resident @relation(fields: [residentId], references: [id])
+
+//   gateLogs         GateLog[]
+//   visitorLocations VisitorLocation[]
+//   trackingSessions TrackingSession[]
+//   gateQueues       GateQueue[]
+// }
+
+// model TrackingSession {
+//   id String @id @default(cuid())
+
+//   visitorId String
+//   visitor   Visitor @relation(fields: [visitorId], references: [id])
+
+//   token String @unique
+
+//   isActive Boolean @default(true)
+
+//   startedAt DateTime  @default(now())
+//   endedAt   DateTime?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   locations      VisitorLocation[]
+//   currentLat     Float?
+//   currentLng     Float?
+//   lastLocationAt DateTime?
+
+//   @@index([visitorId])
+//   @@index([isActive])
+//   @@index([visitorId, isActive])
+// }
+
+// model VisitorLocation {
+//   id String @id @default(cuid())
+
+//   trackingSessionId String
+
+//   trackingSession TrackingSession @relation(fields: [trackingSessionId], references: [id])
+
+//   latitude  Float
+//   longitude Float
+//   accuracy  Float?
+
+//   createdAt DateTime @default(now())
+//   visitor   Visitor? @relation(fields: [visitorId], references: [id])
+//   visitorId String?
+
+//   @@index([visitorId])
+//   @@index([createdAt])
+//   @@index([trackingSessionId, createdAt])
+// }
+
+// model GateLog {
+//   id        String     @id @default(uuid())
+//   visitorId String
+//   guardId   String
+//   action    GateAction
+
+//   createdAt DateTime @default(now())
+
+//   visitor Visitor @relation(fields: [visitorId], references: [id])
+//   guard   Guard   @relation(fields: [guardId], references: [id])
+//   user    User?   @relation(fields: [userId], references: [id])
+//   userId  String?
+// }
+
+// model ActivityLog {
+//   id String @id @default(uuid())
+
+//   estateId String
+
+//   category LogCategory
+//   action   String
+
+//   description String
+
+//   actorId   String?
+//   actorRole Role?
+
+//   metadata Json?
+
+//   createdAt DateTime @default(now())
+
+//   estate Estate @relation(fields: [estateId], references: [id])
+// }
+
+// model GateQueue {
+//   id String @id @default(uuid())
+
+//   estateId  String
+//   visitorId String
+
+//   status GateQueueStatus @default(WAITING)
+
+//   scannedAt   DateTime  @default(now())
+//   processedAt DateTime?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   estate  Estate  @relation(fields: [estateId], references: [id])
+//   visitor Visitor @relation(fields: [visitorId], references: [id])
+
+//   @@unique([visitorId, status])
+// }
+
+// model GuardShift {
+//   id       String @id @default(uuid())
+//   guardId  String
+//   estateId String
+
+//   // Date this shift starts
+//   shiftDate DateTime
+
+//   // Shift configuration
+//   shiftType ShiftType // DAY, NIGHT, STANDBY, REST
+//   startTime DateTime?
+//   endTime   DateTime?
+//   zone      String?
+
+//   // Status
+//   status ShiftStatus @default(SCHEDULED)
+
+//   // Optional notes
+//   notes String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
+//   estate Estate @relation(fields: [estateId], references: [id])
+
+//   attendance             GuardAttendance?
+//   patrolScans            PatrolScan[]
+//   requesterShiftRequests ShiftSwapRequest[] @relation("RequesterShift")
+//   targetShiftRequests    ShiftSwapRequest[] @relation("TargetShift")
+//   shiftSwapRequests      ShiftSwapRequest[]
+
+//   @@index([guardId, shiftDate])
+//   @@index([estateId, shiftDate])
+// }
+
+// model GuardAttendance {
+//   id      String @id @default(uuid())
+//   shiftId String @unique
+//   guardId String
+
+//   // Clock-in
+//   clockInAt        DateTime?
+//   clockInLatitude  Float?
+//   clockInLongitude Float?
+//   clockInPhotoUrl  String?
+
+//   // Clock-out
+//   clockOutAt        DateTime?
+//   clockOutLatitude  Float?
+//   clockOutLongitude Float?
+//   clockOutPhotoUrl  String?
+
+//   // Operational notes
+//   handoverNotes String?
+
+//   // Metrics
+//   minutesLate      Int              @default(0)
+//   minutesWorked    Int              @default(0)
+//   overtimeMinutes  Int              @default(0)
+//   attendanceStatus AttendanceStatus @default(PRESENT)
+
+//   status AttendanceStatus
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   shift GuardShift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+//   guard Guard      @relation(fields: [guardId], references: [id], onDelete: Cascade)
+
+//   @@index([guardId, clockInAt])
+// }
+
+// model PatrolCheckpoint {
+//   id       String @id @default(uuid())
+//   estateId String
+
+//   name        String
+//   qrCode      String?
+//   zone        String
+//   description String?
+
+//   latitude  Float?
+//   longitude Float?
+
+//   requiredFrequency Int // e.g. every 2 hours
+//   isActive          Boolean @default(true)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   estate Estate @relation(fields: [estateId], references: [id])
+
+//   scans                  PatrolScan[]
+//   patrolAlerts           PatrolAlert[]
+//   missedCheckpointAlerts MissedCheckpointAlert[]
+
+//   @@index([estateId, zone])
+// }
+
+// model PatrolScan {
+//   id           String  @id @default(uuid())
+//   guardId      String
+//   checkpointId String
+//   shiftId      String?
+//   estateId     String
+
+//   scannedAt DateTime @default(now())
+
+//   latitude  Float?
+//   longitude Float?
+
+//   // Validation
+//   isValid          Boolean @default(true)
+//   distanceFromSite Float? // meters
+//   notes            String?
+
+//   // Relations
+//   guard      Guard            @relation(fields: [guardId], references: [id], onDelete: Cascade)
+//   checkpoint PatrolCheckpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+//   shift      GuardShift?      @relation(fields: [shiftId], references: [id])
+//   estate     Estate           @relation(fields: [estateId], references: [id])
+
+//   @@index([guardId, scannedAt])
+//   @@index([checkpointId, scannedAt])
+// }
+
+// model PatrolAlert {
+//   id           String  @id @default(uuid())
+//   estateId     String
+//   checkpointId String?
+//   guardId      String?
+//   type         String
+//   message      String
+//   resolved     Boolean @default(false)
+
+//   createdAt DateTime @default(now())
+
+//   checkpoint PatrolCheckpoint? @relation(fields: [checkpointId], references: [id])
+//   guard      Guard?            @relation(fields: [guardId], references: [id])
+// }
+
+// model ShiftSwapRequest {
+//   id String @id @default(uuid())
+
+//   requesterGuardId String
+//   targetGuardId    String
+
+//   requesterShiftId String
+//   targetShiftId    String
+
+//   estateId String
+
+//   reason  ShiftSwapReason
+//   details String?
+
+//   status ShiftSwapStatus @default(PENDING)
+
+//   reviewedBy String? // userId of Super-Guard/Admin
+//   reviewedAt DateTime?
+//   reviewNote String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   requester Guard @relation("SwapRequester", fields: [requesterGuardId], references: [id], onDelete: Cascade)
+
+//   target Guard @relation("SwapRecipient", fields: [targetGuardId], references: [id], onDelete: Cascade)
+
+//   requesterShift GuardShift @relation("RequesterShift", fields: [requesterShiftId], references: [id], onDelete: Cascade)
+
+//   targetShift GuardShift @relation("TargetShift", fields: [targetShiftId], references: [id], onDelete: Cascade)
+
+//   estate       Estate      @relation(fields: [estateId], references: [id])
+//   guard        Guard?      @relation(fields: [guardId], references: [id])
+//   guardId      String?
+//   guardShift   GuardShift? @relation(fields: [guardShiftId], references: [id])
+//   guardShiftId String?
+
+//   @@index([estateId, status])
+//   @@index([requesterGuardId, status])
+//   @@index([targetGuardId, status])
+// }
+
+// model GuardSOS {
+//   id String @id @default(uuid())
+
+//   guardId  String
+//   estateId String
+
+//   category GuardSOSCategory
+//   zone     String?
+//   message  String?
+
+//   latitude  Float?
+//   longitude Float?
+
+//   status GuardSOSStatus @default(ACTIVE)
+
+//   acknowledgedAt DateTime?
+//   acknowledgedBy String?
+
+//   resolvedBy     String?
+//   resolvedAt     DateTime?
+//   resolutionNote String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
+//   estate Estate @relation(fields: [estateId], references: [id])
+
+//   @@index([guardId, createdAt])
+//   @@index([status, createdAt])
+// }
+
+// model Incident {
+//   id       String @id @default(uuid())
+//   estateId String
+
+//   reportedByResidentId String?
+//   reportedByGuardId    String?
+
+//   title       String
+//   category    IncidentCategory
+//   description String
+//   severity    IncidentSeverity
+//   priority    TicketPriority?
+
+//   photos     Json?
+//   occurredAt DateTime @default(now())
+
+//   status        IncidentStatus @default(OPEN)
+//   adminNotes    String?
+//   materialsUsed String?
+//   timeTaken     String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   location String?
+
+//   beforePhotos Json?
+//   afterPhotos  Json?
+
+//   assignedToGuardId String?
+//   assignedToUserId  String?
+
+//   slaDeadline DateTime?
+
+//   startedAt   DateTime?
+//   completedAt DateTime?
+
+//   completionNote String?
+//   residentRating Int?
+
+//   estate Estate @relation(fields: [estateId], references: [id])
+
+//   reportedByResident Resident? @relation(fields: [reportedByResidentId], references: [id])
+
+//   reportedByGuard Guard? @relation("ReportedIncidents", fields: [reportedByGuardId], references: [id])
+
+//   assignedToGuard Guard? @relation("AssignedIncidentGuard", fields: [assignedToGuardId], references: [id])
+
+//   assignedToUser User? @relation("AssignedIncidentUser", fields: [assignedToUserId], references: [id])
+
+//   @@index([estateId])
+//   @@index([category])
+// }
+
+// model MissedCheckpointAlert {
+//   id String @id @default(cuid())
+
+//   estateId String
+
+//   checkpointId String
+//   checkpoint   PatrolCheckpoint @relation(fields: [checkpointId], references: [id])
+
+//   guardId String?
+//   guard   Guard?  @relation(fields: [guardId], references: [id])
+
+//   expectedAt DateTime
+//   resolvedAt DateTime?
+
+//   status AlertStatus @default(ACTIVE)
+
+//   createdAt DateTime @default(now())
+// }
+
+// model GuardPerformanceSnapshot {
+//   id String @id @default(uuid())
+
+//   guardId  String
+//   estateId String
+
+//   periodStart DateTime
+//   periodEnd   DateTime
+
+//   attendanceScore Float @default(0)
+//   patrolScore     Float @default(0)
+//   sosScore        Float @default(0)
+//   incidentScore   Float @default(0)
+//   swapScore       Float @default(0)
+//   penaltyScore    Float @default(0)
+
+//   totalScore Float @default(0)
+//   rank       Int?
+
+//   badge String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
+//   estate Estate @relation(fields: [estateId], references: [id])
+
+//   @@index([guardId, periodStart])
+//   @@index([estateId, periodStart])
+//   @@index([totalScore])
+// }
+
+// model GuardLocation {
+//   id String @id @default(uuid())
+
+//   guardId  String
+//   estateId String
+
+//   latitude  Float
+//   longitude Float
+
+//   speed   Float?
+//   heading Float?
+
+//   batteryLevel Int?
+
+//   recordedAt DateTime @default(now())
+
+//   guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
+//   estate Estate @relation(fields: [estateId], references: [id])
+
+//   @@index([guardId, recordedAt])
+//   @@index([estateId, recordedAt])
+// }
+
+// model Announcement {
+//   id String @id @default(uuid())
+
+//   estateId String
+//   authorId String
+
+//   title String
+//   body  String
+
+//   category AnnouncementCategory
+//   audience AnnouncementAudience
+
+//   isPinned Boolean @default(false)
+//   sendSms  Boolean @default(false)
+
+//   likesCount    Int @default(0)
+//   commentsCount Int @default(0)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   estate Estate @relation(fields: [estateId], references: [id])
+//   author User   @relation(fields: [authorId], references: [id])
+
+//   comments AnnouncementComment[]
+//   likes    AnnouncementLike[]
+
+//   @@index([estateId])
+//   @@index([createdAt])
+// }
+
+// model AnnouncementComment {
+//   id String @id @default(uuid())
+
+//   announcementId String
+//   userId         String
+
+//   comment String
+
+//   createdAt DateTime @default(now())
+
+//   announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+//   user         User         @relation(fields: [userId], references: [id])
+
+//   @@index([announcementId])
+// }
+
+// model AnnouncementLike {
+//   id String @id @default(uuid())
+
+//   announcementId String
+//   userId         String
+
+//   createdAt DateTime @default(now())
+
+//   announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+//   user         User         @relation(fields: [userId], references: [id])
+
+//   @@unique([announcementId, userId])
+// }
+
+// model ChatRoom {
+//   id String @id @default(uuid())
+
+//   estateId String
+
+//   name String
+//   type ChatRoomType
+
+//   block String?
+
+//   createdAt DateTime @default(now())
+
+//   estate Estate @relation(fields: [estateId], references: [id])
+
+//   messages ChatMessage[]
+
+//   @@index([estateId, block])
+// }
+
+// model ChatMessage {
+//   id String @id @default(uuid())
+
+//   roomId   String
+//   senderId String
+
+//   message String
+
+//   createdAt DateTime @default(now())
+
+//   room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+//   sender User @relation(fields: [senderId], references: [id])
+
+//   @@index([roomId])
+//   @@index([senderId])
+//   @@index([createdAt])
+// }
+
+// model ChatReadReceipt {
+//   id String @id @default(uuid())
+
+//   userId String
+//   roomId String
+
+//   lastReadAt DateTime
+
+//   @@unique([userId, roomId])
+// }
+
+// model Poll {
+//   id String @id @default(uuid())
+
+//   estateId    String
+//   createdById String
+
+//   question String
+
+//   audience PollAudience @default(ALL_RESIDENTS)
+//   isClosed Boolean      @default(false)
+
+//   expiresAt DateTime?
+
+//   createdAt DateTime @default(now())
+
+//   estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+
+//   createdBy User @relation(fields: [createdById], references: [id])
+
+//   options PollOption[]
+//   votes   PollVote[]
+
+//   @@index([estateId])
+// }
+
+// model PollOption {
+//   id String @id @default(uuid())
+
+//   pollId String
+
+//   text String
+
+//   poll Poll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+//   votes PollVote[]
+
+//   @@index([pollId])
+// }
+
+// model PollVote {
+//   id String @id @default(uuid())
+
+//   pollId   String
+//   optionId String
+
+//   userId String
+
+//   createdAt DateTime @default(now())
+
+//   poll Poll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+//   option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   @@unique([pollId, userId])
+//   @@index([pollId])
+//   @@index([userId])
+// }
+
+// model Committee {
+//   id          String   @id @default(uuid())
+//   estateId    String
+//   name        String
+//   description String?
+//   createdAt   DateTime @default(now())
+
+//   estate  Estate            @relation(fields: [estateId], references: [id], onDelete: Cascade)
+//   members CommitteeMember[]
+// }
+
+// model CommitteeMember {
+//   id          String   @id @default(uuid())
+//   committeeId String
+//   userId      String
+//   createdAt   DateTime @default(now())
+
+//   committee Committee @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+//   user      User      @relation(fields: [userId], references: [id])
+
+//   @@unique([committeeId, userId])
+// }
+
+// model Levy {
+//   id String @id @default(uuid())
+
+//   estateId    String
+//   createdById String
+
+//   title       String
+//   description String?
+
+//   amount Decimal
+
+//   dueDate DateTime
+
+//   createdAt DateTime @default(now())
+
+//   estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+
+//   createdBy User @relation(fields: [createdById], references: [id])
+
+//   assignments LevyAssignment[]
+
+//   @@index([estateId])
+// }
+
+// model LevyAssignment {
+//   id String @id @default(uuid())
+
+//   levyId     String
+//   residentId String
+
+//   amount Decimal
+
+//   status LevyStatus @default(PENDING)
+
+//   paidAmount Decimal @default(0)
+
+//   paidAt DateTime?
+
+//   levy Levy @relation(fields: [levyId], references: [id], onDelete: Cascade)
+
+//   resident           Resident            @relation(fields: [residentId], references: [id])
+//   walletTransactions WalletTransaction[]
+
+//   @@unique([levyId, residentId])
+//   @@index([residentId])
+// }
+
+// model Wallet {
+//   id String @id @default(uuid())
+
+//   residentId String @unique
+
+//   balance Decimal @default(0)
+
+//   paystackCustomerCode String?
+
+//   virtualAccountNumber String?
+//   virtualAccountName   String?
+//   virtualBankName      String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   resident Resident @relation(fields: [residentId], references: [id])
+
+//   transactions WalletTransaction[]
+// }
+
+// model WalletTransaction {
+//   id String @id @default(uuid())
+
+//   walletId String
+
+//   type   WalletTransactionType
+//   status WalletTransactionStatus
+
+//   amount Decimal
+
+//   levyAssignmentId String?
+
+//   reference String? @unique
+
+//   description String?
+
+//   createdAt DateTime @default(now())
+
+//   wallet Wallet @relation(fields: [walletId], references: [id])
+
+//   levyAssignment LevyAssignment? @relation(fields: [levyAssignmentId], references: [id])
+
+//   @@index([walletId])
+// }
+
+// model WithdrawalRequest {
+//   id String @id @default(uuid())
+
+//   residentId String
+
+//   amount Decimal
+
+//   bankName      String
+//   accountName   String
+//   accountNumber String
+
+//   status WithdrawalStatus @default(PENDING)
+
+//   rejectionReason String?
+
+//   approvedById String?
+
+//   createdAt DateTime @default(now())
+
+//   approvedAt DateTime?
+//   paidAt     DateTime?
+
+//   resident Resident @relation(fields: [residentId], references: [id])
+
+//   approvedBy User? @relation("WithdrawalApprover", fields: [approvedById], references: [id])
+
+//   @@index([residentId])
+//   @@index([status])
+// }
+
+// model ShortletProperty {
+//   id         String @id @default(uuid())
+//   residentId String
+
+//   platform   String
+//   listingUrl String
+
+//   bedrooms  Int
+//   maxGuests Int
+
+//   annualFeePaid      Boolean   @default(false)
+//   annualFeeExpiresAt DateTime?
+
+//   regulationsAccepted Boolean
+
+//   status ShortletStatus
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   resident Resident @relation(fields: [residentId], references: [id])
+
+//   bookings ShortletBooking[]
+// }
+
+// model ShortletBooking {
+//   id String @id @default(uuid())
+
+//   propertyId String
+
+//   guestName   String
+//   guestPhone  String
+//   nationality String
+
+//   guestCount Int
+
+//   platform String
+
+//   checkInDate  DateTime
+//   checkOutDate DateTime
+
+//   qrCode  String?
+//   smsCode String
+
+//   biometricRequired Boolean @default(false)
+
+//   status BookingStatus
+
+//   createdAt DateTime @default(now())
+
+//   property ShortletProperty @relation(fields: [propertyId], references: [id])
+
+//   logs ShortletAccessLog[]
+// }
+
+// model ShortletAccessLog {
+//   id String @id @default(uuid())
+
+//   bookingId String
+
+//   type AccessType
+//   // ENTRY | EXIT
+
+//   gateId String?
+
+//   createdAt DateTime @default(now())
+
+//   booking ShortletBooking @relation(fields: [bookingId], references: [id])
+// }
+
+// model Vehicle {
+//   id String @id @default(uuid())
+
+//   residentId String
+
+//   plateNumber String @unique
+
+//   vehicleType String
+
+//   make  String
+//   model String?
+
+//   color String
+//   year  Int
+
+//   registrationDocUrl String
+//   vehiclePhotoUrl    String
+
+//   status VehicleStatus
+
+//   approvedAt      DateTime?
+//   approvedById    String?
+//   rejectionReason String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   resident   Resident @relation(fields: [residentId], references: [id])
+//   approvedBy User?    @relation("VehicleApprover", fields: [approvedById], references: [id])
+
+//   logs VehicleAccessLog[]
+// }
+
+// model VehicleAccessLog {
+//   id String @id @default(uuid())
+
+//   vehicleId String
+
+//   plateNumber String
+
+//   gateName String
+
+//   direction AccessDirection
+//   // ENTRY | EXIT
+
+//   capturedAt DateTime @default(now())
+
+//   vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+
+//   @@index([vehicleId, capturedAt])
+//   @@index([plateNumber])
+// }
+
+// model HeavyVehiclePass {
+//   id                     String @id @default(uuid())
+//   residentId             String
+//   heavyVehicleCategoryId String
+
+//   driverName         String
+//   driverPhone        String
+//   plateNumber        String
+//   vehicleDescription String
+
+//   entryDate DateTime
+//   exitDate  DateTime
+
+//   paymentOption PaymentOption
+//   amount        Decimal
+//   status        HeavyVehicleRequestStatus @default(PENDING)
+//   paymentStatus PaymentStatus             @default(PENDING)
+
+//   approvedById    String?
+//   approvedAt      DateTime?
+//   rejectionReason String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   resident             Resident                @relation(fields: [residentId], references: [id])
+//   heavyVehicleCategory HeavyVehicleCategory    @relation(fields: [heavyVehicleCategoryId], references: [id])
+//   approvedBy           User?                   @relation("HeavyVehicleApprover", fields: [approvedById], references: [id])
+//   logs                 HeavyVehicleAccessLog[]
+
+//   @@index([residentId, status])
+//   @@index([heavyVehicleCategoryId])
+//   @@index([plateNumber])
+// }
+
+// model HeavyVehicleAccessLog {
+//   id                 String          @id @default(uuid())
+//   heavyVehiclePassId String
+//   gateName           String
+//   direction          AccessDirection
+//   capturedAt         DateTime        @default(now())
+
+//   heavyVehiclePass HeavyVehiclePass @relation(fields: [heavyVehiclePassId], references: [id])
+
+//   @@index([heavyVehiclePassId, capturedAt])
+// }
+
+// // model SmsLog {
+// //   id String @id @default(uuid())
+
+// //   phone   String
+// //   message String
+
+// //   status SmsStatus
+
+// //   providerResponse Json?
+
+// //   createdAt DateTime @default(now())
+// // }
+
+// // VISITOR_SCAN_FAILED
+
+
 // // This is your Prisma schema file,
 // // learn more about it in the docs: https://pris.ly/d/prisma-schema
 

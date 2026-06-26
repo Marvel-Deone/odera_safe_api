@@ -89,14 +89,23 @@ async function main() {
   if (!existingAdmin) {
     const hashedPassword = await bcrypt.hash("Admin@123", 10)
 
-    await prisma.user.create({
-      data: {
-        email: "admin@oderasafe.com",
-        password: hashedPassword,
-        role: Role.SUPER_ADMIN,
-        first_login: true,
-        estateId: estate.id,
-      }
+    await prisma.user.createMany({
+      data: [
+        {
+          email: "superadmin@oderasafe.com",
+          password: hashedPassword,
+          role: Role.SUPER_ADMIN,
+          first_login: true,
+          estateId: estate.id,
+        },
+        {
+          email: "admin@oderasafe.com",
+          password: hashedPassword,
+          role: Role.ADMIN,
+          first_login: true,
+          estateId: estate.id,
+        }
+      ]
     })
 
     console.log("Super Admin created")

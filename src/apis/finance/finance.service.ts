@@ -75,6 +75,33 @@ export class FinanceService {
     return { user, resident: user.resident, wallet }
   }
 
+  async getBanks() {
+    const banks = await this.paystack.getBanks()
+
+    return success(
+      banks.data,
+      'Banks',
+      'Banks fetched successfully',
+    )
+  }
+
+  async resolveAccountNumber(
+    accountNumber: string,
+    bankCode: string,
+  ) {
+    const account =
+      await this.paystack.resolveAccountNumber(
+        accountNumber,
+        bankCode,
+      )
+
+    return success(
+      account.data,
+      'Account Verified',
+      'Account verified successfully',
+    )
+  }
+
   async createLevy(userId: string, dto: CreateLevyDto) {
     const user = await this.getUser(userId)
 

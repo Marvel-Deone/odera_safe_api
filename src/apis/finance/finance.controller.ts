@@ -21,13 +21,14 @@ import {
   FundWalletDto,
   RejectWithdrawalDto,
   RequestWithdrawalDto,
+  ResolveAccountDto,
 } from './dto/finance.dto'
 import { FinanceService } from './finance.service'
 
 @ApiTags('Finance')
 @Controller('finance')
 export class FinanceController {
-  constructor(private readonly financeService: FinanceService) {}
+  constructor(private readonly financeService: FinanceService) { }
 
   @Post('paystack/webhook')
   @ApiOperation({ summary: 'Paystack payment webhook' })
@@ -40,6 +41,21 @@ export class FinanceController {
       request.rawBody,
       signature,
       body,
+    )
+  }
+
+  @Get('banks')
+  async getBanks() {
+    return this.financeService.getBanks()
+  }
+
+  @Post('resolve-account')
+  async resolveAccount(
+    @Body() dto: ResolveAccountDto,
+  ) {
+    return this.financeService.resolveAccountNumber(
+      dto.accountNumber,
+      dto.bankCode,
     )
   }
 
