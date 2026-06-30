@@ -19,7 +19,7 @@ import { ShortletService } from './shortlet.service'
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('shortlet')
 export class ShortletController {
-  constructor(private readonly shortletService: ShortletService) {}
+  constructor(private readonly shortletService: ShortletService) { }
 
   @Post('property')
   @Roles(Role.RESIDENT)
@@ -40,6 +40,12 @@ export class ShortletController {
   @ApiOperation({ summary: 'Update resident shortlet property details' })
   updateProperty(@CurrentUser() user: any, @Body() dto: UpdateShortletPropertyDto) {
     return this.shortletService.updateProperty(user.id, dto)
+  }
+
+  @Get('settings')
+  @ApiOperation({ summary: 'Get annual shortlet registration fee settings' })
+  getSettings(@CurrentUser() user: any) {
+    return this.shortletService.getSettings(user.id)
   }
 
   @Post('booking')
@@ -77,7 +83,7 @@ export class ShortletController {
 @Roles(Role.ADMIN, Role.SUPER_ADMIN)
 @Controller('admin/shortlet')
 export class AdminShortletController {
-  constructor(private readonly shortletService: ShortletService) {}
+  constructor(private readonly shortletService: ShortletService) { }
 
   @Post('settings')
   @ApiOperation({ summary: 'Configure annual shortlet registration fee' })
@@ -88,7 +94,7 @@ export class AdminShortletController {
   @Get('settings')
   @ApiOperation({ summary: 'Get annual shortlet registration fee settings' })
   getSettings(@CurrentUser() user: any) {
-    return this.shortletService.getSettings(user.id)
+    return this.shortletService.getAdminSettings(user.id)
   }
 
   @Get('properties')
@@ -116,7 +122,7 @@ export class AdminShortletController {
 @Roles(Role.GUARD, Role.ADMIN, Role.SUPER_ADMIN)
 @Controller('guard/shortlet')
 export class GuardShortletController {
-  constructor(private readonly shortletService: ShortletService) {}
+  constructor(private readonly shortletService: ShortletService) { }
 
   @Post('verify')
   @ApiOperation({ summary: 'Verify shortlet guest using QR payload or SMS code' })

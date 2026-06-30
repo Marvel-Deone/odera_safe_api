@@ -575,6 +575,15 @@ export class ShortletService {
   }
 
   async getSettings(userId: string) {
+    const user = await this.getUser(userId)
+    const settings = await this.prisma.shortletSettings.findUnique({
+      where: { estateId: user.estateId },
+    })
+
+    return success(settings, 'Shortlet Settings', 'Shortlet settings fetched successfully')
+  }
+
+  async getAdminSettings(userId: string) {
     const admin = await this.getUser(userId)
     const settings = await this.prisma.shortletSettings.upsert({
       where: { estateId: admin.estateId },

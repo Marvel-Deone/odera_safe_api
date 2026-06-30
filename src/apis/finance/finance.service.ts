@@ -89,17 +89,22 @@ export class FinanceService {
     accountNumber: string,
     bankCode: string,
   ) {
-    const account =
-      await this.paystack.resolveAccountNumber(
-        accountNumber,
-        bankCode,
-      )
+    try {
+      const account =
+        await this.paystack.resolveAccountNumber(
+          accountNumber,
+          bankCode,
+        )
 
-    return success(
-      account.data,
-      'Account Verified',
-      'Account verified successfully',
-    )
+      return success(
+        account.data,
+        'Account Verified',
+        'Account verified successfully',
+      )
+    } catch (err: any){
+      console.log('errr:', err);
+      return error('Failed to resolve account number', err.message)
+    }
   }
 
   async createLevy(userId: string, dto: CreateLevyDto) {
