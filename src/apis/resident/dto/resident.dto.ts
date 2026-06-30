@@ -63,15 +63,15 @@ export class CompleteResidentProfileDto {
     @IsString()
     id_no!: string
 
-    @ApiPropertyOptional({ example: 'https://cloudinary.com/front.jpg' })
-    @IsOptional()
-    @IsString()
-    id_document_front?: string
+    // @ApiPropertyOptional({ example: 'https://cloudinary.com/front.jpg' })
+    // @IsOptional()
+    // @IsString()
+    // id_document_front?: string
 
-    @ApiPropertyOptional({ example: 'https://cloudinary.com/back.jpg' })
-    @IsOptional()
-    @IsString()
-    id_document_back?: string
+    // @ApiPropertyOptional({ example: 'https://cloudinary.com/back.jpg' })
+    // @IsOptional()
+    // @IsString()
+    // id_document_back?: string
 
     @ApiPropertyOptional({ example: '22334455667' })
     @IsOptional()
@@ -159,10 +159,10 @@ export class CompleteResidentProfileDto {
     @IsString()
     passport?: string
 
-    @ApiPropertyOptional({ example: 'https://cloudinary.com/tenancy.pdf' })
-    @IsOptional()
-    @IsString()
-    tenancy_ownership_doc?: string
+    // @ApiPropertyOptional({ example: 'https://cloudinary.com/tenancy.pdf' })
+    // @IsOptional()
+    // @IsString()
+    // tenancy_ownership_doc?: string
 
     @ApiPropertyOptional({ example: 'Lekki Phase 1, Lagos' })
     @IsOptional()
