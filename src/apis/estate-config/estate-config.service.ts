@@ -13,7 +13,7 @@ import {
 
 @Injectable()
 export class EstateConfigService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private async getAdmin(userId: string) {
     const admin = await this.prisma.user.findUnique({ where: { id: userId } })
@@ -173,6 +173,32 @@ export class EstateConfigService {
     const admin = await this.getAdmin(userId)
     const streets = await this.prisma.estateStreet.findMany({
       where: { estateId: admin.estateId },
+      orderBy: { name: 'asc' },
+    })
+
+    return success(streets, 'Estate Streets', 'Estate streets fetched successfully')
+  }
+
+  async getResidentStreets(userId: string) {
+    const resident = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        role: true,
+        estateId: true,
+      },
+    })
+
+    if (!resident) {
+      return error('Unauthorized', 'Resident not found', HttpStatus.NOT_FOUND)
+    }
+
+    if (resident.role !== Role.RESIDENT) {
+      return error('Forbidden', 'Only residents can fetch resident streets', HttpStatus.FORBIDDEN)
+    }
+
+    const streets = await this.prisma.estateStreet.findMany({
+      where: { estateId: resident.estateId },
       orderBy: { name: 'asc' },
     })
 

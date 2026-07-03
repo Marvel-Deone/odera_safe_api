@@ -20,8 +20,8 @@ import { EstateConfigService } from './estate-config.service'
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN, Role.SUPER_ADMIN)
 @Controller('admin/estate')
-export class EstateConfigController {
-  constructor(private readonly estateConfigService: EstateConfigService) {}
+export class AdminEstateConfigController {
+  constructor(private readonly estateConfigService: EstateConfigService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get estate configuration dashboard data' })
@@ -104,5 +104,19 @@ export class EstateConfigController {
   @ApiOperation({ summary: 'Delete heavy vehicle category' })
   deleteHeavyVehicleCategory(@CurrentUser() user: any, @Param('categoryId') categoryId: string) {
     return this.estateConfigService.deleteHeavyVehicleCategory(user.id, categoryId)
+  }
+}
+
+@ApiTags('Resident Estate Configuration')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('resident/estate')
+export class EstateConfigController {
+  constructor(private readonly estateConfigService: EstateConfigService) { }
+
+  @Get('streets')
+  @ApiOperation({ summary: 'Get estate streets for resident' })
+  getResidentStreets(@CurrentUser() user: any) {
+    return this.estateConfigService.getResidentStreets(user.id)
   }
 }
