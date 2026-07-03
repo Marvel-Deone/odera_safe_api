@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { BadRequestException, HttpStatus, Injectable, Logger } from '@nestjs/common'
 import {
   LogCategory,
   Prisma,
@@ -13,7 +13,10 @@ import { CreateVehicleDto, RejectVehicleDto, UpdateVehicleDto, VehicleAccessDto 
 
 @Injectable()
 export class VehicleService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
+
+  private readonly logger = new Logger(VehicleService.name)
+
 
   private reference(prefix: string) {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
@@ -74,34 +77,80 @@ export class VehicleService {
     })
   }
 
+  // async createVehicle(userId: string, dto: CreateVehicleDto) {
+  //   const { user, resident } = await this.getResident(userId)
+
+  //   const vehicle = await this.prisma.vehicle.create({
+  //     data: {
+  //       residentId: resident.id,
+  //       plateNumber: this.normalizePlate(dto.plateNumber),
+  //       vehicleType: dto.vehicleType,
+  //       make: dto.make,
+  //       model: dto.model,
+  //       color: dto.color,
+  //       year: dto.year,
+  //       registrationDocUrl: dto.registrationDocUrl,
+  //       vehiclePhotoUrl: dto.vehiclePhotoUrl,
+  //       status: VehicleStatus.PENDING,
+  //     },
+  //   })
+
+  //   await this.log(this.prisma, {
+  //     estateId: resident.estateId,
+  //     action: 'VEHICLE_REGISTERED',
+  //     description: `Resident registered vehicle ${vehicle.plateNumber}`,
+  //     actorId: user.id,
+  //     actorRole: Role.RESIDENT,
+  //     metadata: { vehicleId: vehicle.id, residentId: resident.id },
+  //   })
+
+  //   return success(vehicle, 'Vehicle Registered', 'Vehicle submitted for admin review')
+  // }
+
   async createVehicle(userId: string, dto: CreateVehicleDto) {
-    const { user, resident } = await this.getResident(userId)
+    try {
+      const { user, resident } = await this.getResident(userId)
 
-    const vehicle = await this.prisma.vehicle.create({
-      data: {
-        residentId: resident.id,
-        plateNumber: this.normalizePlate(dto.plateNumber),
-        vehicleType: dto.vehicleType,
-        make: dto.make,
-        model: dto.model,
-        color: dto.color,
-        year: dto.year,
-        registrationDocUrl: dto.registrationDocUrl,
-        vehiclePhotoUrl: dto.vehiclePhotoUrl,
-        status: VehicleStatus.PENDING,
-      },
-    })
+      const vehicle = await this.prisma.vehicle.create({
+        data: {
+          residentId: resident.id,
+          plateNumber: this.normalizePlate(dto.plateNumber),
+          vehicleType: dto.vehicleType,
+          make: dto.make,
+          model: dto.model,
+          color: dto.color,
+          year: dto.year,
+          registrationDocUrl: dto.registrationDocUrl,
+          vehiclePhotoUrl: dto.vehiclePhotoUrl,
+          status: VehicleStatus.PENDING,
+        },
+      })
 
-    await this.log(this.prisma, {
-      estateId: resident.estateId,
-      action: 'VEHICLE_REGISTERED',
-      description: `Resident registered vehicle ${vehicle.plateNumber}`,
-      actorId: user.id,
-      actorRole: Role.RESIDENT,
-      metadata: { vehicleId: vehicle.id, residentId: resident.id },
-    })
+      await this.log(this.prisma, {
+        estateId: resident.estateId,
+        action: 'VEHICLE_REGISTERED',
+        description: `Resident registered vehicle ${vehicle.plateNumber}`,
+        actorId: user.id,
+        actorRole: Role.RESIDENT,
+        metadata: { vehicleId: vehicle.id, residentId: resident.id },
+      })
 
-    return success(vehicle, 'Vehicle Registered', 'Vehicle submitted for admin review')
+      return success(
+        vehicle,
+        'Vehicle Registered',
+        'Vehicle submitted for admin review',
+      )
+    } catch (error: any) {
+      this.logger.error(
+        `Create vehicle failed for user ${userId}`,
+        error?.stack || error?.message,
+      )
+
+      throw new BadRequestException({
+        message: 'Vehicle registration failed',
+        reason: error?.message || 'Unknown error',
+      })
+    }
   }
 
   async getMyVehicles(userId: string) {
