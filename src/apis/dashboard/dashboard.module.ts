@@ -4,8 +4,8 @@ import { DashboardController } from './dashboard.controller'
 import { PrismaModule } from '../../database/prisma/prisma.module'
 
 @Module({
-    imports: [PrismaModule],
+  imports: [PrismaModule],
   providers: [DashboardService],
-    controllers: [DashboardController],
+  controllers: [DashboardController],
 })
 export class DashboardModule { }

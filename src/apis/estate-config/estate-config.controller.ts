@@ -59,6 +59,12 @@ export class AdminEstateConfigController {
     return this.estateConfigService.getStreets(user.id)
   }
 
+  // @Get('streets')
+  // @ApiOperation({ summary: 'Get estate streets' })
+  // getStreets(@CurrentUser() user: any) {
+  //   return this.estateConfigService.getStreets(user.id)
+  // }
+
   @Patch('streets/:streetId')
   @ApiOperation({ summary: 'Update estate street' })
   updateStreet(

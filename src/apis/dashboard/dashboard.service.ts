@@ -19,6 +19,8 @@ export class DashboardService {
   constructor(private prisma: PrismaService) {}
 
   async getAdminDashboard() {
+    console.log('Got here');
+    
     const todayStart = dayjs().startOf('day').toDate()
     const todayEnd = dayjs().endOf('day').toDate()
 
