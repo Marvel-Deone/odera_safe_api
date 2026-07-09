@@ -1567,7 +1567,6 @@
 
 // // VISITOR_SCAN_FAILED
 
-
 // // This is your Prisma schema file,
 // // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -1808,6 +1807,12 @@ enum ResidentReviewAction {
   REJECT
 }
 
+enum ResidentSelfOnboardingStatus {
+  PENDING
+  ACTIVATED
+  EXPIRED
+}
+
 enum ShortletStatus {
   INACTIVE
   PENDING
@@ -1884,6 +1889,7 @@ model Estate {
   createdAt                 DateTime                   @default(now())
   settings                  Json?
   residents                 Resident[]
+  residentSelfOnboardings   ResidentSelfOnboarding[]
   users                     User[]
   visitors                  Visitor[]
   activityLogs              ActivityLog[]
@@ -2015,6 +2021,31 @@ model Resident {
   shortletProperties ShortletProperty[]
   vehicles           Vehicle[]
   heavyVehiclePasses HeavyVehiclePass[]
+}
+
+model ResidentSelfOnboarding {
+  id String @id @default(uuid())
+
+  estateId String
+
+  fullName        String
+  houseNumber     String
+  residentAddress String
+  whatsappPhone   String @unique
+
+  activationCodeHash      String
+  activationCodeExpiresAt DateTime
+  activatedAt             DateTime?
+
+  status ResidentSelfOnboardingStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+
+  @@index([estateId, status])
+  @@index([whatsappPhone])
 }
 
 model EstateStreet {

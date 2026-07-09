@@ -14,7 +14,7 @@ export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
   @Get()
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Get admin dashboard data' })
   getDashboard(@Req() req) {
     console.log('Users:', req.user);
