@@ -11,13 +11,20 @@ import {
   RejectHeavyVehiclePassDto,
 } from './dto/heavy-vehicle.dto'
 import { HeavyVehicleService } from './heavy-vehicle.service'
+import { EstateConfigService } from '../estate-config/estate-config.service'
 
 @ApiTags('Heavy Vehicle Access')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('heavy-vehicles')
 export class HeavyVehicleController {
-  constructor(private readonly heavyVehicleService: HeavyVehicleService) {}
+  constructor(private readonly heavyVehicleService: HeavyVehicleService, private readonly estateConfigService: EstateConfigService) { }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'Get heavy vehicle categories' })
+  getHeavyVehicleCategories(@CurrentUser() user: any) {
+    return this.estateConfigService.getHeavyVehicleCategories(user.id)
+  }
 
   @Post()
   @Roles(Role.RESIDENT)
@@ -54,7 +61,7 @@ export class HeavyVehicleController {
 @Roles(Role.ADMIN, Role.SUPER_ADMIN)
 @Controller('admin/heavy-vehicles')
 export class AdminHeavyVehicleController {
-  constructor(private readonly heavyVehicleService: HeavyVehicleService) {}
+  constructor(private readonly heavyVehicleService: HeavyVehicleService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get estate heavy vehicle requests' })
