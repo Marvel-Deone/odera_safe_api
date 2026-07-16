@@ -249,7 +249,7 @@ export class GuardService {
                                     email: dto.email,
                                     password:
                                         hashedPassword,
-                                    role: Role.GUARD,
+                                    role: Role.SUPER_GUARD,
                                     first_login: true,
                                     estateId:
                                         admin.estateId,
