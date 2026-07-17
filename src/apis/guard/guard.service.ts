@@ -249,7 +249,10 @@ export class GuardService {
                                     email: dto.email,
                                     password:
                                         hashedPassword,
-                                    role: Role.SUPER_GUARD,
+                                    role:
+                                        dto.role === GuardRole.SUPER_GUARD
+                                            ? Role.SUPER_GUARD
+                                            : Role.GUARD,
                                     first_login: true,
                                     estateId:
                                         admin.estateId,
@@ -790,12 +793,31 @@ export class GuardService {
         }
 
         const updatedGuard =
-            await this.prisma.guard.update({
-                where: { id: guardId },
-                data: {
-                    role: newRole,
+            await this.prisma.$transaction(
+                async (tx) => {
+                    const updated =
+                        await tx.guard.update({
+                            where: { id: guardId },
+                            data: {
+                                role: newRole,
+                            },
+                        })
+
+                    await tx.user.update({
+                        where: {
+                            id: guard.userId,
+                        },
+                        data: {
+                            role:
+                                newRole === GuardRole.SUPER_GUARD
+                                    ? Role.SUPER_GUARD
+                                    : Role.GUARD,
+                        },
+                    })
+
+                    return updated
                 },
-            })
+            )
 
         await this.createActivityLog({
             estateId: admin.estateId,

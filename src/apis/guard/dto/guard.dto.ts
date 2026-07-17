@@ -9,7 +9,7 @@ import {
     ApiProperty,
     ApiPropertyOptional,
 } from '@nestjs/swagger'
-import { GuardRole, Role } from '@prisma/client'
+import { GuardRole } from '@prisma/client'
 
 export class CreateGuardDto {
     @ApiProperty({

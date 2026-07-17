@@ -13,7 +13,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { RolesGuard } from '../auth/guards/roles.guard'
 import { Roles } from '../auth/decorators/roles.decorator'
-import { GuardRole, Role } from '@prisma/client'
+import { Role } from '@prisma/client'
 
 
 @ApiTags('Guard Locations')
@@ -30,7 +30,7 @@ export class GuardLocationController {
     ) { }
 
     @Post()
-    @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.GUARD, GuardRole.SUPER_GUARD as unknown as Role)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.GUARD, Role.SUPER_GUARD)
     @ApiOperation({ 
         summary: 'Update guard location (for guards) or get guard location (for admins)',
     })
@@ -46,7 +46,7 @@ export class GuardLocationController {
         )
     }
 
-    @Roles(Role.ADMIN, Role.SUPER_ADMIN, GuardRole.SUPER_GUARD as unknown as Role)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.SUPER_GUARD)
     @ApiOperation({
         summary: 'Get live locations of guards in the estate',
     })

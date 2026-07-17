@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { RolesGuard } from '../auth/guards/roles.guard'
 import { Roles } from '../auth/decorators/roles.decorator'
-import { GuardRole, Role } from '@prisma/client'
+import { Role } from '@prisma/client'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 
 @ApiTags('Performance')
@@ -32,7 +32,7 @@ export class PerformanceController {
 
   // Generate snapshots for a date range
   @Post('generate')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN, GuardRole.SUPER_GUARD as unknown as Role)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.SUPER_GUARD)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Generate guard performance snapshots for a specified date range',
@@ -54,7 +54,7 @@ export class PerformanceController {
 
   // Estate rankings
   @Get('rankings')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN, GuardRole.SUPER_GUARD as unknown as Role)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.SUPER_GUARD)
   @ApiOperation({
     summary: 'Get rankings of estates based on guard performance',
   })
@@ -66,7 +66,7 @@ export class PerformanceController {
 
   // Guard-specific analytics (admin)
   @Get('guard/:guardId')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN, GuardRole.SUPER_GUARD as unknown as Role)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.SUPER_GUARD)
   @ApiOperation({
     summary: 'Get performance metrics for a specific guard',
   })

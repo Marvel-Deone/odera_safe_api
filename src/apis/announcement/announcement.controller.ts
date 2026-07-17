@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common'
 
 import {
-    GuardRole,
     Role,
 } from '@prisma/client'
 
@@ -47,7 +46,7 @@ export class AnnouncementController {
     @Roles(
         Role.ADMIN,
         Role.SUPER_ADMIN,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
     )
     @ApiOperation({
         summary: 'Create announcement',
@@ -67,7 +66,7 @@ export class AnnouncementController {
         Role.SUPER_ADMIN,
         Role.RESIDENT,
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
     )
     @ApiOperation({
         summary: 'Get announcement feed',
@@ -84,7 +83,7 @@ export class AnnouncementController {
         Role.SUPER_ADMIN,
         Role.RESIDENT,
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
     )
     @ApiOperation({
         summary: 'Get announcement details',
@@ -104,7 +103,7 @@ export class AnnouncementController {
         Role.SUPER_ADMIN,
         Role.RESIDENT,
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
     )
     @ApiOperation({
         summary: 'Like or unlike announcement',
@@ -124,7 +123,7 @@ export class AnnouncementController {
         Role.SUPER_ADMIN,
         Role.RESIDENT,
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
     )
     @ApiOperation({
         summary: 'Add comment',
@@ -147,7 +146,7 @@ export class AnnouncementController {
         Role.SUPER_ADMIN,
         Role.RESIDENT,
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
     )
     @ApiOperation({
         summary: 'Get announcement comments',
@@ -163,7 +162,7 @@ export class AnnouncementController {
     @Roles(
         Role.ADMIN,
         Role.SUPER_ADMIN,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
     )
     @ApiOperation({
         summary: 'Pin or unpin announcement',
@@ -181,7 +180,7 @@ export class AnnouncementController {
     @Roles(
         Role.ADMIN,
         Role.SUPER_ADMIN,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
     )
     @ApiOperation({
         summary: 'Delete announcement',

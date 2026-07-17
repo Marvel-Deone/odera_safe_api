@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { GuardRole, IncidentStatus, Role } from '@prisma/client';
+import { IncidentStatus, Role } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateIncidentDto, AssignIncidentDto, CompleteIncidentDto, RateIncidentDto } from './dto/incident.dto';
 
@@ -21,7 +21,7 @@ export class IncidentController {
     ) { }
 
     @Post()
-    @Roles(Role.GUARD, Role.RESIDENT, GuardRole.SUPER_GUARD as unknown as Role)
+    @Roles(Role.GUARD, Role.RESIDENT, Role.SUPER_GUARD)
     createIncident(
         @CurrentUser() user: any,
         @Body() dto: CreateIncidentDto,
@@ -95,7 +95,7 @@ export class IncidentController {
         )
     }
 
-    @Roles(GuardRole.GUARD, GuardRole.SUPER_GUARD as unknown as Role)
+    @Roles(Role.GUARD, Role.SUPER_GUARD)
     @ApiOperation({
         summary: 'Get techicians queeue',
     })
@@ -108,7 +108,7 @@ export class IncidentController {
         )
     }
 
-    @Roles(Role.ADMIN, Role.SUPER_ADMIN, GuardRole.SUPER_GUARD as unknown as Role)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.SUPER_GUARD)
     @ApiOperation({
         summary: 'Assign ticket to technician/guard',
     })
@@ -125,7 +125,7 @@ export class IncidentController {
         )
     }
 
-    @Roles(GuardRole.GUARD, GuardRole.SUPER_GUARD as unknown as Role)
+    @Roles(Role.GUARD, Role.SUPER_GUARD)
     @ApiOperation({
         summary: 'Start job (technician/guard)',
     })
@@ -138,7 +138,7 @@ export class IncidentController {
         )
     }
 
-    @Roles(GuardRole.GUARD, GuardRole.SUPER_GUARD as unknown as Role)
+    @Roles(Role.GUARD, Role.SUPER_GUARD)
     @ApiOperation({
         summary: 'Complete job (technician/guard)',
     })
@@ -173,3 +173,4 @@ export class IncidentController {
         )
     }
 }
+

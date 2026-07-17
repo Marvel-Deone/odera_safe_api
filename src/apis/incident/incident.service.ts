@@ -55,7 +55,10 @@ export class IncidentService {
             reportedByResidentId = resident?.id ?? null
         }
 
-        if (user.role === Role.GUARD) {
+        if (
+            user.role === Role.GUARD ||
+            user.role === Role.SUPER_GUARD
+        ) {
             const guard =
                 await this.prisma.guard.findFirst({
                     where: { userId },

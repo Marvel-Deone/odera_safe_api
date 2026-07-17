@@ -17,7 +17,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 
-import { GuardRole, Role } from '@prisma/client'
+import { Role } from '@prisma/client'
 
 import { VisitorService } from './visitor.service'
 
@@ -85,7 +85,7 @@ export class VisitorController {
     @Get('validate/:code')
     @Roles(
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
         Role.ADMIN,
         Role.SUPER_ADMIN,
     )
@@ -107,7 +107,7 @@ export class VisitorController {
     @Post('check-in/:code')
     @Roles(
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
         Role.ADMIN,
         Role.SUPER_ADMIN,
     )
@@ -135,7 +135,7 @@ export class VisitorController {
     @Post('check-out/:code')
     @Roles(
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
         Role.ADMIN,
         Role.SUPER_ADMIN,
     )
@@ -165,7 +165,7 @@ export class VisitorController {
     @Post('scan')
     @Roles(
         Role.GUARD,
-        GuardRole.SUPER_GUARD as unknown as Role,
+        Role.SUPER_GUARD,
         Role.ADMIN,
         Role.SUPER_ADMIN,
     )
@@ -304,3 +304,4 @@ export class VisitorController {
         )
     }
 }
+
