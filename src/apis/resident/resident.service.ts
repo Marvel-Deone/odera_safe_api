@@ -74,6 +74,24 @@ export class ResidentService {
         const hashedPassword =
             await bcrypt.hash(tempPassword, 10)
 
+        if (dto.streetId) {
+            const street =
+                await this.prisma.estateStreet.findFirst({
+                    where: {
+                        id: dto.streetId,
+                        estateId: estate.id,
+                    },
+                })
+
+            if (!street) {
+                return error(
+                    'Invalid Street',
+                    'Street does not belong to this estate',
+                    HttpStatus.BAD_REQUEST,
+                )
+            }
+        }
+
         const result =
             await this.prisma.$transaction(
                 async (tx) => {
@@ -162,6 +180,24 @@ export class ResidentService {
                 'KYC has already been submitted',
                 HttpStatus.BAD_REQUEST,
             )
+        }
+
+        if (dto.streetId) {
+            const street =
+                await this.prisma.estateStreet.findFirst({
+                    where: {
+                        id: dto.streetId,
+                        estateId: resident.estateId,
+                    },
+                })
+
+            if (!street) {
+                return error(
+                    'Invalid Street',
+                    'Street does not belong to this estate',
+                    HttpStatus.BAD_REQUEST,
+                )
+            }
         }
 
         const updatedResident =

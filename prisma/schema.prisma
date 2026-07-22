@@ -201,7 +201,10 @@ enum AnnouncementAudience {
 
 enum ChatRoomType {
   BLOCK
+  STREET
   BROADCAST
+  SECURITY
+  ADMIN_ONLY
 }
 
 enum PollAudience {
@@ -391,6 +394,7 @@ model Resident {
   dob        String?
   gender     String?
   estateId   String
+  streetId   String?
 
   userId String? @unique
 
@@ -448,6 +452,7 @@ model Resident {
   createdAt DateTime @default(now())
 
   estate             Estate              @relation(fields: [estateId], references: [id])
+  street             EstateStreet?       @relation(fields: [streetId], references: [id])
   user               User?               @relation(fields: [userId], references: [id])
   visitors           Visitor[]
   // maintenanceTickets MaintenanceTicket[]
@@ -491,7 +496,9 @@ model EstateStreet {
   name      String
   createdAt DateTime @default(now())
 
-  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  estate    Estate     @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  residents Resident[]
+  chatRooms ChatRoom[]
 
   @@unique([estateId, name])
   @@index([estateId])
@@ -1183,6 +1190,7 @@ model ChatRoom {
   id String @id @default(uuid())
 
   estateId String
+  streetId String?
 
   name String
   type ChatRoomType
@@ -1191,11 +1199,14 @@ model ChatRoom {
 
   createdAt DateTime @default(now())
 
-  estate Estate @relation(fields: [estateId], references: [id])
+  estate Estate        @relation(fields: [estateId], references: [id])
+  street EstateStreet? @relation(fields: [streetId], references: [id])
 
   messages ChatMessage[]
 
   @@index([estateId, block])
+  @@index([estateId, type])
+  @@index([streetId])
 }
 
 model ChatMessage {

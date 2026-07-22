@@ -24,6 +24,9 @@ export class ResidentSelfOnboardingDto {
 
     @ApiProperty({ example: '08012345678' })
     @IsString()
+    @Length(10, 11, {
+        message: 'WhatsApp phone number must be between 10 and 11 characters',
+    })
     whatsappPhone!: string
 }
 
@@ -51,6 +54,11 @@ export class CreateResidentDto {
     @ApiProperty({ example: 'A' })
     @IsString()
     block!: string
+
+    @ApiPropertyOptional({ example: 'estate-street-id' })
+    @IsOptional()
+    @IsString()
+    streetId?: string
 
     @ApiPropertyOptional({ example: 'Male' })
     @IsOptional()
@@ -186,6 +194,11 @@ export class CompleteResidentProfileDto {
     @IsOptional()
     @IsString()
     home_address?: string
+
+    @ApiPropertyOptional({ example: 'estate-street-id' })
+    @IsOptional()
+    @IsString()
+    streetId?: string
 
     @ApiPropertyOptional({ example: 'Lagos' })
     @IsOptional()

@@ -91,10 +91,14 @@ export class ChatController {
 
     @Get('rooms/:roomId')
     getRoom(
+        @CurrentUser()
+        user: any,
+
         @Param('roomId')
         roomId: string,
     ) {
         return this.chatService.getRoom(
+            user.id,
             roomId,
         )
     }

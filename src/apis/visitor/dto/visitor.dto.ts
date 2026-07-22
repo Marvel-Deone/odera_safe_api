@@ -10,6 +10,7 @@ import {
   Matches,
   IsNumber,
 } from 'class-validator'
+import { IsFutureOrToday } from '../../../common/utils/is-future-or-today.validator'
 
 export class CreateVisitorDto {
   @ApiProperty({
@@ -46,6 +47,9 @@ export class CreateVisitorDto {
     example: '2026-05-10T14:00:00.000Z',
   })
   @IsDateString()
+  @IsFutureOrToday({
+    message: 'Visit date cannot be in the past',
+  })
   visit_date!: string
 
   @ApiProperty({
