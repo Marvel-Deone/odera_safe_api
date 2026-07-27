@@ -399,6 +399,12 @@ export class ResidentService {
                 user: true,
                 estate: true,
                 visitors: true,
+                street: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
             },
         })
 

@@ -108,8 +108,8 @@ export class AdminEstateConfigController {
 }
 
 @ApiTags('Resident Estate Configuration')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+// @ApiBearerAuth()
+// @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('resident/estate')
 export class EstateConfigController {
   constructor(private readonly estateConfigService: EstateConfigService) { }
