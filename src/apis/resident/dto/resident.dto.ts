@@ -78,6 +78,19 @@ export class CreateResidentDto {
     ndprConsentThirdParty!: boolean
 }
 
+export class NinVerificationDto {
+    @IsOptional()
+    @IsString()
+    @Length(0, 13)
+    @ApiProperty({ example: '63184876213' })
+    idcard_no?: string;
+
+    @IsOptional()
+    @IsString()
+    @ApiProperty({ example: process.env.DEFAULT_FACE_CAPTURE_URL })
+    face_capture?: string;
+}
+
 export class CompleteResidentProfileDto {
     @ApiPropertyOptional({ example: 'NIN' })
     @IsOptional()

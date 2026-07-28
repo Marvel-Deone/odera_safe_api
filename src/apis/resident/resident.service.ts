@@ -1,18 +1,40 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
-// import { ResidentStatus } from '@prisma/client'
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { PrismaService } from '../../database/prisma/prisma.service'
-import { CompleteResidentProfileDto, CreateResidentDto, ReviewResidentKycDto } from './dto/resident.dto'
+import { CompleteResidentProfileDto, CreateResidentDto, NinVerificationDto, ReviewResidentKycDto } from './dto/resident.dto'
 import * as bcrypt from 'bcrypt'
 import { success, error } from '../../common/utils/response.util'
 import { KycStatus, ResidentReviewAction, ResidentStatus, Role } from '@prisma/client'
 import { PaystackService } from '../finance/paystack.service'
-// import { ResidentStatus, Role } from '../../../generated/prisma'
+import { ClientsService } from '../../shared/client/client.service'
+import dayjs from 'dayjs'
+
+const getErrorMessage = (err: unknown, fallback = 'Unknown error') =>
+    err instanceof Error ? err.message : ((err as { message?: string })?.message || fallback);
+
+const getErrorData = (err: unknown) =>
+    (err as { response?: { data?: any }; data?: any })?.response?.data ||
+    (err as { response?: { data?: any }; data?: any })?.data;
+
+const getResponseMessage = (err: unknown) =>
+    (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+
+const getResponseStatus = (err: unknown, fallback = HttpStatus.INTERNAL_SERVER_ERROR) =>
+    (err as { response?: { status?: number; data?: { statusCode?: number; status?: number } } })?.response?.status ||
+    (err as { response?: { status?: number; data?: { statusCode?: number; status?: number } } })?.response?.data?.statusCode ||
+    (err as { response?: { status?: number; data?: { statusCode?: number; status?: number } } })?.response?.data?.status ||
+    fallback;
+
 
 @Injectable()
 export class ResidentService {
+    qore_id_secret = process.env.QORE_ID_SECRET_KEY;
+    qore_id_client_id = process.env.QORE_ID_CLIENT_ID;
+    qore_id_url = process.env.QORE_ID_BASE_URL;
+
     constructor(
         private prisma: PrismaService,
         private paystack: PaystackService,
+        private readonly clientsService: ClientsService,
     ) { }
 
     async onboardResident(dto: CreateResidentDto) {
@@ -142,6 +164,277 @@ export class ResidentService {
             'Resident account created successfully',
             HttpStatus.CREATED,
         )
+    }
+
+    // QoreID Login
+    private async qoreIdLogin() {
+        try {
+            const qoreIdInfo = {
+                clientId: this.qore_id_client_id,
+                secret: this.qore_id_secret,
+            };
+
+            const loginHeaders = { 'Content-Type': 'application/json' };
+            console.log('Sending QoreID login request...');
+            const qoreid_login = await this.clientsService.postUrl(`${this.qore_id_url}/token`, qoreIdInfo, loginHeaders);
+            console.log('QoreID login successful');
+
+            return qoreid_login;
+        } catch (err) {
+            const statusCode = getResponseStatus(err);
+            console.error('Error during QoreID login:', getResponseMessage(err) || getErrorMessage(err));
+            throw new HttpException({
+                statusCode,
+                status: 'error',
+                title: 'Login Failed',
+                message: getResponseMessage(err) || 'An error occurred during QoreID login.',
+                data: getErrorData(err) || getErrorMessage(err)
+            }, statusCode);
+        }
+    }
+
+    // NIN Verification
+    private async verifyNinWithQoreId(user, accessToken) {
+        try {
+            const headers = {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`
+            };
+            console.log('Sending NIN verification request...');
+
+            const enquiry = await this.clientsService.postUrl(
+                `${this.qore_id_url}/v1/ng/identities/face-verification/nin`,
+                {
+                    idNumber: user.idNumber,
+                    photoUrl: user.photoUrl
+                },
+                headers
+            );
+            console.log('NIN verification response:', enquiry);
+
+            return enquiry;
+        } catch (err) {
+            const statusCode = getResponseStatus(err, HttpStatus.BAD_GATEWAY);
+            console.error('Error during NIN verification:', getResponseMessage(err) || getErrorMessage(err));
+            throw new HttpException({
+                statusCode,
+                status: 'error',
+                title: 'NIN Verification Failed',
+                message: getResponseMessage(err) || 'An error occurred during NIN verification.',
+                data: getErrorData(err),
+            }, statusCode);
+        }
+    }
+
+    // Verify NIN
+    async verifyNIN(userData) {
+        try {
+            console.log('Starting NIN verification process...');
+            const user = {
+                idNumber: userData.idcard_no,
+                photoUrl: userData.face_capture,
+            };
+            console.log('NIN entry created:', user);
+
+            const qoreid_login = await this.qoreIdLogin();
+            if (!qoreid_login) {
+                throw new HttpException({
+                    status: 'error',
+                    title: 'Verification Failed',
+                    message: 'Failed to authenticate with QoreID'
+                }, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            const enquiry = await this.verifyNinWithQoreId(user, qoreid_login.accessToken);
+            if (!enquiry) {
+                throw new HttpException({
+                    status: 'error',
+                    title: 'Verification Failed',
+                    message: 'Failed to verify NIN with QoreID'
+                }, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return enquiry;
+        } catch (err) {
+            console.error('Error during NIN verification process:', err);
+            if (err instanceof HttpException) {
+                throw err;
+            }
+
+            throw new HttpException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                status: 'error',
+                title: 'Registration Failed',
+                message: getErrorData(err) || getErrorMessage(err) || 'An error occurred while verifying NIN.',
+                data: getErrorData(err) || getErrorMessage(err)
+            }, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async verifyNinOnly(user: { id: string }, ninData: NinVerificationDto) {
+        try {
+            // Fetch the latest user details from the database
+            const latestUser = await this.prisma.user.findUnique({ where: { id: user.id } });
+             const resident = await this.prisma.resident.findFirst({
+                where: { userId: user.id },
+            })
+
+            const ninExists = await this.prisma.resident.findFirst({
+                where: {
+                    nin: ninData.idcard_no,
+                    userId: { not: user.id },
+                },
+            });
+            if ((process.env.NODE_ENV || '').toLowerCase() !== "development") {
+                if (ninExists) {
+                    console.log("Nin exists in database")
+                    throw new HttpException({
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        status: 'error',
+                        title: 'Nin already exists',
+                        message: 'This NIN is being used by another user.'
+                    }, HttpStatus.BAD_REQUEST);
+                }
+            }
+            if (!latestUser || !resident) {
+                throw new HttpException({
+                    status: 'error',
+                    title: 'Verification Failed',
+                    message: 'User not found'
+                }, HttpStatus.NOT_FOUND);
+            }
+
+            // Verify NIN with QoreID
+            const verify_nin = await this.verifyNIN(ninData);
+            if (!verify_nin || !verify_nin.nin) {
+                throw new HttpException({
+                    status: 'error',
+                    title: 'Verification Failed',
+                    message: 'Failed to verify NIN'
+                }, HttpStatus.BAD_REQUEST);
+            }
+
+            // Check face verification match
+            if (verify_nin.face_verification) {
+                if (!verify_nin.face_verification.match) {
+                    console.log('[NIN Verification] Failed: Face verification mismatch',
+                        {
+                            match_score: verify_nin.face_verification.match_score,
+                            threshold: verify_nin.face_verification.matching_threshold
+                        });
+                    throw new HttpException({
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        status: 'error',
+                        title: 'Face Verification Failed',
+                        message: 'Face verification failed. Please ensure the photo matches your NIN.'
+                    }, HttpStatus.BAD_REQUEST);
+                }
+
+                // Check if match score is below threshold
+                if (verify_nin.face_verification.match_score < verify_nin.face_verification.matching_threshold) {
+                    console.log('[NIN Verification] Failed: Low face match score',
+                        {
+                            match_score: verify_nin.face_verification.match_score,
+                            threshold: verify_nin.face_verification.matching_threshold
+                        });
+                    throw new HttpException({
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        status: 'error',
+                        title: 'Face Verification Failed',
+                        message: 'Face verification score is too low. Please try again with a clearer photo.'
+                    }, HttpStatus.BAD_REQUEST);
+                }
+            }
+
+            // Compare NIN details with latest user details
+            if (
+                verify_nin.nin.firstname && resident.first_name &&
+                verify_nin.nin.firstname.toLowerCase().trim() !== resident.first_name.toLowerCase().trim()
+            ) {
+                console.log('[NIN Verification] Failed: First name mismatch',
+                    { nin: verify_nin.nin.firstname, user: resident.first_name });
+                throw new HttpException({
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    status: 'error',
+                    title: 'NIN Mismatch',
+                    message: 'First name on NIN does not match your account.'
+                }, HttpStatus.BAD_REQUEST);
+            }
+
+            if (
+                verify_nin.nin.lastname && resident.last_name &&
+                verify_nin.nin.lastname.toLowerCase().trim() !== resident.last_name.toLowerCase().trim()
+            ) {
+                console.log('[NIN Verification] Failed: Last name mismatch',
+                    { nin: verify_nin.nin.lastname, user: resident.last_name });
+                throw new HttpException({
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    status: 'error',
+                    title: 'NIN Mismatch',
+                    message: 'Last name on NIN does not match your account.'
+                }, HttpStatus.BAD_REQUEST);
+            }
+
+            if (verify_nin.nin.birthdate && resident.dob) {
+                // Format dates for comparison (YYYY-MM-DD)
+                const ninDob = dayjs(verify_nin.nin.birthdate, 'DD-MM-YYYY').format('YYYY-MM-DD');
+                const userDob = dayjs(resident.dob).format('YYYY-MM-DD');
+
+                if (ninDob !== userDob) {
+                    console.log('[NIN Verification] Failed: DOB mismatch',
+                        { nin: ninDob, user: userDob });
+                    throw new HttpException({
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        status: 'error',
+                        title: 'NIN Mismatch',
+                        message: 'Date of birth on NIN does not match your account.'
+                    }, HttpStatus.BAD_REQUEST);
+                }
+            }
+
+            // Ensure idcard_no is properly saved with validation
+            if (!ninData.idcard_no) {
+                throw new HttpException({
+                    status: 'error',
+                    title: 'Validation Failed',
+                    message: 'NIN (idcard_no) is required for verification'
+                }, HttpStatus.BAD_REQUEST);
+            }
+
+            const updateData = {
+                nin: ninData.idcard_no,
+                face_capture: ninData.face_capture,
+                kycStatus: KycStatus.COMPLETED,
+            };
+
+            console.log('[NIN Verification] Updating user with data:', updateData);
+
+            const updatedResident = await this.prisma.resident.update({
+                where: { id: resident.id },
+                data: updateData,
+            });
+
+            console.log('[NIN Verification] Update successful for user:', latestUser.id);
+
+            console.log('[NIN Verification] Successfully completed for user:', latestUser.id);
+
+            return success(
+                {
+                    resident: updatedResident,
+                    nin_verification: verify_nin,
+                },
+                'NIN Verification Successful',
+                'Your NIN has been verified successfully'
+            );
+        } catch (err) {
+            console.error('[NIN Verification] Error:', err);
+            // If it's already an HttpException, throw it directly
+            if (err instanceof HttpException) {
+                throw err;
+            }
+            // For other errors, return a generic error
+            return error('Verification Failed', getErrorMessage(err, 'An error occurred during NIN verification'), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     async completeProfile(

@@ -55,6 +55,13 @@ export class ResidentSelfOnboardingService {
     const activationCodeExpiresAt = this.activationExpiry()
     const appDownloadLink = process.env.APP_DOWNLOAD_LINK ?? 'https://odera-safe.vercel.app'
 
+    const whatsappDelivery = await this.whatsappService.sendOnboardingActivationMessage({
+      whatsappPhone,
+      houseNumber: dto.houseNumber,
+      activationCode,
+      appDownloadLink,
+    })
+
     const onboarding = await this.prisma.$transaction(async (tx) => {
       const record = existing
         ? await tx.residentSelfOnboarding.update({
@@ -104,13 +111,6 @@ export class ResidentSelfOnboardingService {
       return record
     })
 
-    const whatsappDelivery = await this.whatsappService.sendOnboardingActivationMessage({
-      whatsappPhone,
-      houseNumber: dto.houseNumber,
-      activationCode,
-      appDownloadLink,
-    })
-
     return success(
       {
         onboarding: {
@@ -126,7 +126,7 @@ export class ResidentSelfOnboardingService {
         whatsappDelivery,
       },
       'Onboarding Successful',
-      'Resident onboarding completed and activation message prepared',
+      'Resident onboarding completed and activation message sent',
       HttpStatus.CREATED,
     )
   }

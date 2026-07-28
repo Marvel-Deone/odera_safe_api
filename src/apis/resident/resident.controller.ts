@@ -24,6 +24,7 @@ import {
   CreateResidentDto,
   CompleteResidentProfileDto,
   ReviewResidentKycDto,
+  NinVerificationDto,
 } from './dto/resident.dto'
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -57,6 +58,25 @@ export class ResidentController {
     @Body() dto: CreateResidentDto,
   ) {
     return this.residentService.onboardResident(dto)
+  }
+
+  @Post('verify-nin')
+  @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth('access-token')
+  // @UsePipes(DtoValidationPipe)
+  @ApiOperation({
+    summary: 'Verify NIN with face capture',
+    description: 'Verifies user\'s NIN and face capture through QoreID'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'NIN verification successful'
+  })
+  async verifyNinOnly(
+     @CurrentUser() user: any,
+    @Body() ninData: NinVerificationDto
+  ) {
+    return await this.residentService.verifyNinOnly(user, ninData);
   }
 
   // RESIDENT - COMPLETE PROFILE/KYC

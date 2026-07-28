@@ -1,0 +1,1 @@
+ALTER TABLE "Resident" ADD COLUMN IF NOT EXISTS "face_capture" TEXT;

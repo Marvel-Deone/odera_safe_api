@@ -401,6 +401,7 @@ model Resident {
   status          ResidentStatus @default(PENDING)
   kycStatus       KycStatus      @default(NOT_SUBMITTED)
   rejectionReason String?
+  face_capture     String?
 
   house_no        String
   block           String
