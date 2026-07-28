@@ -61,6 +61,45 @@ export class EstateConfigService {
     return success(estate, 'Estate Configuration', 'Estate configuration fetched successfully')
   }
 
+  async getPublicEstates() {
+    const estates = await this.prisma.estate.findMany({
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        totalHouses: true,
+        createdAt: true,
+      },
+      orderBy: { name: 'asc' },
+    })
+
+    return success(estates, 'Estates', 'Estates fetched successfully')
+  }
+
+  async getPublicEstateStreets(estateId: string) {
+    const estate = await this.prisma.estate.findUnique({
+      where: { id: estateId },
+      select: { id: true },
+    })
+
+    if (!estate) {
+      return error('Not Found', 'Estate not found', HttpStatus.NOT_FOUND)
+    }
+
+    const streets = await this.prisma.estateStreet.findMany({
+      where: { estateId },
+      select: {
+        id: true,
+        estateId: true,
+        name: true,
+        createdAt: true,
+      },
+      orderBy: { name: 'asc' },
+    })
+
+    return success(streets, 'Estate Streets', 'Estate streets fetched successfully')
+  }
+
   async updateEstateDetails(userId: string, dto: UpdateEstateDetailsDto) {
     const admin = await this.getAdmin(userId)
 

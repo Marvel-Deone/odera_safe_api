@@ -15,6 +15,24 @@ import {
 } from './dto/estate-config.dto'
 import { EstateConfigService } from './estate-config.service'
 
+@ApiTags('Public Estates')
+@Controller('estates')
+export class PublicEstateController {
+  constructor(private readonly estateConfigService: EstateConfigService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get all estates' })
+  getEstates() {
+    return this.estateConfigService.getPublicEstates()
+  }
+
+  @Get(':estateId/streets')
+  @ApiOperation({ summary: 'Get estate streets by estate ID' })
+  getEstateStreets(@Param('estateId') estateId: string) {
+    return this.estateConfigService.getPublicEstateStreets(estateId)
+  }
+}
+
 @ApiTags('Admin Estate Configuration')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -108,8 +126,8 @@ export class AdminEstateConfigController {
 }
 
 @ApiTags('Resident Estate Configuration')
-// @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('resident/estate')
 export class EstateConfigController {
   constructor(private readonly estateConfigService: EstateConfigService) { }
