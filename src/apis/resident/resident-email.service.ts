@@ -316,7 +316,7 @@ export class ResidentEmailService {
     color:#ffffff;
     text-decoration:none;
     ">
-    Download the App
+    Get the App
     </a>
     </td>
     </tr>
