@@ -16,7 +16,7 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'https://odera-safe.vercel.app', 'https://ddsafe.vercel.app', 'https://app.ddsafe.tech', 'https://ddsafe.tech'],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'https://odera-safe.vercel.app', 'https://ddsafe.vercel.app', 'https://oderasafe.ddsafe.tech', 'https://ddsafe.tech'],
     credentials: true,
   });
 
