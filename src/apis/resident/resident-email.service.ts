@@ -269,7 +269,7 @@ export class ResidentEmailService {
     <td align="center"
     style="
     background:#eef4ff;
-    border:2px dashed #2563eb;
+    border:2px dashed #a41818;
     border-radius:12px;
     padding:28px;
     ">
@@ -279,7 +279,7 @@ export class ResidentEmailService {
     font-size:38px;
     font-weight:700;
     letter-spacing:10px;
-    color:#1d4ed8;
+    color:#a41818;
     ">
     ${input.activationCode}
     </div>
@@ -304,7 +304,7 @@ export class ResidentEmailService {
     <td
     style="
     border-radius:8px;
-    background:#2563eb;
+    background:#a41818;
     ">
     <a
     href="${input.appDownloadLink}"
