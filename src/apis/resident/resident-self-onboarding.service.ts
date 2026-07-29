@@ -67,7 +67,7 @@ export class ResidentSelfOnboardingService {
     const hashedPassword = await bcrypt.hash(tempPassword, 10)
     const activationCodeHash = await bcrypt.hash(activationCode, 10)
     const activationCodeExpiresAt = this.activationExpiry()
-    const appDownloadLink = process.env.APP_DOWNLOAD_LINK ?? 'https://odera-safe.vercel.app'
+    const appDownloadLink = process.env.APP_DOWNLOAD_LINK ?? 'https://oderasafe.ddsafe.tech'
 
     // const whatsappDelivery = await this.whatsappService.sendOnboardingActivationMessage({
     //   whatsappPhone,
