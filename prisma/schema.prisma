@@ -452,7 +452,7 @@ model Resident {
   face_capture    String?
 
   house_no        String
-  block           String
+  block           String?
   home_address    String?
   state_of_origin String?
   lga             String?
@@ -498,6 +498,9 @@ model Resident {
   approvedAt DateTime?
   rejectedAt DateTime?
 
+  activationCodeExpiresAt DateTime?
+  activatedAt             DateTime?
+
   createdAt DateTime @default(now())
 
   estate                Estate                 @relation(fields: [estateId], references: [id])
@@ -524,7 +527,7 @@ model ResidentSelfOnboarding {
   houseNumber     String
   residentAddress String
   whatsappPhone   String @unique
-  email   String @unique
+  email           String @unique
 
   activationCodeHash      String
   activationCodeExpiresAt DateTime

@@ -10,9 +10,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { ResidentReviewAction } from '@prisma/client'
 
 export class ResidentSelfOnboardingDto {
-    @ApiProperty({ example: 'John Doe' })
+    @ApiProperty({ example: 'John' })
     @IsString()
-    fullName!: string
+    first_name!: string
+
+    @ApiProperty({ example: 'Doe' })
+    @IsString()
+    last_name!: string
 
     @ApiProperty({ example: 'A12' })
     @IsString()
@@ -32,6 +36,15 @@ export class ResidentSelfOnboardingDto {
     @ApiProperty({ example: 'john@example.com' })
     @IsEmail()
     email!: string
+
+    @ApiProperty({ example: 'A' })
+    @IsString()
+    block?: string
+
+    @ApiPropertyOptional({ example: 'estate-street-id' })
+    @IsOptional()
+    @IsString()
+    streetId?: string
 }
 
 export class CreateResidentDto {
