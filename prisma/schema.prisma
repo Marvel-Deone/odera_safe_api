@@ -524,6 +524,7 @@ model ResidentSelfOnboarding {
   houseNumber     String
   residentAddress String
   whatsappPhone   String @unique
+  email   String @unique
 
   activationCodeHash      String
   activationCodeExpiresAt DateTime

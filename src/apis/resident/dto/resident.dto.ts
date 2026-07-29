@@ -28,6 +28,10 @@ export class ResidentSelfOnboardingDto {
         message: 'WhatsApp phone number must be between 10 and 11 characters',
     })
     whatsappPhone!: string
+
+    @ApiProperty({ example: 'john@example.com' })
+    @IsEmail()
+    email!: string
 }
 
 export class CreateResidentDto {
