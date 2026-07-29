@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt'
 import { success, error } from '../../common/utils/response.util'
 import { KycStatus, ResidentReviewAction, ResidentStatus, Role } from '@prisma/client'
 import { PaystackService } from '../finance/paystack.service'
-import { ClientsService } from '../../shared/client/client.service'
+import { ClientService } from '../../shared/client/client.service'
 import dayjs from 'dayjs'
 
 const getErrorMessage = (err: unknown, fallback = 'Unknown error') =>
@@ -34,7 +34,7 @@ export class ResidentService {
     constructor(
         private prisma: PrismaService,
         private paystack: PaystackService,
-        private readonly clientsService: ClientsService,
+        private readonly clientsService: ClientService,
     ) { }
 
     async onboardResident(dto: CreateResidentDto) {

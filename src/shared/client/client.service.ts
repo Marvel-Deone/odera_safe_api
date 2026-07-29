@@ -5,7 +5,7 @@ import { lastValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable()
-export class ClientsService {
+export class ClientService {
     constructor (private readonly httpService: HttpService) { }
 
     async getUrl (url: string, headers: Record<string, string>, timeoutMs = 30000): Promise<any> {

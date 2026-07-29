@@ -33,6 +33,7 @@ import { EstateConfigModule } from './apis/estate-config/estate-config.module';
 import { HeavyVehicleModule } from './apis/heavy-vehicle/heavy-vehicle.module';
 import { ShortletModule } from './apis/shortlet/shortlet.module';
 import { ClientsModule } from './shared/client/client.module';
+import { BusinessHubModule } from './apis/business-hub/business-hub.module';
 // import { ClientModule } from './shared/client/client.module';
 
 @Module({
@@ -75,6 +76,7 @@ import { ClientsModule } from './shared/client/client.module';
     HeavyVehicleModule,
     ShortletModule,
     ClientsModule,
+    BusinessHubModule,
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],

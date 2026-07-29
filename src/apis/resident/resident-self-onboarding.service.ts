@@ -1,18 +1,22 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable, Logger } from '@nestjs/common'
 import { LogCategory, ResidentSelfOnboardingStatus } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
 import { error, success } from '../../common/utils/response.util'
 import { formatPhoneNumber } from '../../common/utils/phone.util'
 import { PrismaService } from '../../database/prisma/prisma.service'
 import { ResidentSelfOnboardingDto } from './dto/resident.dto'
+import { ResidentEmailService } from './resident-email.service'
 import { ResidentWhatsappService } from './resident-whatsapp.service'
 
 @Injectable()
 export class ResidentSelfOnboardingService {
+  private readonly logger = new Logger(ResidentSelfOnboardingService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly whatsappService: ResidentWhatsappService,
-  ) {}
+    private readonly emailService: ResidentEmailService,
+  ) { }
 
   private generateActivationCode() {
     return Math.floor(100000 + Math.random() * 900000).toString()
@@ -55,41 +59,42 @@ export class ResidentSelfOnboardingService {
     const activationCodeExpiresAt = this.activationExpiry()
     const appDownloadLink = process.env.APP_DOWNLOAD_LINK ?? 'https://odera-safe.vercel.app'
 
-    const whatsappDelivery = await this.whatsappService.sendOnboardingActivationMessage({
-      whatsappPhone,
-      houseNumber: dto.houseNumber,
-      activationCode,
-      appDownloadLink,
-    })
+    // const whatsappDelivery = await this.whatsappService.sendOnboardingActivationMessage({
+    //   whatsappPhone,
+    //   houseNumber: dto.houseNumber,
+    //   activationCode,
+    //   appDownloadLink,
+    // })
 
     const onboarding = await this.prisma.$transaction(async (tx) => {
       const record = existing
         ? await tx.residentSelfOnboarding.update({
-            where: { id: existing.id },
-            data: {
-              estateId: estate.id,
-              fullName: dto.fullName,
-              houseNumber: dto.houseNumber,
-              residentAddress: dto.residentAddress,
-              whatsappPhone,
-              activationCodeHash,
-              activationCodeExpiresAt,
-              activatedAt: null,
-              status: ResidentSelfOnboardingStatus.PENDING,
-            },
-          })
+          where: { id: existing.id },
+          data: {
+            estateId: estate.id,
+            fullName: dto.fullName,
+            houseNumber: dto.houseNumber,
+            residentAddress: dto.residentAddress,
+            whatsappPhone,
+            activationCodeHash,
+            activationCodeExpiresAt,
+            activatedAt: null,
+            status: ResidentSelfOnboardingStatus.PENDING,
+          },
+        })
         : await tx.residentSelfOnboarding.create({
-            data: {
-              estateId: estate.id,
-              fullName: dto.fullName,
-              houseNumber: dto.houseNumber,
-              residentAddress: dto.residentAddress,
-              whatsappPhone,
-              activationCodeHash,
-              activationCodeExpiresAt,
-              status: ResidentSelfOnboardingStatus.PENDING,
-            },
-          })
+          data: {
+            estateId: estate.id,
+            fullName: dto.fullName,
+            houseNumber: dto.houseNumber,
+            residentAddress: dto.residentAddress,
+            whatsappPhone,
+            email: dto.email,
+            activationCodeHash,
+            activationCodeExpiresAt,
+            status: ResidentSelfOnboardingStatus.PENDING,
+          },
+        })
 
       await tx.activityLog.create({
         data: {
@@ -104,11 +109,20 @@ export class ResidentSelfOnboardingService {
             fullName: dto.fullName,
             houseNumber: dto.houseNumber,
             whatsappPhone,
+            email: dto.email,
           },
         },
       })
 
       return record
+    })
+
+    const emailDelivery = await this.emailService.sendOnboardingActivationEmail({
+      toEmail: dto.email,
+      fullName: dto.fullName,
+      houseNumber: dto.houseNumber,
+      activationCode,
+      appDownloadLink,
     })
 
     return success(
@@ -123,7 +137,8 @@ export class ResidentSelfOnboardingService {
           activationCodeExpiresAt: onboarding.activationCodeExpiresAt,
           createdAt: onboarding.createdAt,
         },
-        whatsappDelivery,
+        // whatsappDelivery,
+        emailDelivery,
       },
       'Onboarding Successful',
       'Resident onboarding completed and activation message sent',

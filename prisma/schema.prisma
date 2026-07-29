@@ -225,6 +225,7 @@ enum WalletTransactionType {
   VEHICLE_REGISTRATION
   HEAVY_VEHICLE_PASS
   SHORTLET_REGISTRATION
+  BUSINESS_REGISTRATION
   WITHDRAWAL
   REFUND
 }
@@ -306,6 +307,50 @@ enum PaymentStatus {
   FAILED
 }
 
+enum BusinessPaymentFrequency {
+  MONTHLY
+  ANNUAL
+}
+
+enum BusinessHubStatus {
+  ENABLED
+  DISABLED
+}
+
+enum BusinessCategory {
+  CHURCH
+  SCHOOL
+  RELIGIOUS_ORGANIZATION
+  OFFICE
+  SHOP
+  OTHER
+}
+
+enum BusinessRegistrationStatus {
+  DRAFT
+  PENDING_PAYMENT
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+}
+
+enum BusinessPaymentStatus {
+  UNPAID
+  PAID
+  FAILED
+  EXPIRED
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -353,6 +398,8 @@ model Estate {
   shortletSettings          ShortletSettings?
   streets                   EstateStreet[]
   heavyVehicleCategories    HeavyVehicleCategory[]
+  businessHubSettings       BusinessHubSettings?
+  businessRegistrations     BusinessRegistration[]
 }
 
 model User {
@@ -382,6 +429,7 @@ model User {
   approvedVehicles      Vehicle[]             @relation("VehicleApprover")
   approvedHeavyVehicles HeavyVehiclePass[]    @relation("HeavyVehicleApprover")
   shortletAccessLogs    ShortletAccessLog[]   @relation("ShortletAccessVerifier")
+  businessAccessLogs    BusinessAccessLog[]
 }
 
 model Resident {
@@ -401,7 +449,7 @@ model Resident {
   status          ResidentStatus @default(PENDING)
   kycStatus       KycStatus      @default(NOT_SUBMITTED)
   rejectionReason String?
-  face_capture     String?
+  face_capture    String?
 
   house_no        String
   block           String
@@ -452,18 +500,19 @@ model Resident {
 
   createdAt DateTime @default(now())
 
-  estate             Estate              @relation(fields: [estateId], references: [id])
-  street             EstateStreet?       @relation(fields: [streetId], references: [id])
-  user               User?               @relation(fields: [userId], references: [id])
-  visitors           Visitor[]
+  estate                Estate                 @relation(fields: [estateId], references: [id])
+  street                EstateStreet?          @relation(fields: [streetId], references: [id])
+  user                  User?                  @relation(fields: [userId], references: [id])
+  visitors              Visitor[]
   // maintenanceTickets MaintenanceTicket[]
-  incidents          Incident[]
-  wallet             Wallet?
-  levyAssignments    LevyAssignment[]
-  withdrawalRequests WithdrawalRequest[]
-  shortletProperties ShortletProperty[]
-  vehicles           Vehicle[]
-  heavyVehiclePasses HeavyVehiclePass[]
+  incidents             Incident[]
+  wallet                Wallet?
+  levyAssignments       LevyAssignment[]
+  withdrawalRequests    WithdrawalRequest[]
+  shortletProperties    ShortletProperty[]
+  vehicles              Vehicle[]
+  heavyVehiclePasses    HeavyVehiclePass[]
+  businessRegistrations BusinessRegistration[]
 }
 
 model ResidentSelfOnboarding {
@@ -475,6 +524,7 @@ model ResidentSelfOnboarding {
   houseNumber     String
   residentAddress String
   whatsappPhone   String @unique
+  email   String @unique
 
   activationCodeHash      String
   activationCodeExpiresAt DateTime
@@ -541,6 +591,88 @@ model ShortletSettings {
   updatedAt             DateTime @updatedAt
 
   estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+}
+
+model BusinessHubSettings {
+  id                 String                   @id @default(uuid())
+  estateId           String                   @unique
+  registrationFee    Decimal                  @default(0)
+  paymentFrequency   BusinessPaymentFrequency @default(ANNUAL)
+  maxVehiclesAllowed Int                      @default(1)
+  status             BusinessHubStatus        @default(DISABLED)
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+}
+
+model BusinessRegistration {
+  id                 String                     @id @default(uuid())
+  estateId           String
+  residentId         String
+  category           BusinessCategory
+  otherCategory      String?
+  validDays          Weekday[]
+  startTime          String
+  endTime            String
+  maxVehiclesAllowed Int
+  registrationFee    Decimal
+  paymentFrequency   BusinessPaymentFrequency
+  registrationStatus BusinessRegistrationStatus @default(DRAFT)
+  paymentStatus      BusinessPaymentStatus      @default(UNPAID)
+  paidAt             DateTime?
+  expiresAt          DateTime?
+  suspendedAt        DateTime?
+  suspensionReason   String?
+  passcode           String                     @unique
+  qrPayload          String                     @unique
+  qrCode             String
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+
+  estate     Estate              @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  resident   Resident            @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  payments   BusinessPayment[]
+  accessLogs BusinessAccessLog[]
+
+  @@index([estateId, registrationStatus])
+  @@index([residentId])
+  @@index([paymentStatus])
+}
+
+model BusinessPayment {
+  id             String                @id @default(uuid())
+  registrationId String
+  amount         Decimal
+  status         BusinessPaymentStatus
+  reference      String                @unique
+  paidAt         DateTime?
+  createdAt      DateTime              @default(now())
+
+  registration BusinessRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@index([registrationId])
+  @@index([status])
+}
+
+model BusinessAccessLog {
+  id             String   @id @default(uuid())
+  registrationId String?
+  passcode       String?
+  qrPayload      String?
+  gateName       String
+  vehiclePlate   String?
+  verifiedById   String?
+  allowed        Boolean
+  deniedReason   String?
+  createdAt      DateTime @default(now())
+
+  registration BusinessRegistration? @relation(fields: [registrationId], references: [id], onDelete: SetNull)
+  verifiedBy   User?                 @relation(fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@index([registrationId])
+  @@index([verifiedById])
+  @@index([createdAt])
 }
 
 model Guard {
