@@ -294,7 +294,7 @@ Use the activation code below to complete your registration.
     font-size:13px;
     color:#64748b;
     ">
-    Activation Code
+    Temporary Password
     </div>
 
     </td>
