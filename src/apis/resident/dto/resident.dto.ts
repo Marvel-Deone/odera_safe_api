@@ -38,6 +38,7 @@ export class ResidentSelfOnboardingDto {
     email!: string
 
     @ApiProperty({ example: 'A' })
+    @IsOptional()
     @IsString()
     block?: string
 
