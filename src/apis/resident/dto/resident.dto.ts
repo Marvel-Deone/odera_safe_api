@@ -248,6 +248,18 @@ export class CompleteResidentProfileDto {
 
     @ApiProperty({ example: true })
     @IsBoolean()
+    ndprConsentDataProcessing!: boolean
+
+    @ApiProperty({ example: true })
+    @IsBoolean()
+    ndprConsentIdentity!: boolean
+
+    @ApiProperty({ example: true })
+    @IsBoolean()
+    ndprConsentThirdParty!: boolean
+
+    @ApiProperty({ example: true })
+    @IsBoolean()
     profileDeclaration!: boolean
 }
 
