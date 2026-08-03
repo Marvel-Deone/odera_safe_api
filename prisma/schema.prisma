@@ -351,6 +351,17 @@ enum Weekday {
   SUNDAY
 }
 
+enum ResidentAssociateCategory {
+  STAFF
+  CO_RESIDENT
+}
+
+enum NinVerificationStatus {
+  NOT_SUBMITTED
+  VERIFIED
+  FAILED
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -414,6 +425,7 @@ model User {
   estateId              String
   estate                Estate                @relation(fields: [estateId], references: [id])
   resident              Resident?
+  residentAssociate     ResidentAssociate?
   gateLogs              GateLog[]
   guard                 Guard?
   assignedIncidents     Incident[]            @relation("AssignedIncidentUser")
@@ -516,6 +528,7 @@ model Resident {
   vehicles              Vehicle[]
   heavyVehiclePasses    HeavyVehiclePass[]
   businessRegistrations BusinessRegistration[]
+  residentAssociates    ResidentAssociate[]
 }
 
 model ResidentSelfOnboarding {
@@ -542,6 +555,35 @@ model ResidentSelfOnboarding {
 
   @@index([estateId, status])
   @@index([whatsappPhone])
+}
+
+model ResidentAssociate {
+  id                    String                    @id @default(uuid())
+  residentId            String
+  userId                String?                   @unique
+  category              ResidentAssociateCategory @default(CO_RESIDENT)
+  fullName              String
+  email                 String?                   @unique
+  phoneNumber           String
+  role                  String                    @default("Co-resident")
+  idType                String
+  idNumber              String
+  faceCapture           String?
+  workingDays           Weekday[]
+  entryTime             String?
+  exitTime              String?
+  ninVerificationStatus NinVerificationStatus     @default(NOT_SUBMITTED)
+  ninVerificationData   Json?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+
+  resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([residentId])
+  @@index([userId])
+  @@index([category])
+  @@index([ninVerificationStatus])
 }
 
 model EstateStreet {

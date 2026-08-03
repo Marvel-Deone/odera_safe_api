@@ -138,48 +138,47 @@
 //   }
 // }
 
-
-import { Injectable, Logger } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { Resend } from 'resend'
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Resend } from 'resend';
 
 @Injectable()
 export class ResidentEmailService {
-    private readonly logger = new Logger(ResidentEmailService.name)
-    private readonly resend: Resend
+    private readonly logger = new Logger(ResidentEmailService.name);
+    private readonly resend: Resend;
 
     constructor(private readonly config: ConfigService) {
-        this.resend = new Resend(this.config.get<string>('RESEND_API_KEY'))
+        this.resend = new Resend(this.config.get<string>('RESEND_API_KEY'));
     }
 
     async sendOnboardingActivationEmail(input: {
-        toEmail: string
-        fullName?: string
-        houseNumber: string
-        activationCode: string
-        appDownloadLink: string
+        toEmail: string;
+        fullName?: string;
+        houseNumber: string;
+        activationCode: string;
+        appDownloadLink: string;
     }) {
-        const toEmail = input.toEmail?.trim()
+        const toEmail = input.toEmail?.trim();
 
         if (!toEmail) {
             return {
                 accepted: false,
                 status: 'SKIPPED',
                 reason: 'No recipient email provided',
-            }
+            };
         }
 
-        const from = this.config.get<string>('RESEND_FROM_EMAIL')?.trim()
+        const from = this.config.get<string>('RESEND_FROM_EMAIL')?.trim();
 
         if (!from) {
             return {
                 accepted: false,
                 status: 'SKIPPED',
                 reason: 'RESEND_FROM_EMAIL not configured',
-            }
+            };
         }
 
-        const subject = 'Welcome to Odera Safe • Your Activation Code'
+        const subject = 'Welcome to Odera Safe • Your Activation Code';
 
         const text = [
             `Hello ${input.fullName ?? 'there'},`,
@@ -188,7 +187,7 @@ export class ResidentEmailService {
             `Download the app here: ${input.appDownloadLink}`,
             '',
             'Use this code to complete your onboarding.',
-        ].join('\n')
+        ].join('\n');
 
         // const html = `
         //   <p>Hello ${input.fullName ?? 'there'},</p>
@@ -399,7 +398,7 @@ If you weren't expecting this invitation, you can safely ignore this email.
 
     </body>
     </html>
-    `
+    `;
 
         try {
             const { data, error } = await this.resend.emails.send({
@@ -408,18 +407,18 @@ If you weren't expecting this invitation, you can safely ignore this email.
                 subject,
                 text,
                 html,
-            })
+            });
 
             if (error) {
                 this.logger.warn(
                     `Email delivery failed for ${toEmail}: ${error.message}`,
-                )
+                );
 
                 return {
                     accepted: false,
                     status: 'FAILED',
                     reason: error.message,
-                }
+                };
             }
 
             return {
@@ -428,18 +427,158 @@ If you weren't expecting this invitation, you can safely ignore this email.
                 provider: 'resend',
                 recipient: toEmail,
                 emailId: data?.id,
-            }
+            };
         } catch (error) {
             const message =
-                error instanceof Error ? error.message : 'Unknown Resend error'
+                error instanceof Error ? error.message : 'Unknown Resend error';
 
-            this.logger.error(`Email delivery failed for ${toEmail}: ${message}`)
+            this.logger.error(
+                `Email delivery failed for ${toEmail}: ${message}`,
+            );
 
             return {
                 accepted: false,
                 status: 'FAILED',
                 reason: message,
+            };
+        }
+    }
+
+    async sendCoResidentWelcomeEmail(input: {
+        toEmail: string;
+        fullName?: string;
+        temporaryPassword: string;
+        appLoginLink: string;
+    }) {
+        const toEmail = input.toEmail?.trim();
+
+        if (!toEmail) {
+            return {
+                accepted: false,
+                status: 'SKIPPED',
+                reason: 'No recipient email provided',
+            };
+        }
+
+        const from = this.config.get<string>('RESEND_FROM_EMAIL')?.trim();
+
+        if (!from) {
+            return {
+                accepted: false,
+                status: 'SKIPPED',
+                reason: 'RESEND_FROM_EMAIL not configured',
+            };
+        }
+
+        const subject = 'Welcome to Odera Safe';
+        const text = [
+            `Hello ${input.fullName ?? 'there'},`,
+            '',
+            'A co-resident account has been created for you on Odera Safe.',
+            `Email: ${toEmail}`,
+            `Temporary password: ${input.temporaryPassword}`,
+            `Open the app and log in here: ${input.appLoginLink}`,
+            '',
+            'You will be asked to change this password after your first login.',
+        ].join('\n');
+
+        const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Odera Safe Co-resident Welcome</title>
+    </head>
+    <body style="margin:0;padding:0;background:#f5f7fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7fb;padding:40px 16px;">
+    <tr>
+    <td align="center">
+    <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);">
+    <tr>
+    <td style="background:#a41818;padding:32px;text-align:center;color:#ffffff;">
+    <h1 style="margin:0;font-size:28px;font-weight:700;">Odera Safe</h1>
+    <p style="margin-top:10px;font-size:16px;color:#f3dada;">Co-resident Account</p>
+    </td>
+    </tr>
+    <tr>
+    <td style="padding:40px;">
+    <p style="margin-top:0;font-size:18px;">Hello <strong>${input.fullName ?? 'there'}</strong>,</p>
+    <p style="line-height:1.7;color:#475569;">
+    A co-resident account has been created for you on <strong>Odera Safe</strong>.
+    Use the temporary password below to log in.
+    </p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:28px 0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+    <tr>
+    <td style="padding:24px;">
+    <p style="margin:0 0 10px;color:#64748b;font-size:14px;">Email</p>
+    <p style="margin:0 0 20px;font-size:18px;color:#0f172a;"><strong>${toEmail}</strong></p>
+    <p style="margin:0 0 10px;color:#64748b;font-size:14px;">Temporary password</p>
+    <p style="margin:0;font-size:24px;color:#a41818;"><strong>${input.temporaryPassword}</strong></p>
+    </td>
+    </tr>
+    </table>
+    <table cellspacing="0" cellpadding="0" align="center">
+    <tr>
+    <td style="border-radius:8px;background:#a41818;">
+    <a href="${input.appLoginLink}" style="display:inline-block;padding:16px 32px;font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;">Open App</a>
+    </td>
+    </tr>
+    </table>
+    <p style="margin-top:32px;line-height:1.7;color:#475569;">
+    You will be asked to change this password after your first login. No extra account setup is required.
+    </p>
+    </td>
+    </tr>
+    </table>
+    </td>
+    </tr>
+    </table>
+    </body>
+    </html>
+    `;
+
+        try {
+            const { data, error } = await this.resend.emails.send({
+                from,
+                to: toEmail,
+                subject,
+                text,
+                html,
+            });
+
+            if (error) {
+                this.logger.warn(
+                    `Co-resident email delivery failed for ${toEmail}: ${error.message}`,
+                );
+
+                return {
+                    accepted: false,
+                    status: 'FAILED',
+                    reason: error.message,
+                };
             }
+
+            return {
+                accepted: true,
+                status: 'SENT',
+                provider: 'resend',
+                recipient: toEmail,
+                emailId: data?.id,
+            };
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : 'Unknown Resend error';
+
+            this.logger.error(
+                `Co-resident email delivery failed for ${toEmail}: ${message}`,
+            );
+
+            return {
+                accepted: false,
+                status: 'FAILED',
+                reason: message,
+            };
         }
     }
 }
