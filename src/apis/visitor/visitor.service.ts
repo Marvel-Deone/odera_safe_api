@@ -5,6 +5,7 @@ import {
 
 import {
     LogCategory,
+    Prisma,
     Role,
     VisitorStatus,
 } from '@prisma/client'
@@ -29,6 +30,14 @@ export class VisitorService {
         private prisma: PrismaService,
         private trackingService: TrackingService,
     ) { }
+
+    private accompanyingVisitorsJson(visitors: CreateVisitorDto['accompanyingVisitors'] = []) {
+        return visitors.map((visitor) => ({
+            name: visitor.name,
+            ageCategory: visitor.ageCategory,
+            ...(visitor.phoneNumber !== undefined ? { phoneNumber: visitor.phoneNumber } : {}),
+        })) as Prisma.InputJsonValue
+    }
 
     // resident: create visitor
     async createVisitor(
@@ -84,6 +93,15 @@ export class VisitorService {
 
                     plate_no:
                         dto.plate_no || null,
+
+                    hasAccompanyingVisitor:
+                        dto.hasAccompanyingVisitor ??
+                        false,
+
+                    accompanyingVisitors:
+                        dto.hasAccompanyingVisitor
+                            ? this.accompanyingVisitorsJson(dto.accompanyingVisitors)
+                            : this.accompanyingVisitorsJson(),
 
                     visit_date: new Date(
                         dto.visit_date,
@@ -349,6 +367,26 @@ export class VisitorService {
                         undefined && {
                         biometric_enabled:
                             dto.biometric_enabled,
+                    }),
+
+                    ...(dto.hasAccompanyingVisitor !==
+                        undefined && {
+                        hasAccompanyingVisitor:
+                            dto.hasAccompanyingVisitor,
+                        accompanyingVisitors:
+                            dto.hasAccompanyingVisitor
+                                ? this.accompanyingVisitorsJson(dto.accompanyingVisitors)
+                                : this.accompanyingVisitorsJson(),
+                    }),
+
+                    ...(dto.hasAccompanyingVisitor ===
+                        undefined &&
+                        dto.accompanyingVisitors !==
+                        undefined && {
+                        hasAccompanyingVisitor:
+                            dto.accompanyingVisitors.length > 0,
+                        accompanyingVisitors:
+                            this.accompanyingVisitorsJson(dto.accompanyingVisitors),
                     }),
                 },
             })

@@ -1,0 +1,2 @@
+ALTER TABLE "Visitor" ADD COLUMN IF NOT EXISTS "hasAccompanyingVisitor" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Visitor" ADD COLUMN IF NOT EXISTS "accompanyingVisitors" JSONB NOT NULL DEFAULT '[]';
