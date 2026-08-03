@@ -770,10 +770,12 @@ model Visitor {
   estateId   String
   residentId String
 
-  name     String
-  phone    String?
-  purpose  String?
-  plate_no String?
+  name                   String
+  phone                  String?
+  purpose                String?
+  plate_no               String?
+  hasAccompanyingVisitor Boolean @default(false)
+  accompanyingVisitors   Json    @default("[]")
 
   visit_date DateTime @default(now())
 
