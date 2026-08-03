@@ -34,6 +34,7 @@ import { HeavyVehicleModule } from './apis/heavy-vehicle/heavy-vehicle.module';
 import { ShortletModule } from './apis/shortlet/shortlet.module';
 import { ClientsModule } from './shared/client/client.module';
 import { BusinessHubModule } from './apis/business-hub/business-hub.module';
+import { ResidentAssociateModule } from './apis/resident-associate/resident-associate.module';
 // import { ClientModule } from './shared/client/client.module';
 
 @Module({
@@ -77,6 +78,7 @@ import { BusinessHubModule } from './apis/business-hub/business-hub.module';
     ShortletModule,
     ClientsModule,
     BusinessHubModule,
+    ResidentAssociateModule,
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],
