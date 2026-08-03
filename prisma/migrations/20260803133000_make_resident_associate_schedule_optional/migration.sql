@@ -1,0 +1,3 @@
+ALTER TABLE "ResidentAssociate"
+  ALTER COLUMN "entryTime" DROP NOT NULL,
+  ALTER COLUMN "exitTime" DROP NOT NULL;

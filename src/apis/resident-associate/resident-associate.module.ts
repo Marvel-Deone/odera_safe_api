@@ -1,12 +1,14 @@
-import { HttpModule } from '@nestjs/axios'
-import { Module } from '@nestjs/common'
-import { PrismaModule } from '../../database/prisma/prisma.module'
-import { ResidentAssociateController } from './resident-associate.controller'
-import { ResidentAssociateService } from './resident-associate.service'
+import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from '../../database/prisma/prisma.module';
+import { ResidentEmailService } from '../resident/resident-email.service';
+import { ResidentAssociateController } from './resident-associate.controller';
+import { ResidentAssociateService } from './resident-associate.service';
 
 @Module({
-  imports: [PrismaModule, HttpModule],
-  controllers: [ResidentAssociateController],
-  providers: [ResidentAssociateService],
+    imports: [ConfigModule, PrismaModule, HttpModule],
+    controllers: [ResidentAssociateController],
+    providers: [ResidentAssociateService, ResidentEmailService],
 })
 export class ResidentAssociateModule {}
