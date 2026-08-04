@@ -5,10 +5,14 @@ import {
     IsOptional,
     IsString,
     IsUUID,
-} from 'class-validator'
+} from 'class-validator';
 
-import { IncidentCategory, IncidentSeverity, TicketPriority } from '@prisma/client'
-import { ApiProperty } from '@nestjs/swagger'
+import {
+    IncidentCategory,
+    IncidentSeverity,
+    TicketPriority,
+} from '@prisma/client';
+import { ApiProperty } from '@nestjs/swagger';
 
 // export class CreateIncidentDto {
 //     @ApiProperty({
@@ -55,28 +59,27 @@ export class CreateIncidentDto {
         example: 'Water leakage in kitchen',
     })
     @IsString()
-    title!: string
+    title!: string;
 
     @ApiProperty({
         enum: IncidentCategory,
         example: IncidentCategory.MAINTENANCE,
     })
     @IsEnum(IncidentCategory)
-    category!: IncidentCategory
+    category!: IncidentCategory;
 
     @ApiProperty({
-        example:
-            'Water has been leaking from the kitchen sink since yesterday',
+        example: 'Water has been leaking from the kitchen sink since yesterday',
     })
     @IsString()
-    description!: string
+    description!: string;
 
     @ApiProperty({
         enum: IncidentSeverity,
         example: IncidentSeverity.MEDIUM,
     })
     @IsEnum(IncidentSeverity)
-    severity!: IncidentSeverity
+    severity!: IncidentSeverity;
 
     @ApiProperty({
         required: false,
@@ -88,7 +91,7 @@ export class CreateIncidentDto {
     })
     @IsOptional()
     @IsArray()
-    beforePhotos?: string[]
+    beforePhotos?: string[];
 
     @ApiProperty({
         required: false,
@@ -96,7 +99,7 @@ export class CreateIncidentDto {
     })
     @IsOptional()
     @IsString()
-    location?: string
+    location?: string;
 
     @ApiProperty({
         required: false,
@@ -104,7 +107,7 @@ export class CreateIncidentDto {
     })
     @IsOptional()
     @IsDateString()
-    occurredAt?: string
+    occurredAt?: string;
 }
 
 export class AssignIncidentDto {
@@ -112,7 +115,7 @@ export class AssignIncidentDto {
         example: '9876543289756gf6dd55',
     })
     @IsUUID()
-    assignedToId!: string
+    assignedToId!: string;
 }
 
 export class CompleteIncidentDto {
@@ -122,33 +125,64 @@ export class CompleteIncidentDto {
     })
     @IsOptional()
     @IsArray()
-    afterPhotos?: string[]
+    afterPhotos?: string[];
 
     @ApiProperty({
         example: 'Rake, wire',
     })
     @IsOptional()
     @IsString()
-    materialsUsed?: string
+    materialsUsed?: string;
 
     @ApiProperty({
         example: 'Less than 1 hour',
     })
     @IsOptional()
     @IsString()
-    timeTaken?: string
+    timeTaken?: string;
 
     @ApiProperty({
         example: 'Replaced damaged pipe and restored water supply',
     })
     @IsOptional()
     @IsString()
-    completionNote?: string
+    completionNote?: string;
 }
 
 export class RateIncidentDto {
     @ApiProperty({
         example: 5,
     })
-    rating!: number
+    rating!: number;
+}
+
+export class CreateResidentSOSDto {
+    @ApiProperty({
+        required: false,
+        example: 'I need urgent help at home',
+    })
+    @IsOptional()
+    @IsString()
+    message?: string;
+}
+
+export class SilenceResidentSOSDto {
+    @ApiProperty({
+        required: false,
+        example: 'Checked with resident. No estate-wide emergency.',
+    })
+    @IsOptional()
+    @IsString()
+    note?: string;
+}
+
+export class ResolveAllResidentSOSDto {
+    @ApiProperty({
+        required: false,
+        example:
+            'All active resident SOS alerts have been reviewed and cleared.',
+    })
+    @IsOptional()
+    @IsString()
+    resolutionNote?: string;
 }
