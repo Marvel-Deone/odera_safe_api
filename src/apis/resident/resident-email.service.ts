@@ -246,19 +246,23 @@ export class ResidentEmailService {
     <tr>
     <td style="padding:40px;">
 
-    <p style="margin-top:0;font-size:18px;">
+<p style="margin-top:0;font-size:18px;">
     Hello <strong>${input.fullName ?? 'Resident'}</strong>,
-    </p>
+</p>
+<p style="line-height:1.7;color:#475569;">
+Welcome to <strong>Odera Safe</strong>.
+Your resident onboarding has been created successfully for house
+<strong>${input.houseNumber}</strong>.
+</p>
 
-    <p style="line-height:1.7;color:#475569;">
-    Welcome to <strong>Odera Safe</strong>.
-    Your resident onboarding has been created successfully for house
-    <strong>${input.houseNumber}</strong>.
-    </p>
+<p style="line-height:1.7;color:#475569;">
+Open the link below in your phone's browser to access the Odera Safe app.
+You can then install it on your home screen for a native app experience.
+</p>
 
-    <p style="line-height:1.7;color:#475569;">
-    Use the activation code below to complete your registration in the mobile app.
-    </p>
+<p style="line-height:1.7;color:#475569;">
+Use the activation code below to complete your registration.
+</p>
 
     <!-- Code -->
 
@@ -289,7 +293,7 @@ export class ResidentEmailService {
     font-size:13px;
     color:#64748b;
     ">
-    Activation Code
+    Temporary Password
     </div>
 
     </td>
@@ -315,15 +319,49 @@ export class ResidentEmailService {
     color:#ffffff;
     text-decoration:none;
     ">
-    Get the App
+    Open & Install App
     </a>
     </td>
     </tr>
     </table>
 
+    <table width="100%" cellspacing="0" cellpadding="0" style="margin-top:36px;">
+<tr>
+<td
+style="
+background:#f8fafc;
+border-left:4px solid #a41818;
+padding:20px;
+border-radius:8px;
+">
+
+<p style="margin-top:0;font-weight:bold;color:#1f2937;">
+📱 Install Odera Safe on your phone
+</p>
+
+<p style="margin:12px 0;color:#475569;line-height:1.6;">
+<strong>iPhone (Safari)</strong><br>
+Tap the <strong>Share</strong> button, then select
+<strong>Add to Home Screen</strong>.
+</p>
+
+<p style="margin:12px 0;color:#475569;line-height:1.6;">
+<strong>Android (Chrome)</strong><br>
+Tap the browser menu (⋮), then choose
+<strong>Install App</strong> or
+<strong>Add to Home Screen</strong>.
+</p>
+
+</td>
+</tr>
+</table>
+
     <p style="margin-top:40px;line-height:1.7;color:#475569;">
     For your security, never share this activation code with anyone.
-    If you did not request this onboarding, please ignore this email.
+
+Once you've opened the app, enter the code to activate your account.
+
+If you weren't expecting this invitation, you can safely ignore this email.
     </p>
 
     </td>
