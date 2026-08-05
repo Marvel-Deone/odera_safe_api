@@ -17,7 +17,6 @@ import { SmsModule } from './apis/sms/sms.module';
 import { ScheduleModule } from '@nestjs/schedule'
 import { PatrolMonitoringModule } from './apis/patrol-monitoring/patrol-monitoring.module';
 import { PatrolModule } from './apis/patrol/patrol.module';
-import { GuardSosModule } from './apis/guard-sos/guard-sos.module';
 import { ShiftSwapModule } from './apis/shift-swap/shift-swap.module';
 import { PerformanceModule } from './apis/performance/performance.module';
 import { GuardLocationModule } from './apis/guard-location/guard-location.module';
@@ -36,6 +35,7 @@ import { ClientsModule } from './shared/client/client.module';
 import { BusinessHubModule } from './apis/business-hub/business-hub.module';
 import { ResidentAssociateModule } from './apis/resident-associate/resident-associate.module';
 // import { ClientModule } from './shared/client/client.module';
+import { SosModule } from './apis/sos/sos.module';
 
 @Module({
   imports: [
@@ -62,11 +62,11 @@ import { ResidentAssociateModule } from './apis/resident-associate/resident-asso
     SmsModule,
     PatrolMonitoringModule,
     PatrolModule,
-    GuardSosModule,
     ShiftSwapModule,
     PerformanceModule,
     GuardLocationModule,
     IncidentModule,
+    SosModule,
     AnnouncementModule,
     ChatModule,
     PollModule,
