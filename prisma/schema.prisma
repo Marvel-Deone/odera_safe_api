@@ -148,6 +148,8 @@ enum IncidentStatus {
   ASSIGNED
   IN_PROGRESS
   RESOLVED
+  FALSE_ALARM
+  CLOSED
   OVERDUE
   BREACHED
 }
@@ -205,6 +207,39 @@ enum ChatRoomType {
   BROADCAST
   SECURITY
   ADMIN_ONLY
+  INCIDENT
+}
+
+enum IncidentTimelineEvent {
+  SOS_TRIGGERED
+  GPS_ACTIVATED
+  LIVE_STREAM_STARTED
+  NOTIFICATIONS_SENT
+  ESCALATED
+  RESOLVED
+  FALSE_ALARM
+  CLOSED
+}
+
+enum EmergencyNotificationEvent {
+  SOS_TRIGGERED
+  ESCALATED
+  ALARM_TRIGGERED
+  INCIDENT_CLOSED
+}
+
+enum EmergencyContactType {
+  POLICE
+  FIRE_SERVICE
+  AMBULANCE
+  ESTATE_SECURITY
+  OTHER
+}
+
+enum EmergencyContactActionType {
+  CALL
+  SMS
+  SUPER_ADMIN_ESCALATION
 }
 
 enum PollAudience {
@@ -411,6 +446,8 @@ model Estate {
   heavyVehicleCategories    HeavyVehicleCategory[]
   businessHubSettings       BusinessHubSettings?
   businessRegistrations     BusinessRegistration[]
+  emergencyContacts         EmergencyContact[]
+  emergencyContactActions   EmergencyContactAction[]
 }
 
 model User {
@@ -442,6 +479,10 @@ model User {
   approvedHeavyVehicles HeavyVehiclePass[]    @relation("HeavyVehicleApprover")
   shortletAccessLogs    ShortletAccessLog[]   @relation("ShortletAccessVerifier")
   businessAccessLogs    BusinessAccessLog[]
+  incidentChatParticipants  IncidentChatParticipant[]
+  emergencyNotifications    EmergencyNotification[]
+  emergencyContactActions   EmergencyContactAction[]
+  incidentTimelineEntries   IncidentTimelineEntry[]
 }
 
 model Resident {
@@ -655,6 +696,7 @@ model BusinessRegistration {
   id                 String                     @id @default(uuid())
   estateId           String
   residentId         String
+  name               String?
   category           BusinessCategory
   otherCategory      String?
   validDays          Weekday[]
@@ -1149,6 +1191,7 @@ model GuardSOS {
 
   guardId  String
   estateId String
+  incidentId String? @unique
 
   category GuardSOSCategory
   zone     String?
@@ -1170,11 +1213,13 @@ model GuardSOS {
   updatedAt DateTime @updatedAt
 
   // Relations
-  guard  Guard  @relation(fields: [guardId], references: [id], onDelete: Cascade)
-  estate Estate @relation(fields: [estateId], references: [id])
+  guard    Guard     @relation(fields: [guardId], references: [id], onDelete: Cascade)
+  estate   Estate    @relation(fields: [estateId], references: [id])
+  incident Incident? @relation(fields: [incidentId], references: [id], onDelete: SetNull)
 
   @@index([guardId, createdAt])
   @@index([status, createdAt])
+  @@index([incidentId])
 }
 
 model Incident {
@@ -1216,6 +1261,8 @@ model Incident {
 
   completionNote String?
   residentRating Int?
+  silencedAt     DateTime?
+  silencedBy     String?
 
   estate Estate @relation(fields: [estateId], references: [id])
 
@@ -1226,9 +1273,34 @@ model Incident {
   assignedToGuard Guard? @relation("AssignedIncidentGuard", fields: [assignedToGuardId], references: [id])
 
   assignedToUser User? @relation("AssignedIncidentUser", fields: [assignedToUserId], references: [id])
+  guardSos GuardSOS?
+  timeline IncidentTimelineEntry[]
+  chatRoom ChatRoom?
+  notifications EmergencyNotification[]
+  emergencyContactActions EmergencyContactAction[]
 
   @@index([estateId])
   @@index([category])
+}
+
+model IncidentTimelineEntry {
+  id String @id @default(uuid())
+
+  incidentId String
+  event      IncidentTimelineEvent
+  actorId    String?
+  actorRole  Role?
+  note       String?
+  location   String?
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  actor    User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([incidentId, createdAt])
+  @@index([event])
 }
 
 model MissedCheckpointAlert {
@@ -1371,22 +1443,98 @@ model ChatRoom {
 
   estateId String
   streetId String?
+  incidentId String? @unique
 
   name String
   type ChatRoomType
 
   block String?
+  closedAt DateTime?
 
   createdAt DateTime @default(now())
 
-  estate Estate        @relation(fields: [estateId], references: [id])
-  street EstateStreet? @relation(fields: [streetId], references: [id])
+  estate   Estate        @relation(fields: [estateId], references: [id])
+  street   EstateStreet? @relation(fields: [streetId], references: [id])
+  incident Incident?     @relation(fields: [incidentId], references: [id], onDelete: Cascade)
 
   messages ChatMessage[]
+  participants IncidentChatParticipant[]
 
   @@index([estateId, block])
   @@index([estateId, type])
   @@index([streetId])
+  @@index([incidentId])
+}
+
+model IncidentChatParticipant {
+  id String @id @default(uuid())
+
+  roomId String
+  userId String
+
+  createdAt DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId])
+}
+
+model EmergencyNotification {
+  id String @id @default(uuid())
+
+  incidentId String
+  recipientId String
+  event EmergencyNotificationEvent
+  deliveredAt DateTime @default(now())
+  metadata Json?
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@unique([incidentId, recipientId, event])
+  @@index([recipientId, deliveredAt])
+}
+
+model EmergencyContact {
+  id String @id @default(uuid())
+
+  estateId String
+  name String
+  type EmergencyContactType
+  phone String
+  smsPhone String?
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  actions EmergencyContactAction[]
+
+  @@index([estateId, isActive])
+}
+
+model EmergencyContactAction {
+  id String @id @default(uuid())
+
+  estateId String
+  incidentId String?
+  contactId String?
+  actorId String
+  action EmergencyContactActionType
+  destination String
+  note String?
+  metadata Json?
+  createdAt DateTime @default(now())
+
+  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  incident Incident? @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  contact EmergencyContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  actor User @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([estateId, createdAt])
+  @@index([incidentId])
 }
 
 model ChatMessage {
