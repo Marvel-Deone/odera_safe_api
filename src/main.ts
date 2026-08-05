@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SocketAuthAdapter } from './apis/sos/realtime/socket-auth.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,6 +27,7 @@ async function bootstrap() {
       transform: true,
     }),
   )
+  app.useWebSocketAdapter(new SocketAuthAdapter(app));
 
   const config = new DocumentBuilder()
     .setTitle('DD-SAFE API')
