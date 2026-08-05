@@ -40,10 +40,7 @@ export class VisitorService {
     }
 
     // resident: create visitor
-    async createVisitor(
-        userId: string,
-        dto: CreateVisitorDto,
-    ) {
+    async createVisitor(userId: string, dto: CreateVisitorDto,) {
         const resident =
             await this.prisma.resident.findFirst({
                 where: { userId },

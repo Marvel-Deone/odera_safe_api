@@ -696,6 +696,7 @@ model BusinessRegistration {
   id                 String                     @id @default(uuid())
   estateId           String
   residentId         String
+  name               String?
   category           BusinessCategory
   otherCategory      String?
   validDays          Weekday[]

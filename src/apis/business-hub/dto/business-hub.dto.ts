@@ -40,6 +40,10 @@ export class UpsertBusinessHubSettingsDto {
 }
 
 export class RegisterBusinessDto {
+  @ApiProperty({ example: 'Bolatito School' })
+  @IsString()
+  name!: string
+
   @ApiProperty({ enum: BusinessCategory, example: BusinessCategory.SCHOOL })
   @IsEnum(BusinessCategory)
   category!: BusinessCategory

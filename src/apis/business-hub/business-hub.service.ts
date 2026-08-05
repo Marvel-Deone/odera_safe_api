@@ -247,6 +247,7 @@ export class BusinessHubService {
           data: {
             estateId: resident.estateId,
             residentId: resident.id,
+            name: dto.name?.trim() || null,
             category: dto.category,
             otherCategory: dto.category === 'OTHER' ? dto.otherCategory?.trim() : null,
             validDays: dto.validDays,

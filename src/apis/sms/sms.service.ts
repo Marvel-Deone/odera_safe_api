@@ -64,12 +64,59 @@
 // }
 
 
-import { Injectable } from '@nestjs/common'
+// import { Injectable } from '@nestjs/common'
 
+// import axios from 'axios'
+
+// import { success } from '../../common/utils/response.util'
+
+// import { formatPhoneNumber } from '../../common/utils/phone.util'
+
+// @Injectable()
+// export class SmsService {
+//   async sendSms(
+//     phone: string,
+//     message: string,
+//   ) {
+//     console.log(`${process.env.TERMII_BASE_URL}/api/sms/send`)
+//     const response =
+//       await axios.post(
+//         `${process.env.TERMII_BASE_URL}/api/sms/send`,
+//         {
+//           api_key:
+//             process.env
+//               .TERMII_API_KEY,
+
+//           to:
+//             formatPhoneNumber(
+//               phone,
+//             ),
+
+//           from:
+//             process.env
+//               .TERMII_SENDER_ID,
+
+//           sms: message,
+
+//           type: 'plain',
+
+//           channel:
+//             'generic',
+//         },
+//       )
+
+//     return success(
+//       response.data,
+//       'SMS Sent',
+//       'SMS sent successfully',
+//     )
+//   }
+// }
+
+import { Injectable } from '@nestjs/common'
 import axios from 'axios'
 
 import { success } from '../../common/utils/response.util'
-
 import { formatPhoneNumber } from '../../common/utils/phone.util'
 
 @Injectable()
@@ -78,32 +125,22 @@ export class SmsService {
     phone: string,
     message: string,
   ) {
-    console.log(`${process.env.TERMII_BASE_URL}/api/sms/send`)
-    const response =
-      await axios.post(
-        `${process.env.TERMII_BASE_URL}/api/sms/send`,
-        {
-          api_key:
-            process.env
-              .TERMII_API_KEY,
+    const url = `${process.env.TERMII_BASE_URL}/api/v1/sms/send`
 
-          to:
-            formatPhoneNumber(
-              phone,
-            ),
+    console.log('Termii URL:', url)
+    console.log('Sender ID:', process.env.TERMII_SENDER_ID)
 
-          from:
-            process.env
-              .TERMII_SENDER_ID,
-
-          sms: message,
-
-          type: 'plain',
-
-          channel:
-            'generic',
-        },
-      )
+    const response = await axios.post(
+      url,
+      {
+        api_key: process.env.TERMII_API_KEY,
+        to: formatPhoneNumber(phone),
+        from: process.env.TERMII_SENDER_ID,
+        sms: message,
+        type: 'plain',
+        channel: 'generic',
+      },
+    )
 
     return success(
       response.data,
