@@ -1,41 +1,92 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-} from '@nestjs/common'
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
-import { Reflector } from '@nestjs/core'
+import { Reflector } from '@nestjs/core';
 
-import { ROLES_KEY } from '../decorators/roles.decorator'
-import { Role } from '@prisma/client'
+import { ROLES_KEY } from '../decorators/roles.decorator';
+import { Role } from '@prisma/client';
+import { PrismaService } from '../../../database/prisma/prisma.service';
+import { SKIP_LEVY_CHECK_KEY } from '../decorators/skip-levy-check.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+    constructor(
+        private reflector: Reflector,
+        private prisma: PrismaService,
+    ) { }
 
-  canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(
-      ROLES_KEY,
-      [
-        context.getHandler(),
-        context.getClass(),
-      ],
-    )
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        const requiredRoles = this.reflector.getAllAndOverride<Role[]>(
+            ROLES_KEY,
+            [context.getHandler(), context.getClass()],
+        );
 
-    // route has no roles
-    if (!requiredRoles) {
-      return true
+        const request = context.switchToHttp().getRequest();
+        const { user } = request;
+
+        const roleAllowed =
+            !requiredRoles ||
+            requiredRoles.includes(user.role) ||
+            (user.role === Role.SUPER_GUARD &&
+                requiredRoles.includes(Role.GUARD));
+
+        if (!roleAllowed) {
+            return false;
+        }
+
+        if (user.role !== Role.RESIDENT) {
+            return true;
+        }
+
+        const skipLevyCheck = this.reflector.getAllAndOverride<boolean>(
+            SKIP_LEVY_CHECK_KEY,
+            [context.getHandler(), context.getClass()],
+        );
+
+        if (skipLevyCheck) {
+            return true;
+        }
+
+        if (this.isLevyAllowedRoute(request.method, request.path)) {
+            return true;
+        }
+
+        const resident = await this.prisma.resident.findFirst({
+            where: { userId: user.id },
+            select: { levyCleared: true },
+        });
+
+        return resident?.levyCleared !== false;
     }
 
-    const { user } = context.switchToHttp().getRequest()
+    private isLevyAllowedRoute(method: string, path: string) {
+        const normalized = path.replace(/^\/+/, '');
 
-    if (requiredRoles.includes(user.role)) {
-      return true
+        if (method === 'GET' && normalized === 'finance/wallet') {
+            return true;
+        }
+
+        if (method === 'POST' && normalized === 'finance/wallet/fund') {
+            return true;
+        }
+
+        if (method === 'GET' && normalized === 'finance/payments/outstanding') {
+            return true;
+        }
+
+        if (
+            method === 'POST' &&
+            /^finance\/payments\/[^/]+\/(wallet|paystack)$/.test(normalized)
+        ) {
+            return true;
+        }
+
+        if (
+            method === 'POST' &&
+            normalized === 'finance/monthly-levies/pay-outstanding'
+        ) {
+            return true;
+        }
+
+        return false;
     }
-
-    return (
-      user.role === Role.SUPER_GUARD &&
-      requiredRoles.includes(Role.GUARD)
-    )
-  }
 }

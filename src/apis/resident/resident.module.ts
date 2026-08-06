@@ -10,17 +10,18 @@ import { ResidentWhatsappService } from './resident-whatsapp.service';
 import { ResidentEmailService } from './resident-email.service';
 import { ClientService } from '../../shared/client/client.service';
 import { HttpModule, HttpService } from '@nestjs/axios';
+import { FinanceModule } from '../finance/finance.module';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, HttpModule],
-  providers: [
-    ResidentService,
-    ResidentSelfOnboardingService,
-    ResidentWhatsappService,
-    ResidentEmailService,
-    PaystackService,
-    ClientService,
-  ],
-  controllers: [ResidentController, ResidentSelfOnboardingController]
+    imports: [ConfigModule, PrismaModule, HttpModule, FinanceModule],
+    providers: [
+        ResidentService,
+        ResidentSelfOnboardingService,
+        ResidentWhatsappService,
+        ResidentEmailService,
+        PaystackService,
+        ClientService,
+    ],
+    controllers: [ResidentController, ResidentSelfOnboardingController],
 })
 export class ResidentModule {}
