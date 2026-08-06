@@ -24,6 +24,7 @@ import {
     ResolveAccountDto,
 } from './dto/finance.dto';
 import { FinanceService } from './finance.service';
+import { SkipLevyCheck } from '../auth/decorators/skip-levy-check.decorator';
 
 @ApiTags('Finance')
 @Controller('finance')
@@ -31,6 +32,7 @@ export class FinanceController {
     constructor(private readonly financeService: FinanceService) {}
 
     @Post('paystack/webhook')
+    @SkipLevyCheck()
     @ApiOperation({ summary: 'Paystack payment webhook' })
     handlePaystackWebhook(
         @Req() request: any,
@@ -45,11 +47,13 @@ export class FinanceController {
     }
 
     @Get('banks')
+    @SkipLevyCheck()
     async getBanks() {
         return this.financeService.getBanks();
     }
 
     @Post('resolve-account')
+    @SkipLevyCheck()
     async resolveAccount(@Body() dto: ResolveAccountDto) {
         return this.financeService.resolveAccountNumber(
             dto.accountNumber,
@@ -79,6 +83,7 @@ export class FinanceController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.RESIDENT)
+    @SkipLevyCheck()
     @ApiOperation({ summary: 'Get resident outstanding levy bills' })
     getOutstandingBills(@CurrentUser() user: any) {
         return this.financeService.getOutstandingBills(user.id);
@@ -88,6 +93,7 @@ export class FinanceController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+    @SkipLevyCheck()
     @ApiOperation({
         summary: 'Generate monthly resident levies for active residents',
     })
@@ -99,6 +105,7 @@ export class FinanceController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.RESIDENT)
+    @SkipLevyCheck()
     @ApiOperation({ summary: 'Initialize Paystack levy payment' })
     initializeLevyPayment(
         @CurrentUser() user: any,
@@ -111,6 +118,7 @@ export class FinanceController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.RESIDENT)
+    @SkipLevyCheck()
     @ApiOperation({ summary: 'Pay levy from wallet' })
     payLevyFromWallet(
         @CurrentUser() user: any,
@@ -123,6 +131,7 @@ export class FinanceController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.RESIDENT)
+    @SkipLevyCheck()
     @ApiOperation({
         summary: 'Pay all outstanding monthly resident levies from wallet',
     })
@@ -136,6 +145,7 @@ export class FinanceController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.RESIDENT)
+    @SkipLevyCheck()
     @ApiOperation({ summary: 'Get resident wallet and transactions' })
     getWallet(@CurrentUser() user: any) {
         return this.financeService.getWallet(user.id);
@@ -145,6 +155,7 @@ export class FinanceController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.RESIDENT)
+    @SkipLevyCheck()
     @ApiOperation({ summary: 'Initialize Paystack wallet funding' })
     initializeWalletFunding(
         @CurrentUser() user: any,
@@ -157,6 +168,7 @@ export class FinanceController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.RESIDENT)
+    @SkipLevyCheck()
     @ApiOperation({ summary: 'Request wallet withdrawal' })
     requestWithdrawal(
         @CurrentUser() user: any,
