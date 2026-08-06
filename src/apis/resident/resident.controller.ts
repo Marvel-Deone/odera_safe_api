@@ -34,6 +34,7 @@ import { Roles } from '../auth/decorators/roles.decorator'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 
 import { Role } from '@prisma/client'
+import { SkipLevyCheck } from '../auth/decorators/skip-levy-check.decorator'
 
 @ApiTags('Residents')
 @ApiBearerAuth()
@@ -62,6 +63,7 @@ export class ResidentController {
 
   @Post('verify-nin')
   @UseGuards(JwtAuthGuard)
+  @SkipLevyCheck()
   // @ApiBearerAuth('access-token')
   // @UsePipes(DtoValidationPipe)
   @ApiOperation({
@@ -82,6 +84,7 @@ export class ResidentController {
   // RESIDENT - COMPLETE PROFILE/KYC
   @Patch('complete-profile')
   @Roles(Role.RESIDENT)
+  @SkipLevyCheck()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Complete resident profile',
@@ -156,6 +159,7 @@ export class ResidentController {
   //  RESIDENT DASHBOARD
   @Get('dashboard/me')
   @Roles(Role.RESIDENT)
+  @SkipLevyCheck()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Resident dashboard',

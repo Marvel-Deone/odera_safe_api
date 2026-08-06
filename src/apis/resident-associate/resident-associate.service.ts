@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { firstValueFrom } from 'rxjs';
 import { error, success } from '../../common/utils/response.util';
 import { PrismaService } from '../../database/prisma/prisma.service';
+import { FinanceService } from '../finance/finance.service';
 import { ResidentEmailService } from '../resident/resident-email.service';
 import {
     CreateResidentAssociateDto,
@@ -23,6 +24,7 @@ export class ResidentAssociateService {
         private readonly prisma: PrismaService,
         private readonly http: HttpService,
         private readonly emailService: ResidentEmailService,
+        private readonly financeService: FinanceService,
     ) {}
 
     private qoreIdSecret = process.env.QORE_ID_SECRET_KEY;
@@ -343,8 +345,13 @@ export class ResidentAssociateService {
                     appLoginLink,
                 });
 
+            const monthlyLevy =
+                await this.financeService.ensureMonthlyResidentLevyForResident(
+                    resident.id,
+                );
+
             return success(
-                { associate, emailDelivery },
+                { associate, emailDelivery, monthlyLevy },
                 'Associate Created',
                 'Co-resident created successfully and welcome email sent',
                 HttpStatus.CREATED,
@@ -354,7 +361,7 @@ export class ResidentAssociateService {
         const associate = await this.prisma.residentAssociate.create({
             data: associateData,
         });
-
+        
         return success(
             associate,
             'Associate Created',
@@ -491,6 +498,15 @@ export class ResidentAssociateService {
                       data: updateData,
                   });
 
+        if (
+            category === ResidentAssociateCategory.CO_RESIDENT ||
+            associate.category === ResidentAssociateCategory.CO_RESIDENT
+        ) {
+            await this.financeService.ensureMonthlyResidentLevyForResident(
+                resident.id,
+            );
+        }
+
         return success(
             updated,
             'Associate Updated',
@@ -515,6 +531,12 @@ export class ResidentAssociateService {
         await this.prisma.residentAssociate.delete({
             where: { id: associate.id },
         });
+
+        if (associate.category === ResidentAssociateCategory.CO_RESIDENT) {
+            await this.financeService.ensureMonthlyResidentLevyForResident(
+                resident.id,
+            );
+        }
 
         return success(
             null,
