@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { ConfigService } from '@nestjs/config';
+import { EmailService } from '../../shared/email.service';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ConfigService } from '@nestjs/config';
   ],
   providers: [
     AuthService,
+    EmailService,
     JwtStrategy,
     RolesGuard,
   ],
