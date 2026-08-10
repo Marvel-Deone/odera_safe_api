@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsString, Length, MinLength } from 'class-validator'
+import { IsEmail, IsString, Length, Matches, MinLength } from 'class-validator'
 
 export class LoginDto {
   @ApiProperty({
@@ -53,4 +53,30 @@ export class ResetPinDto {
   @IsString()
   @Length(4, 6)
   newPin!: string
+}
+
+export class ForgotPasswordDto {
+  @IsEmail()
+  email!: string;
+}
+
+export class VerifyForgotPasswordOtpDto {
+  @IsEmail()
+  email!: string;
+
+  @IsString()
+  @Length(6, 6)
+  @Matches(/^\d{6}$/, {
+    message: 'OTP must be a 6-digit number',
+  })
+  otp!: string;
+}
+
+export class ResetPasswordDto {
+  @IsString()
+  resetToken!: string;
+
+  @IsString()
+  @MinLength(8)
+  newPassword!: string;
 }

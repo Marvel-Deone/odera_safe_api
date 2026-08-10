@@ -513,6 +513,26 @@ model User {
   emergencyContactActions  EmergencyContactAction[]
   incidentTimelineEntries  IncidentTimelineEntry[]
   estateFinanceRecords     EstateFinanceRecord[]
+  passwordResetOtps        PasswordResetOtp[]
+}
+
+model PasswordResetOtp {
+  id     String @id @default(cuid())
+  userId String
+
+  otpHash   String
+  expiresAt DateTime
+
+  verified Boolean @default(false)
+  attempts Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Resident {
@@ -590,7 +610,6 @@ model Resident {
   street                EstateStreet?          @relation(fields: [streetId], references: [id])
   user                  User?                  @relation(fields: [userId], references: [id])
   visitors              Visitor[]
-  // maintenanceTickets MaintenanceTicket[]
   incidents             Incident[]
   wallet                Wallet?
   levyAssignments       LevyAssignment[]

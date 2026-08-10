@@ -12,18 +12,18 @@ import { firstValueFrom } from 'rxjs';
 import { error, success } from '../../common/utils/response.util';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { FinanceService } from '../finance/finance.service';
-import { ResidentEmailService } from '../resident/resident-email.service';
 import {
     CreateResidentAssociateDto,
     UpdateResidentAssociateDto,
 } from './dto/resident-associate.dto';
+import { EmailService } from '../../shared/email.service';
 
 @Injectable()
 export class ResidentAssociateService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly http: HttpService,
-        private readonly emailService: ResidentEmailService,
+        private readonly emailService: EmailService,
         private readonly financeService: FinanceService,
     ) {}
 

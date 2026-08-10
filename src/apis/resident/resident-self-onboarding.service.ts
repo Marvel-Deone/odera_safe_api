@@ -5,8 +5,8 @@ import { error, success } from '../../common/utils/response.util'
 import { formatPhoneNumber } from '../../common/utils/phone.util'
 import { PrismaService } from '../../database/prisma/prisma.service'
 import { ResidentSelfOnboardingDto } from './dto/resident.dto'
-import { ResidentEmailService } from './resident-email.service'
 import { ResidentWhatsappService } from './resident-whatsapp.service'
+import { EmailService } from '../../shared/email.service'
 
 @Injectable()
 export class ResidentSelfOnboardingService {
@@ -15,7 +15,7 @@ export class ResidentSelfOnboardingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly whatsappService: ResidentWhatsappService,
-    private readonly emailService: ResidentEmailService,
+    private readonly emailService: EmailService,
   ) { }
 
   private generateActivationCode() {
