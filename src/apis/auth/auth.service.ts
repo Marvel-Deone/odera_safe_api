@@ -6,16 +6,20 @@ import * as bcrypt from 'bcrypt';
 import {
     ChangePasswordDto,
     ChangePinDto,
+    ForgotPasswordDto,
     LoginDto,
     ResetPinDto,
+    VerifyForgotPasswordOtpDto,
 } from './dto/auth.dto';
+import { EmailService } from '../../shared/email.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private prisma: PrismaService,
         private jwtService: JwtService,
-    ) {}
+        private emailService: EmailService,
+    ) { }
 
     async login(dto: LoginDto) {
         const user = await this.prisma.user.findUnique({
@@ -87,6 +91,180 @@ export class AuthService {
             user,
             'Profile Fetched',
             'User profile fetched successfully',
+        );
+    }
+
+    async forgotPassword(dto: ForgotPasswordDto) {
+        const email = dto.email.trim().toLowerCase();
+
+        const user = await this.prisma.user.findUnique({
+            where: {
+                email,
+            },
+        });
+
+        if (!user) {
+            return success(
+                null,
+                'OTP Sent',
+                'If an account exists with this email, a password reset OTP has been sent.',
+            );
+        }
+
+        // Invalidate any previous OTPs
+        await this.prisma.passwordResetOtp.updateMany({
+            where: {
+                userId: user.id,
+                verified: false,
+            },
+            data: {
+                expiresAt: new Date(),
+            },
+        });
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(
+            100000 + Math.random() * 900000,
+        ).toString();
+
+        const otpHash = await bcrypt.hash(otp, 10);
+
+        const expiresAt = new Date(
+            Date.now() + 10 * 60 * 1000,
+        );
+
+        await this.prisma.passwordResetOtp.create({
+            data: {
+                userId: user.id,
+                otpHash,
+                expiresAt,
+            },
+        });
+
+        await this.emailService.sendPasswordResetOtpEmail({
+            toEmail: user.email,
+            // fullName: user.first_name
+            //     ? `${user.first_name} ${user.last_name ?? ''}`.trim()
+            //     : undefined,
+            otp,
+        });
+
+        return success(
+            null,
+            'OTP Sent',
+            'If an account exists with this email, a password reset OTP has been sent.',
+        );
+    }
+
+    async verifyForgotPasswordOtp(dto: VerifyForgotPasswordOtpDto) {
+        const email = dto.email.trim().toLowerCase();
+
+        const user = await this.prisma.user.findUnique({
+            where: {
+                email,
+            },
+        });
+
+        if (!user) {
+            return error(
+                'Invalid OTP',
+                'The OTP is invalid or has expired',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        const otpRecord = await this.prisma.passwordResetOtp.findFirst({
+            where: {
+                userId: user.id,
+                verified: false,
+                expiresAt: {
+                    gt: new Date(),
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+
+        if (!otpRecord) {
+            return error(
+                'Invalid OTP',
+                'The OTP is invalid or has expired',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        // Limit OTP attempts
+        if (otpRecord.attempts >= 5) {
+            await this.prisma.passwordResetOtp.update({
+                where: {
+                    id: otpRecord.id,
+                },
+                data: {
+                    expiresAt: new Date(),
+                },
+            });
+
+            return error(
+                'Too Many Attempts',
+                'Too many incorrect OTP attempts. Please request a new OTP.',
+                HttpStatus.TOO_MANY_REQUESTS,
+            );
+        }
+
+        const isValid = await bcrypt.compare(
+            dto.otp,
+            otpRecord.otpHash,
+        );
+
+        if (!isValid) {
+            await this.prisma.passwordResetOtp.update({
+                where: {
+                    id: otpRecord.id,
+                },
+                data: {
+                    attempts: {
+                        increment: 1,
+                    },
+                },
+            });
+
+            return error(
+                'Invalid OTP',
+                'The OTP is invalid or has expired',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        //  Mark OTP as verified.
+        await this.prisma.passwordResetOtp.update({
+            where: {
+                id: otpRecord.id,
+            },
+            data: {
+                verified: true,
+            },
+        });
+
+        //   Generate a short-lived reset token.
+        //  This token is only for changing the password.
+        const resetToken = await this.jwtService.signAsync(
+            {
+                sub: user.id,
+                purpose: 'password_reset',
+                otpId: otpRecord.id,
+            },
+            {
+                expiresIn: '10m',
+            },
+        );
+
+        return success(
+            {
+                resetToken,
+            },
+            'OTP Verified',
+            'OTP verified successfully. You can now reset your password.',
         );
     }
 
