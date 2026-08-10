@@ -14,6 +14,7 @@ import {
   UpdateHeavyVehicleCategoryDto,
 } from './dto/estate-config.dto'
 import { EstateConfigService } from './estate-config.service'
+import { SkipLevyCheck } from '../auth/decorators/skip-levy-check.decorator'
 
 @ApiTags('Public Estates')
 @Controller('estates')
@@ -134,6 +135,7 @@ export class EstateConfigController {
 
   @Get('streets')
   @ApiOperation({ summary: 'Get estate streets for resident' })
+  @SkipLevyCheck()
   getResidentStreets(@CurrentUser() user: any) {
     return this.estateConfigService.getResidentStreets(user.id)
   }

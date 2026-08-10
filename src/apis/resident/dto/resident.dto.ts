@@ -18,13 +18,22 @@ export class ResidentSelfOnboardingDto {
     @IsString()
     last_name!: string
 
+    @ApiProperty({ example: 'Oyo' })
+    @IsString()
+    state_of_origin!: string
+
+    @ApiProperty({ example: 'Ogbomoso North' })
+    @IsString()
+    lga!: string
+
     @ApiProperty({ example: 'A12' })
     @IsString()
     houseNumber!: string
 
-    @ApiProperty({ example: '12 Palm Street, Lekki Phase 1' })
-    @IsString()
-    residentAddress!: string
+    // @ApiProperty({ example: '12 Palm Street, Lekki Phase 1' })
+    // @IsString()
+    // @IsOptional
+    // residentAddress!: string
 
     @ApiProperty({ example: '08012345678' })
     @IsString()
@@ -221,25 +230,25 @@ export class CompleteResidentProfileDto {
     // @IsString()
     // tenancy_ownership_doc?: string
 
-    @ApiPropertyOptional({ example: 'Lekki Phase 1, Lagos' })
-    @IsOptional()
-    @IsString()
-    home_address?: string
+    // @ApiPropertyOptional({ example: 'Lekki Phase 1, Lagos' })
+    // @IsOptional()
+    // @IsString()
+    // home_address?: string
 
-    @ApiPropertyOptional({ example: 'estate-street-id' })
-    @IsOptional()
-    @IsString()
-    streetId?: string
+    // @ApiPropertyOptional({ example: 'estate-street-id' })
+    // @IsOptional()
+    // @IsString()
+    // streetId?: string
 
-    @ApiPropertyOptional({ example: 'Lagos' })
-    @IsOptional()
-    @IsString()
-    state_of_origin?: string
+    // @ApiPropertyOptional({ example: 'Lagos' })
+    // @IsOptional()
+    // @IsString()
+    // state_of_origin?: string
 
-    @ApiPropertyOptional({ example: 'Eti-Osa' })
-    @IsOptional()
-    @IsString()
-    lga?: string
+    // @ApiPropertyOptional({ example: 'Eti-Osa' })
+    // @IsOptional()
+    // @IsString()
+    // lga?: string
 
     @ApiPropertyOptional({ example: '08099887766' })
     @IsOptional()

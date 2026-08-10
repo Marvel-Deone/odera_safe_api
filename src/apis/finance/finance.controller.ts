@@ -10,7 +10,7 @@ import {
     Req,
     UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -25,11 +25,12 @@ import {
 } from './dto/finance.dto';
 import { FinanceService } from './finance.service';
 import { SkipLevyCheck } from '../auth/decorators/skip-levy-check.decorator';
+import { CreateFinanceRecordDto, FinanceRecordType } from './dto/finance-record.dto';
 
 @ApiTags('Finance')
 @Controller('finance')
 export class FinanceController {
-    constructor(private readonly financeService: FinanceService) {}
+    constructor(private readonly financeService: FinanceService) { }
 
     @Post('paystack/webhook')
     @SkipLevyCheck()
@@ -70,6 +71,21 @@ export class FinanceController {
         return this.financeService.createLevy(user.id, dto);
     }
 
+    @Post('records')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+    @SkipLevyCheck()
+    @ApiOperation({
+        summary: 'Record estate income or expense',
+    })
+    createFinanceRecord(
+        @CurrentUser() user: any,
+        @Body() dto: CreateFinanceRecordDto,
+    ) {
+        return this.financeService.createFinanceRecord(user.id, dto);
+    }
+
     @Get('levies')
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -77,6 +93,38 @@ export class FinanceController {
     @ApiOperation({ summary: 'Get estate levies' })
     getLevies(@CurrentUser() user: any) {
         return this.financeService.getLevies(user.id);
+    }
+
+    @Get('records')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+    @SkipLevyCheck()
+    @ApiOperation({
+        summary: 'Get estate income and expense records',
+    })
+    @ApiQuery({
+        name: 'type',
+        enum: FinanceRecordType,
+        required: false,
+    })
+    getFinanceRecords(
+        @CurrentUser() user: any,
+        @Query('type') type?: FinanceRecordType,
+    ) {
+        return this.financeService.getFinanceRecords(user.id, type);
+    }
+
+    @Get('records/summary')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+    @SkipLevyCheck()
+    @ApiOperation({
+        summary: 'Get estate finance summary',
+    })
+    getFinanceSummary(@CurrentUser() user: any) {
+        return this.financeService.getFinanceSummary(user.id);
     }
 
     @Get('payments/outstanding')

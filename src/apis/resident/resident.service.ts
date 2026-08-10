@@ -598,22 +598,22 @@ export class ResidentService {
             );
         }
 
-        if (dto.streetId) {
-            const street = await this.prisma.estateStreet.findFirst({
-                where: {
-                    id: dto.streetId,
-                    estateId: resident.estateId,
-                },
-            });
+        // if (dto.streetId) {
+        //     const street = await this.prisma.estateStreet.findFirst({
+        //         where: {
+        //             id: dto.streetId,
+        //             estateId: resident.estateId,
+        //         },
+        //     });
 
-            if (!street) {
-                return error(
-                    'Invalid Street',
-                    'Street does not belong to this estate',
-                    HttpStatus.BAD_REQUEST,
-                );
-            }
-        }
+        //     if (!street) {
+        //         return error(
+        //             'Invalid Street',
+        //             'Street does not belong to this estate',
+        //             HttpStatus.BAD_REQUEST,
+        //         );
+        //     }
+        // }
 
         const updatedResident = await this.prisma.resident.update({
             where: {
