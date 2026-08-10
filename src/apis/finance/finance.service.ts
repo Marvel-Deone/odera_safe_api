@@ -20,6 +20,7 @@ import {
     RequestWithdrawalDto,
 } from './dto/finance.dto';
 import { PaystackService } from './paystack.service';
+import { CreateFinanceRecordDto, FinanceRecordType } from './dto/finance-record.dto';
 
 @Injectable()
 export class FinanceService {
@@ -30,7 +31,7 @@ export class FinanceService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly paystack: PaystackService,
-    ) {}
+    ) { }
 
     private reference(prefix: string) {
         return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
@@ -164,8 +165,8 @@ export class FinanceService {
             paidAmount >= amount
                 ? LevyStatus.PAID
                 : paidAmount > 0
-                  ? LevyStatus.PARTIALLY_PAID
-                  : LevyStatus.PENDING;
+                    ? LevyStatus.PARTIALLY_PAID
+                    : LevyStatus.PENDING;
 
         const updatedAssignment = await this.prisma.levyAssignment.update({
             where: { id: assignment.id },
@@ -481,7 +482,7 @@ export class FinanceService {
                     this.toNumber(assignment.paidAmount),
                 status:
                     assignment.status !== LevyStatus.PAID &&
-                    assignment.levy.dueDate < new Date()
+                        assignment.levy.dueDate < new Date()
                         ? LevyStatus.OVERDUE
                         : assignment.status,
             })),
@@ -1310,5 +1311,105 @@ export class FinanceService {
             where: { id: residentId },
             data: { levyCleared: outstandingCount === 0 },
         });
+    }
+
+    async createFinanceRecord(
+        userId: string,
+        dto: CreateFinanceRecordDto,
+    ) {
+        const admin = await this.getUser(userId);
+
+        const record = await this.prisma.estateFinanceRecord.create({
+            data: {
+                estateId: admin.estateId,
+                recordedById: admin.id,
+                type: dto.type,
+                amount: dto.amount,
+                description: dto.description,
+                category: dto.category,
+                recordedAt: dto.recordedAt
+                    ? new Date(dto.recordedAt)
+                    : new Date(),
+            },
+            include: {
+                recordedBy: {
+                    select: {
+                        id: true,
+                        email: true,
+                        role: true,
+                    },
+                },
+            },
+        });
+
+        return success(
+            record,
+            'Finance Record Created',
+            `${dto.type === 'INCOME' ? 'Income' : 'Expense'} recorded successfully`,
+        );
+    }
+
+    async getFinanceRecords(
+        userId: string,
+        type?: FinanceRecordType,
+    ) {
+        const admin = await this.getUser(userId);
+
+        const records = await this.prisma.estateFinanceRecord.findMany({
+            where: {
+                estateId: admin.estateId,
+                ...(type ? { type } : {}),
+            },
+            include: {
+                recordedBy: {
+                    select: {
+                        id: true,
+                        email: true,
+                        role: true,
+                    },
+                },
+            },
+            orderBy: {
+                recordedAt: 'desc',
+            },
+        });
+
+        return success(
+            records,
+            'Finance Records',
+            'Finance records fetched successfully',
+        );
+    }
+
+    async getFinanceSummary(userId: string) {
+        const admin = await this.getUser(userId);
+
+        const records = await this.prisma.estateFinanceRecord.findMany({
+            where: {
+                estateId: admin.estateId,
+            },
+            select: {
+                type: true,
+                amount: true,
+            },
+        });
+
+        const totalIncome = records
+            .filter((record) => record.type === FinanceRecordType.INCOME)
+            .reduce((sum, record) => sum + Number(record.amount), 0);
+
+        const totalExpenses = records
+            .filter((record) => record.type === FinanceRecordType.EXPENSE)
+            .reduce((sum, record) => sum + Number(record.amount), 0);
+
+        return success(
+            {
+                totalIncome,
+                totalExpenses,
+                balance: totalIncome - totalExpenses,
+            },
+            'Finance Summary',
+            'Finance summary fetched successfully',
+        );
     }
 }

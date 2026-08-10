@@ -28,8 +28,9 @@ export class SocketAuthAdapter extends IoAdapter {
                 if (!user) throw new UnauthorizedException('User not found');
                 socket.data.user = user;
                 next();
-            } catch {
-                next(new Error('Unauthorized socket connection'));
+            } catch (err) {
+                console.error("Socket auth error:", err);
+                next(new Error("Unauthorized socket connection"));
             }
         });
 

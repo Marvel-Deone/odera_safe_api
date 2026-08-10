@@ -412,12 +412,17 @@ enum NinVerificationStatus {
 }
 
 enum AdminSosCategory {
-    SECURITY_EMERGENCY
-    POLICE_ASSISTANCE
-    FIRE_EMERGENCY
-    MEDICAL_EMERGENCY
-    ESTATE_WIDE_EMERGENCY
-    OTHER
+  SECURITY_EMERGENCY
+  POLICE_ASSISTANCE
+  FIRE_EMERGENCY
+  MEDICAL_EMERGENCY
+  ESTATE_WIDE_EMERGENCY
+  OTHER
+}
+
+enum FinanceRecordType {
+  INCOME
+  EXPENSE
 }
 
 // model EstateSettings {
@@ -471,6 +476,7 @@ model Estate {
   businessRegistrations     BusinessRegistration[]
   emergencyContacts         EmergencyContact[]
   emergencyContactActions   EmergencyContactAction[]
+  estateFinanceRecords      EstateFinanceRecord[]
 }
 
 model User {
@@ -482,30 +488,31 @@ model User {
   first_login Boolean  @default(true)
   createdAt   DateTime @default(now())
 
-  estateId              String
-  estate                Estate                @relation(fields: [estateId], references: [id])
-  resident              Resident?
-  residentAssociate     ResidentAssociate?
-  gateLogs              GateLog[]
-  guard                 Guard?
-  assignedIncidents     Incident[]            @relation("AssignedIncidentUser")
-  announcements         Announcement[]
-  announcementComments  AnnouncementComment[]
-  announcementLikes     AnnouncementLike[]
-  chatMessages          ChatMessage[]
-  polls                 Poll[]
-  pollVotes             PollVote[]
-  committeeMembers      CommitteeMember[]
-  createdLevies         Levy[]
-  approvedWithdrawals   WithdrawalRequest[]   @relation("WithdrawalApprover")
-  approvedVehicles      Vehicle[]             @relation("VehicleApprover")
-  approvedHeavyVehicles HeavyVehiclePass[]    @relation("HeavyVehicleApprover")
-  shortletAccessLogs    ShortletAccessLog[]   @relation("ShortletAccessVerifier")
-  businessAccessLogs    BusinessAccessLog[]
-  incidentChatParticipants  IncidentChatParticipant[]
-  emergencyNotifications    EmergencyNotification[]
-  emergencyContactActions   EmergencyContactAction[]
-  incidentTimelineEntries   IncidentTimelineEntry[]
+  estateId                 String
+  estate                   Estate                    @relation(fields: [estateId], references: [id])
+  resident                 Resident?
+  residentAssociate        ResidentAssociate?
+  gateLogs                 GateLog[]
+  guard                    Guard?
+  assignedIncidents        Incident[]                @relation("AssignedIncidentUser")
+  announcements            Announcement[]
+  announcementComments     AnnouncementComment[]
+  announcementLikes        AnnouncementLike[]
+  chatMessages             ChatMessage[]
+  polls                    Poll[]
+  pollVotes                PollVote[]
+  committeeMembers         CommitteeMember[]
+  createdLevies            Levy[]
+  approvedWithdrawals      WithdrawalRequest[]       @relation("WithdrawalApprover")
+  approvedVehicles         Vehicle[]                 @relation("VehicleApprover")
+  approvedHeavyVehicles    HeavyVehiclePass[]        @relation("HeavyVehicleApprover")
+  shortletAccessLogs       ShortletAccessLog[]       @relation("ShortletAccessVerifier")
+  businessAccessLogs       BusinessAccessLog[]
+  incidentChatParticipants IncidentChatParticipant[]
+  emergencyNotifications   EmergencyNotification[]
+  emergencyContactActions  EmergencyContactAction[]
+  incidentTimelineEntries  IncidentTimelineEntry[]
+  estateFinanceRecords     EstateFinanceRecord[]
 }
 
 model Resident {
@@ -783,6 +790,29 @@ model BusinessAccessLog {
   @@index([registrationId])
   @@index([verifiedById])
   @@index([createdAt])
+}
+
+model EstateFinanceRecord {
+  id String @id @default(cuid())
+
+  estateId     String
+  recordedById String
+
+  type        FinanceRecordType
+  category    String?
+  description String
+  amount      Decimal           @db.Decimal(15, 2)
+  recordedAt  DateTime          @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estate     Estate @relation(fields: [estateId], references: [id])
+  recordedBy User   @relation(fields: [recordedById], references: [id])
+
+  @@index([estateId])
+  @@index([estateId, type])
+  @@index([recordedAt])
 }
 
 model Guard {
@@ -1212,8 +1242,8 @@ model ShiftSwapRequest {
 model GuardSOS {
   id String @id @default(uuid())
 
-  guardId  String
-  estateId String
+  guardId    String
+  estateId   String
   incidentId String? @unique
 
   category GuardSOSCategory
@@ -1295,11 +1325,11 @@ model Incident {
 
   assignedToGuard Guard? @relation("AssignedIncidentGuard", fields: [assignedToGuardId], references: [id])
 
-  assignedToUser User? @relation("AssignedIncidentUser", fields: [assignedToUserId], references: [id])
-  guardSos GuardSOS?
-  timeline IncidentTimelineEntry[]
-  chatRoom ChatRoom?
-  notifications EmergencyNotification[]
+  assignedToUser          User?                    @relation("AssignedIncidentUser", fields: [assignedToUserId], references: [id])
+  guardSos                GuardSOS?
+  timeline                IncidentTimelineEntry[]
+  chatRoom                ChatRoom?
+  notifications           EmergencyNotification[]
   emergencyContactActions EmergencyContactAction[]
 
   @@index([estateId])
@@ -1464,14 +1494,14 @@ model AnnouncementLike {
 model ChatRoom {
   id String @id @default(uuid())
 
-  estateId String
-  streetId String?
+  estateId   String
+  streetId   String?
   incidentId String? @unique
 
   name String
   type ChatRoomType
 
-  block String?
+  block    String?
   closedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -1480,7 +1510,7 @@ model ChatRoom {
   street   EstateStreet? @relation(fields: [streetId], references: [id])
   incident Incident?     @relation(fields: [incidentId], references: [id], onDelete: Cascade)
 
-  messages ChatMessage[]
+  messages     ChatMessage[]
   participants IncidentChatParticipant[]
 
   @@index([estateId, block])
@@ -1498,7 +1528,7 @@ model IncidentChatParticipant {
   createdAt DateTime @default(now())
 
   room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, userId])
   @@index([userId])
@@ -1507,14 +1537,14 @@ model IncidentChatParticipant {
 model EmergencyNotification {
   id String @id @default(uuid())
 
-  incidentId String
+  incidentId  String
   recipientId String
-  event EmergencyNotificationEvent
-  deliveredAt DateTime @default(now())
-  metadata Json?
+  event       EmergencyNotificationEvent
+  deliveredAt DateTime                   @default(now())
+  metadata    Json?
 
-  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
-  recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  incident  Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  recipient User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 
   @@unique([incidentId, recipientId, event])
   @@index([recipientId, deliveredAt])
@@ -1523,16 +1553,16 @@ model EmergencyNotification {
 model EmergencyContact {
   id String @id @default(uuid())
 
-  estateId String
-  name String
-  type EmergencyContactType
-  phone String
-  smsPhone String?
-  isActive Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  estateId  String
+  name      String
+  type      EmergencyContactType
+  phone     String
+  smsPhone  String?
+  isActive  Boolean              @default(true)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
 
-  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  estate  Estate                   @relation(fields: [estateId], references: [id], onDelete: Cascade)
   actions EmergencyContactAction[]
 
   @@index([estateId, isActive])
@@ -1541,20 +1571,20 @@ model EmergencyContact {
 model EmergencyContactAction {
   id String @id @default(uuid())
 
-  estateId String
-  incidentId String?
-  contactId String?
-  actorId String
-  action EmergencyContactActionType
+  estateId    String
+  incidentId  String?
+  contactId   String?
+  actorId     String
+  action      EmergencyContactActionType
   destination String
-  note String?
-  metadata Json?
-  createdAt DateTime @default(now())
+  note        String?
+  metadata    Json?
+  createdAt   DateTime                   @default(now())
 
-  estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
-  incident Incident? @relation(fields: [incidentId], references: [id], onDelete: SetNull)
-  contact EmergencyContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  actor User @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  estate   Estate            @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  incident Incident?         @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  contact  EmergencyContact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  actor    User              @relation(fields: [actorId], references: [id], onDelete: Cascade)
 
   @@index([estateId, createdAt])
   @@index([incidentId])
@@ -1696,8 +1726,8 @@ model Levy {
 
   assignments LevyAssignment[]
 
-  @@index([estateId])
   @@unique([estateId, category, period])
+  @@index([estateId])
 }
 
 model LevyAssignment {
@@ -1706,8 +1736,8 @@ model LevyAssignment {
   levyId     String
   residentId String
 
-  amount Decimal
-  headCount Int @default(1)
+  amount    Decimal
+  headCount Int     @default(1)
 
   status LevyStatus @default(PENDING)
 

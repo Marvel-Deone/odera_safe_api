@@ -145,7 +145,7 @@ export class ResidentSelfOnboardingService {
             estateId: estate.id,
             userId: user.id,
             house_no: dto.houseNumber,
-            home_address: dto.residentAddress,
+            // home_address: dto.residentAddress,
             block: dto.block,
             streetId: dto.streetId,
             phone: whatsappPhone,
