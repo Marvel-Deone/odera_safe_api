@@ -8,6 +8,7 @@ import {
     ChangePinDto,
     ForgotPasswordDto,
     LoginDto,
+    ResetPasswordDto,
     ResetPinDto,
     VerifyForgotPasswordOtpDto,
 } from './dto/auth.dto';
@@ -265,6 +266,109 @@ export class AuthService {
             },
             'OTP Verified',
             'OTP verified successfully. You can now reset your password.',
+        );
+    }
+
+    async resetPassword(dto: ResetPasswordDto) {
+        let payload: {
+            sub: string;
+            purpose: string;
+            otpId: string;
+        };
+
+        try {
+            payload = await this.jwtService.verifyAsync(
+                dto.resetToken,
+            );
+        } catch {
+            return error(
+                'Invalid Reset Token',
+                'The password reset session is invalid or has expired.',
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
+        if (payload.purpose !== 'password_reset') {
+            return error(
+                'Invalid Reset Token',
+                'Invalid password reset token.',
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
+        const otpRecord =
+            await this.prisma.passwordResetOtp.findUnique({
+                where: {
+                    id: payload.otpId,
+                },
+            });
+
+        if (!otpRecord) {
+            return error(
+                'Invalid Reset Token',
+                'Password reset session is invalid.',
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
+        if (!otpRecord.verified) {
+            return error(
+                'OTP Not Verified',
+                'Please verify your OTP before resetting your password.',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        if (otpRecord.expiresAt < new Date()) {
+            return error(
+                'Reset Expired',
+                'The password reset session has expired. Please request a new OTP.',
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
+        const user = await this.prisma.user.findUnique({
+            where: {
+                id: payload.sub,
+            },
+        });
+
+        if (!user) {
+            return error(
+                'Not Found',
+                'User not found.',
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        const hashedPassword = await bcrypt.hash(
+            dto.newPassword,
+            10,
+        );
+
+        await this.prisma.$transaction(async (tx) => {
+            await tx.user.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    password: hashedPassword,
+                    first_login: false,
+                },
+            });
+
+            // Consume the OTP
+            await tx.passwordResetOtp.delete({
+                where: {
+                    id: otpRecord.id,
+                },
+            });
+        });
+
+        return success(
+            null,
+            'Password Reset',
+            'Your password has been reset successfully. You can now log in.',
         );
     }
 
