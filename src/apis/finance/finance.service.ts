@@ -20,7 +20,10 @@ import {
     RequestWithdrawalDto,
 } from './dto/finance.dto';
 import { PaystackService } from './paystack.service';
-import { CreateFinanceRecordDto, FinanceRecordType } from './dto/finance-record.dto';
+import {
+    CreateFinanceRecordDto,
+    FinanceRecordType,
+} from './dto/finance-record.dto';
 
 @Injectable()
 export class FinanceService {
@@ -31,7 +34,7 @@ export class FinanceService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly paystack: PaystackService,
-    ) { }
+    ) {}
 
     private reference(prefix: string) {
         return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
@@ -165,8 +168,8 @@ export class FinanceService {
             paidAmount >= amount
                 ? LevyStatus.PAID
                 : paidAmount > 0
-                    ? LevyStatus.PARTIALLY_PAID
-                    : LevyStatus.PENDING;
+                  ? LevyStatus.PARTIALLY_PAID
+                  : LevyStatus.PENDING;
 
         const updatedAssignment = await this.prisma.levyAssignment.update({
             where: { id: assignment.id },
@@ -427,6 +430,12 @@ export class FinanceService {
             },
         });
 
+        await Promise.all(
+            residents.map((resident) =>
+                this.updateResidentLevyCleared(this.prisma, resident.id),
+            ),
+        );
+
         return success(levy, 'Levy Created', 'Levy assigned successfully');
     }
 
@@ -458,6 +467,7 @@ export class FinanceService {
 
     async getOutstandingBills(userId: string) {
         const { resident } = await this.getResidentWallet(userId);
+        const now = new Date();
 
         const assignments = await this.prisma.levyAssignment.findMany({
             where: {
@@ -469,6 +479,7 @@ export class FinanceService {
                         LevyStatus.OVERDUE,
                     ],
                 },
+                levy: { dueDate: { lte: now } },
             },
             include: { levy: true },
             orderBy: { levy: { dueDate: 'asc' } },
@@ -482,7 +493,7 @@ export class FinanceService {
                     this.toNumber(assignment.paidAmount),
                 status:
                     assignment.status !== LevyStatus.PAID &&
-                        assignment.levy.dueDate < new Date()
+                    assignment.levy.dueDate <= now
                         ? LevyStatus.OVERDUE
                         : assignment.status,
             })),
@@ -730,6 +741,7 @@ export class FinanceService {
     async payOutstandingMonthlyLeviesFromWallet(userId: string) {
         const { resident } = await this.getResidentWallet(userId);
         const paid = await this.tryPayOutstandingMonthlyLevies(resident.id);
+        const now = new Date();
 
         const outstanding = await this.prisma.levyAssignment.findMany({
             where: {
@@ -741,7 +753,10 @@ export class FinanceService {
                         LevyStatus.OVERDUE,
                     ],
                 },
-                levy: { category: this.monthlyResidentLevyCategory },
+                levy: {
+                    category: this.monthlyResidentLevyCategory,
+                    dueDate: { lte: now },
+                },
             },
             include: { levy: true },
             orderBy: { levy: { dueDate: 'asc' } },
@@ -1300,10 +1315,12 @@ export class FinanceService {
         tx: Prisma.TransactionClient,
         residentId: string,
     ) {
+        const now = new Date();
         const outstandingCount = await tx.levyAssignment.count({
             where: {
                 residentId,
                 status: { not: LevyStatus.PAID },
+                levy: { dueDate: { lte: now } },
             },
         });
 
@@ -1313,10 +1330,7 @@ export class FinanceService {
         });
     }
 
-    async createFinanceRecord(
-        userId: string,
-        dto: CreateFinanceRecordDto,
-    ) {
+    async createFinanceRecord(userId: string, dto: CreateFinanceRecordDto) {
         const admin = await this.getUser(userId);
 
         const record = await this.prisma.estateFinanceRecord.create({
@@ -1349,10 +1363,7 @@ export class FinanceService {
         );
     }
 
-    async getFinanceRecords(
-        userId: string,
-        type?: FinanceRecordType,
-    ) {
+    async getFinanceRecords(userId: string, type?: FinanceRecordType) {
         const admin = await this.getUser(userId);
 
         const records = await this.prisma.estateFinanceRecord.findMany({
