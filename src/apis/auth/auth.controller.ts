@@ -17,7 +17,7 @@ import {
 } from '@nestjs/swagger'
 
 import { AuthService } from './auth.service'
-import { ChangePasswordDto, ChangePinDto, LoginDto, ResetPinDto } from './dto/auth.dto'
+import { ChangePasswordDto, ChangePinDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, ResetPinDto, VerifyForgotPasswordOtpDto } from './dto/auth.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { CurrentUser } from './decorators/current-user.decorator'
 
@@ -93,6 +93,36 @@ export class AuthController {
         @Body() dto: ChangePasswordDto,
     ) {
         return this.authService.changePassword(user.id, dto)
+    }
+
+    @Post('forgot-password')
+    @ApiOperation({
+        summary: 'Request password reset OTP',
+    })
+    forgotPassword(
+        @Body() dto: ForgotPasswordDto,
+    ) {
+        return this.authService.forgotPassword(dto);
+    }
+
+    @Post('verify-forgot-password-otp')
+    @ApiOperation({
+        summary: 'Verify password reset OTP',
+    })
+    verifyForgotPasswordOtp(
+        @Body() dto: VerifyForgotPasswordOtpDto,
+    ) {
+        return this.authService.verifyForgotPasswordOtp(dto);
+    }
+
+    @Post('reset-password')
+    @ApiOperation({
+        summary: 'Reset password using verified OTP',
+    })
+    resetPassword(
+        @Body() dto: ResetPasswordDto,
+    ) {
+        return this.authService.resetPassword(dto);
     }
 
     // CHANGE PIN
