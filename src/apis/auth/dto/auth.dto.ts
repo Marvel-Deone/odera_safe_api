@@ -56,14 +56,23 @@ export class ResetPinDto {
 }
 
 export class ForgotPasswordDto {
+  @ApiProperty({
+    example: 'resident@mail.com',
+  })
   @IsEmail()
   email!: string;
 }
 
 export class VerifyForgotPasswordOtpDto {
+  @ApiProperty({
+    example: 'resident@mail.com',
+  })
   @IsEmail()
   email!: string;
 
+  @ApiProperty({
+    example: '423568',
+  })
   @IsString()
   @Length(6, 6)
   @Matches(/^\d{6}$/, {
@@ -73,9 +82,15 @@ export class VerifyForgotPasswordOtpDto {
 }
 
 export class ResetPasswordDto {
+  @ApiProperty({
+    example: 'token1234567890',
+  })
   @IsString()
   resetToken!: string;
 
+  @ApiProperty({
+    example: 'NewPassword123',
+  })
   @IsString()
   @MinLength(8)
   newPassword!: string;
