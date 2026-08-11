@@ -17,7 +17,7 @@ import { EmailService } from '../../shared/email.service';
     //   signOptions: {
     //     expiresIn: '7d',
     //   },
-    // }),
+    // }), 
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
