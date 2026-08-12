@@ -93,7 +93,9 @@ If the wallet does not have enough balance, the levy remains outstanding.
 
 ## Auto Payment Behavior
 
-The backend attempts to clear outstanding monthly levies when:
+For now, monthly resident levy is paid automatically when the main resident wallet has enough balance.
+
+The backend attempts to clear monthly resident levies when:
 
 - A resident is approved.
 - Monthly levy is generated.
@@ -115,13 +117,39 @@ If the wallet balance is not enough:
 - Levy remains `PENDING`, `PARTIALLY_PAID`, or `OVERDUE`.
 - Resident `levyCleared` remains `false`.
 
+Note: automatic monthly resident levy payment is intentionally enabled for now. It may be turned off in the future.
+
 ## Defaulting and Restrictions
 
-Residents with unpaid levies are treated as defaulting residents.
+Residents are treated as defaulting only when they have unpaid levies whose due date has arrived.
 
-The `RolesGuard` now checks `Resident.levyCleared`.
+Future levies do not make a resident default yet.
 
-If `levyCleared` is `false`, the resident is blocked from normal app features.
+The `RolesGuard` now checks due unpaid levies dynamically using:
+
+```text
+LevyAssignment.status != PAID
+AND Levy.dueDate <= now
+```
+
+It then syncs `Resident.levyCleared`:
+
+- `true` if there are no due unpaid levies.
+- `false` if there is at least one due unpaid levy.
+
+### 24-Hour KYC Grace Period
+
+Residents are not restricted immediately after KYC approval.
+
+Restriction starts only after:
+
+```text
+resident.approvedAt + 24 hours
+```
+
+During the first 24 hours after approval, the resident can use the app even if a due unpaid levy exists.
+
+After the 24-hour grace period, if due unpaid levies exist, the resident is blocked from normal app features.
 
 Allowed routes while defaulting:
 
@@ -248,10 +276,20 @@ Allowed even when resident is defaulting.
 - Monthly levy due date is the last day of the month.
 - The monthly cron runs at midnight on the first day of every month.
 - Co-residents do not pay directly; they increase the main resident's monthly bill.
+- `levyCleared` is based on all due levies, not only monthly resident levy.
+- Undue/future levies do not restrict residents.
+- Defaulting restrictions begin 24 hours after KYC approval.
+- Monthly resident levy is still auto-paid from wallet for now.
 - Withdrawals are not allowed for residents in default because withdrawal routes are not in the defaulting allowlist.
 
 ## Verification Status
 
 Prisma client generation completed successfully after the schema changes.
 
-The TypeScript files were formatted. Formatting `prisma/schema.prisma` with Prettier failed because this project does not have a Prisma Prettier parser configured, so the schema was left as standard Prisma syntax.
+Latest build check:
+
+```text
+nest build passed
+```
+
+Formatting `prisma/schema.prisma` with Prettier failed because this project does not have a Prisma Prettier parser configured, so the schema was left as standard Prisma syntax.

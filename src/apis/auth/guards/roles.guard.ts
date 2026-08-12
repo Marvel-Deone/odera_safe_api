@@ -3,7 +3,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { Role } from '@prisma/client';
+import { LevyStatus, Role } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma/prisma.service';
 import { SKIP_LEVY_CHECK_KEY } from '../decorators/skip-levy-check.decorator';
 
@@ -12,7 +12,7 @@ export class RolesGuard implements CanActivate {
     constructor(
         private reflector: Reflector,
         private prisma: PrismaService,
-    ) { }
+    ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const requiredRoles = this.reflector.getAllAndOverride<Role[]>(
@@ -52,10 +52,34 @@ export class RolesGuard implements CanActivate {
 
         const resident = await this.prisma.resident.findFirst({
             where: { userId: user.id },
-            select: { levyCleared: true },
+            select: { id: true, approvedAt: true },
         });
 
-        return resident?.levyCleared !== false;
+        if (!resident?.approvedAt) {
+            return true;
+        }
+
+        const restrictionStartsAt =
+            resident.approvedAt.getTime() + 24 * 60 * 60 * 1000;
+
+        if (Date.now() < restrictionStartsAt) {
+            return true;
+        }
+
+        const dueOutstandingCount = await this.prisma.levyAssignment.count({
+            where: {
+                residentId: resident.id,
+                status: { not: LevyStatus.PAID },
+                levy: { dueDate: { lte: new Date() } },
+            },
+        });
+
+        await this.prisma.resident.update({
+            where: { id: resident.id },
+            data: { levyCleared: dueOutstandingCount === 0 },
+        });
+
+        return dueOutstandingCount === 0;
     }
 
     private isLevyAllowedRoute(method: string, path: string) {
@@ -76,13 +100,6 @@ export class RolesGuard implements CanActivate {
         if (
             method === 'POST' &&
             /^finance\/payments\/[^/]+\/(wallet|paystack)$/.test(normalized)
-        ) {
-            return true;
-        }
-
-        if (
-            method === 'POST' &&
-            normalized === 'finance/monthly-levies/pay-outstanding'
         ) {
             return true;
         }

@@ -10,7 +10,12 @@ import {
     Req,
     UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+    ApiBearerAuth,
+    ApiOperation,
+    ApiQuery,
+    ApiTags,
+} from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -18,19 +23,24 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import {
     CreateLevyDto,
+    EstateWalletWithdrawalDto,
     FundWalletDto,
     RejectWithdrawalDto,
     RequestWithdrawalDto,
     ResolveAccountDto,
+    SetEstateWalletPinDto,
 } from './dto/finance.dto';
 import { FinanceService } from './finance.service';
 import { SkipLevyCheck } from '../auth/decorators/skip-levy-check.decorator';
-import { CreateFinanceRecordDto, FinanceRecordType } from './dto/finance-record.dto';
+import {
+    CreateFinanceRecordDto,
+    FinanceRecordType,
+} from './dto/finance-record.dto';
 
 @ApiTags('Finance')
 @Controller('finance')
 export class FinanceController {
-    constructor(private readonly financeService: FinanceService) { }
+    constructor(private readonly financeService: FinanceService) {}
 
     @Post('paystack/webhook')
     @SkipLevyCheck()
@@ -197,6 +207,42 @@ export class FinanceController {
     @ApiOperation({ summary: 'Get resident wallet and transactions' })
     getWallet(@CurrentUser() user: any) {
         return this.financeService.getWallet(user.id);
+    }
+
+    @Get('estate-wallet')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @SkipLevyCheck()
+    @ApiOperation({ summary: 'Get estate wallet and transactions' })
+    getEstateWallet(@CurrentUser() user: any) {
+        return this.financeService.getEstateWallet(user.id);
+    }
+
+    @Post('estate-wallet/pin')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @SkipLevyCheck()
+    @ApiOperation({ summary: 'Set estate wallet withdrawal PIN' })
+    setEstateWalletPin(
+        @CurrentUser() user: any,
+        @Body() dto: SetEstateWalletPinDto,
+    ) {
+        return this.financeService.setEstateWalletPin(user.id, dto);
+    }
+
+    @Post('estate-wallet/withdraw')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.SUPER_ADMIN)
+    @SkipLevyCheck()
+    @ApiOperation({ summary: 'Withdraw from estate wallet' })
+    withdrawFromEstateWallet(
+        @CurrentUser() user: any,
+        @Body() dto: EstateWalletWithdrawalDto,
+    ) {
+        return this.financeService.withdrawFromEstateWallet(user.id, dto);
     }
 
     @Post('wallet/fund')

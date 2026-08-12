@@ -468,6 +468,7 @@ model Estate {
   polls                     Poll[]
   committees                Committee[]
   levies                    Levy[]
+  wallet                    Wallet?
   estateSettings            EstateSettings?
   shortletSettings          ShortletSettings?
   streets                   EstateStreet[]
@@ -1776,9 +1777,12 @@ model LevyAssignment {
 model Wallet {
   id String @id @default(uuid())
 
-  residentId String @unique
+  residentId String? @unique
+  estateId   String? @unique
 
   balance Decimal @default(0)
+
+  pinHash String?
 
   paystackCustomerCode String?
 
@@ -1789,7 +1793,8 @@ model Wallet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  resident Resident @relation(fields: [residentId], references: [id])
+  resident Resident? @relation(fields: [residentId], references: [id])
+  estate   Estate?   @relation(fields: [estateId], references: [id])
 
   transactions WalletTransaction[]
 }

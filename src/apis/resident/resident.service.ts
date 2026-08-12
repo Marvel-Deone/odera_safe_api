@@ -740,10 +740,8 @@ export class ResidentService {
             {
                 resident: result.updatedResident,
                 wallet: result.wallet,
-                monthlyLevy:
-                    await this.financeService.ensureMonthlyResidentLevyForResident(
-                        result.updatedResident.id,
-                    ),
+                // Monthly resident levy is currently on hold.
+                monthlyLevy: null,
             },
             'Approved',
             'Resident approved successfully',
