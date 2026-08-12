@@ -18,6 +18,7 @@ import { PaystackService } from '../finance/paystack.service';
 import { ClientService } from '../../shared/client/client.service';
 import dayjs from 'dayjs';
 import { FinanceService } from '../finance/finance.service';
+import { EmailService } from '../../shared/email.service';
 
 const getErrorMessage = (err: unknown, fallback = 'Unknown error') =>
     err instanceof Error
@@ -73,7 +74,8 @@ export class ResidentService {
         private paystack: PaystackService,
         private readonly clientsService: ClientService,
         private readonly financeService: FinanceService,
-    ) {}
+        private readonly emailService: EmailService,
+    ) { }
 
     async onboardResident(dto: CreateResidentDto) {
         const estate = await this.prisma.estate.findFirst();
@@ -169,6 +171,15 @@ export class ResidentService {
                     ndprConsentGivenAt: new Date(),
                 },
             });
+
+            const appDownloadLink = process.env.APP_DOWNLOAD_LINK ?? 'https://localhost:3001'
+            const emailDelivery = await this.emailService.sendOnboardingActivationEmail({
+                toEmail: dto.email,
+                fullName: `${dto.first_name} ${dto.last_name}`,
+                houseNumber: dto.house_no,
+                activationCode: tempPassword,
+                appDownloadLink,
+            })
 
             return {
                 resident,
@@ -437,7 +448,7 @@ export class ResidentService {
                 verify_nin.nin.firstname &&
                 resident.first_name &&
                 verify_nin.nin.firstname.toLowerCase().trim() !==
-                    resident.first_name.toLowerCase().trim()
+                resident.first_name.toLowerCase().trim()
             ) {
                 console.log('[NIN Verification] Failed: First name mismatch', {
                     nin: verify_nin.nin.firstname,
@@ -459,7 +470,7 @@ export class ResidentService {
                 verify_nin.nin.lastname &&
                 resident.last_name &&
                 verify_nin.nin.lastname.toLowerCase().trim() !==
-                    resident.last_name.toLowerCase().trim()
+                resident.last_name.toLowerCase().trim()
             ) {
                 console.log('[NIN Verification] Failed: Last name mismatch', {
                     nin: verify_nin.nin.lastname,
@@ -752,8 +763,8 @@ export class ResidentService {
         const residents = await this.prisma.resident.findMany({
             where: status
                 ? {
-                      status,
-                  }
+                    status,
+                }
                 : undefined,
 
             include: {
