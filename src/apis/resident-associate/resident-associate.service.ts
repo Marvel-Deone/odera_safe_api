@@ -345,13 +345,13 @@ export class ResidentAssociateService {
                     appLoginLink,
                 });
 
-            const monthlyLevy =
-                await this.financeService.ensureMonthlyResidentLevyForResident(
-                    resident.id,
-                );
-
             return success(
-                { associate, emailDelivery, monthlyLevy },
+                {
+                    associate,
+                    emailDelivery,
+                    // Monthly resident levy is currently on hold.
+                    monthlyLevy: null,
+                },
                 'Associate Created',
                 'Co-resident created successfully and welcome email sent',
                 HttpStatus.CREATED,
@@ -361,7 +361,7 @@ export class ResidentAssociateService {
         const associate = await this.prisma.residentAssociate.create({
             data: associateData,
         });
-        
+
         return success(
             associate,
             'Associate Created',
@@ -498,14 +498,7 @@ export class ResidentAssociateService {
                       data: updateData,
                   });
 
-        if (
-            category === ResidentAssociateCategory.CO_RESIDENT ||
-            associate.category === ResidentAssociateCategory.CO_RESIDENT
-        ) {
-            await this.financeService.ensureMonthlyResidentLevyForResident(
-                resident.id,
-            );
-        }
+        // Monthly resident levy is currently on hold.
 
         return success(
             updated,
@@ -532,11 +525,7 @@ export class ResidentAssociateService {
             where: { id: associate.id },
         });
 
-        if (associate.category === ResidentAssociateCategory.CO_RESIDENT) {
-            await this.financeService.ensureMonthlyResidentLevyForResident(
-                resident.id,
-            );
-        }
+        // Monthly resident levy is currently on hold.
 
         return success(
             null,

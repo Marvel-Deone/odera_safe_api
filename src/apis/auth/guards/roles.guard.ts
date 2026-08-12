@@ -104,13 +104,6 @@ export class RolesGuard implements CanActivate {
             return true;
         }
 
-        if (
-            method === 'POST' &&
-            normalized === 'finance/monthly-levies/pay-outstanding'
-        ) {
-            return true;
-        }
-
         return false;
     }
 }

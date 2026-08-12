@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import {
     LevyStatus,
     KycStatus,
@@ -15,9 +16,11 @@ import { PrismaService } from '../../database/prisma/prisma.service';
 import { error, success } from '../../common/utils/response.util';
 import {
     CreateLevyDto,
+    EstateWalletWithdrawalDto,
     FundWalletDto,
     RejectWithdrawalDto,
     RequestWithdrawalDto,
+    SetEstateWalletPinDto,
 } from './dto/finance.dto';
 import { PaystackService } from './paystack.service';
 import {
@@ -105,224 +108,31 @@ export class FinanceService {
         residentId: string,
         period = this.currentMonthlyPeriod(),
     ) {
-        const resident = await this.prisma.resident.findUnique({
-            where: { id: residentId },
-            select: { id: true, estateId: true, userId: true },
-        });
-
-        if (!resident) {
-            error('Not Found', 'Resident not found', HttpStatus.NOT_FOUND);
-            throw new Error('RESIDENT_NOT_FOUND');
-        }
-
-        const actorId = await this.getMonthlyLevyActorId(
-            resident.estateId,
-            resident.userId,
-        );
-
-        if (!actorId) {
-            error(
-                'Monthly Levy Error',
-                'No user found to create monthly resident levy',
-                HttpStatus.BAD_REQUEST,
-            );
-            throw new Error('LEVY_ACTOR_NOT_FOUND');
-        }
-
-        const coResidentCount = await this.prisma.residentAssociate.count({
-            where: {
-                residentId: resident.id,
-                category: ResidentAssociateCategory.CO_RESIDENT,
-            },
-        });
-        const headCount = 1 + coResidentCount;
-        const amount = this.monthlyResidentLevyAmount * headCount;
-        const levy = await this.getOrCreateMonthlyLevy({
-            estateId: resident.estateId,
-            period,
-            actorId,
-        });
-
-        const assignment = await this.prisma.levyAssignment.upsert({
-            where: {
-                levyId_residentId: {
-                    levyId: levy.id,
-                    residentId: resident.id,
-                },
-            },
-            update: {
-                amount,
-                headCount,
-            },
-            create: {
-                levyId: levy.id,
-                residentId: resident.id,
-                amount,
-                headCount,
-            },
-            include: { levy: true },
-        });
-
-        const paidAmount = this.toNumber(assignment.paidAmount);
-        const status =
-            paidAmount >= amount
-                ? LevyStatus.PAID
-                : paidAmount > 0
-                  ? LevyStatus.PARTIALLY_PAID
-                  : LevyStatus.PENDING;
-
-        const updatedAssignment = await this.prisma.levyAssignment.update({
-            where: { id: assignment.id },
-            data: {
-                status,
-                paidAt:
-                    status === LevyStatus.PAID
-                        ? (assignment.paidAt ?? new Date())
-                        : null,
-            },
-            include: { levy: true },
-        });
-
-        await this.updateResidentLevyCleared(this.prisma, resident.id);
-        await this.tryPayOutstandingMonthlyLevies(resident.id);
-
-        return (await this.prisma.levyAssignment.findUnique({
-            where: { id: updatedAssignment.id },
-            include: { levy: true },
-        }))!;
+        // Monthly resident levy is on hold. Keep this hook dormant so it can be
+        // restored later without touching callers again.
+        void residentId;
+        void period;
+        return null;
     }
 
     async generateMonthlyResidentLevies(period = this.currentMonthlyPeriod()) {
-        const residents = await this.prisma.resident.findMany({
-            where: {
-                kycStatus: KycStatus.COMPLETED,
-                status: ResidentStatus.ACTIVE,
-            },
-            select: { id: true },
-        });
-
-        const assignments: any[] = [];
-
-        for (const resident of residents) {
-            assignments.push(
-                await this.ensureMonthlyResidentLevyForResident(
-                    resident.id,
-                    period,
-                ),
-            );
-        }
-
         return success(
-            {
-                period,
-                residentCount: residents.length,
-                assignmentCount: assignments.length,
-                assignments,
-            },
-            'Monthly Levies Generated',
-            'Monthly resident levies generated successfully',
+            { period, residentCount: 0, assignmentCount: 0, assignments: [] },
+            'Monthly Levies On Hold',
+            'Monthly resident levy is currently on hold',
         );
     }
 
     @Cron('0 0 1 * *')
     async generateMonthlyResidentLeviesCron() {
-        await this.generateMonthlyResidentLevies();
+        // Monthly resident levy is currently on hold.
+        return;
     }
 
     private async tryPayOutstandingMonthlyLevies(residentId: string) {
-        const resident = await this.prisma.resident.findUnique({
-            where: { id: residentId },
-            include: { wallet: true },
-        });
-
-        if (!resident?.wallet) {
-            return [];
-        }
-
-        const paidAssignments: any[] = [];
-
-        while (true) {
-            const assignment = await this.prisma.levyAssignment.findFirst({
-                where: {
-                    residentId,
-                    status: {
-                        in: [
-                            LevyStatus.PENDING,
-                            LevyStatus.PARTIALLY_PAID,
-                            LevyStatus.OVERDUE,
-                        ],
-                    },
-                    levy: { category: this.monthlyResidentLevyCategory },
-                },
-                include: { levy: true },
-                orderBy: { levy: { dueDate: 'asc' } },
-            });
-
-            if (!assignment) {
-                break;
-            }
-
-            const outstandingAmount =
-                this.toNumber(assignment.amount) -
-                this.toNumber(assignment.paidAmount);
-
-            if (outstandingAmount <= 0) {
-                await this.prisma.levyAssignment.update({
-                    where: { id: assignment.id },
-                    data: {
-                        status: LevyStatus.PAID,
-                        paidAt: assignment.paidAt ?? new Date(),
-                    },
-                });
-                continue;
-            }
-
-            const wallet = await this.prisma.wallet.findUnique({
-                where: { id: resident.wallet.id },
-            });
-
-            if (!wallet || this.toNumber(wallet.balance) < outstandingAmount) {
-                break;
-            }
-
-            const paid = await this.prisma.$transaction(async (tx) => {
-                await tx.wallet.update({
-                    where: { id: wallet.id },
-                    data: { balance: { decrement: outstandingAmount } },
-                });
-
-                const transaction = await tx.walletTransaction.create({
-                    data: {
-                        walletId: wallet.id,
-                        type: WalletTransactionType.LEVY_PAYMENT,
-                        status: WalletTransactionStatus.SUCCESS,
-                        amount: outstandingAmount,
-                        levyAssignmentId: assignment.id,
-                        reference: this.reference('monthly_levy'),
-                        description: `Monthly resident levy payment: ${assignment.levy.period ?? assignment.levy.title}`,
-                    },
-                });
-
-                const updatedAssignment = await tx.levyAssignment.update({
-                    where: { id: assignment.id },
-                    data: {
-                        paidAmount: this.toNumber(assignment.amount),
-                        status: LevyStatus.PAID,
-                        paidAt: new Date(),
-                    },
-                });
-
-                await this.updateResidentLevyCleared(tx, residentId);
-
-                return { transaction, assignment: updatedAssignment };
-            });
-
-            paidAssignments.push(paid);
-        }
-
-        await this.updateResidentLevyCleared(this.prisma, residentId);
-
-        return paidAssignments;
+        // Monthly resident levy is currently on hold.
+        void residentId;
+        return [];
     }
 
     private async getUser(userId: string): Promise<
@@ -362,6 +172,62 @@ export class FinanceService {
             }));
 
         return { user, resident: user.resident, wallet };
+    }
+
+    private async getOrCreateEstateWallet(estateId: string) {
+        return this.prisma.wallet.upsert({
+            where: { estateId },
+            update: {},
+            create: { estateId },
+        });
+    }
+
+    private async getOrCreateEstateWalletInTx(
+        tx: Prisma.TransactionClient,
+        estateId: string,
+    ) {
+        return tx.wallet.upsert({
+            where: { estateId },
+            update: {},
+            create: { estateId },
+        });
+    }
+
+    private shouldCreditEstateWallet(levy: { category: string }) {
+        return levy.category !== this.monthlyResidentLevyCategory;
+    }
+
+    private async creditEstateWalletForLevyPayment(
+        tx: Prisma.TransactionClient,
+        input: {
+            estateId: string;
+            amount: number;
+            levyAssignmentId: string;
+            levyTitle: string;
+            referencePrefix: string;
+        },
+    ) {
+        const estateWallet = await this.getOrCreateEstateWalletInTx(
+            tx,
+            input.estateId,
+        );
+
+        await tx.wallet.update({
+            where: { id: estateWallet.id },
+            data: { balance: { increment: input.amount } },
+        });
+
+        return tx.walletTransaction.create({
+            data: {
+                walletId: estateWallet.id,
+                type: WalletTransactionType.LEVY_PAYMENT,
+                status: WalletTransactionStatus.SUCCESS,
+                amount: input.amount,
+                levyAssignmentId: input.levyAssignmentId,
+                reference: this.reference(input.referencePrefix),
+                description: `Estate wallet levy collection: ${input.levyTitle}`,
+            },
+        });
     }
 
     async getBanks() {
@@ -687,6 +553,18 @@ export class FinanceService {
                     },
                 });
 
+                const estateWalletTransaction = this.shouldCreditEstateWallet(
+                    assignment.levy,
+                )
+                    ? await this.creditEstateWalletForLevyPayment(tx, {
+                          estateId: assignment.levy.estateId,
+                          amount: outstandingAmount,
+                          levyAssignmentId: assignment.id,
+                          levyTitle: assignment.levy.title,
+                          referencePrefix: 'estate_levy_wallet',
+                      })
+                    : null;
+
                 const paidAmount =
                     this.toNumber(assignment.paidAmount) + outstandingAmount;
 
@@ -701,7 +579,11 @@ export class FinanceService {
 
                 await this.updateResidentLevyCleared(tx, resident.id);
 
-                return { transaction, assignment: updatedAssignment };
+                return {
+                    transaction,
+                    estateWalletTransaction,
+                    assignment: updatedAssignment,
+                };
             })
             .catch((err) => {
                 if (err.message === 'LEVY_NOT_FOUND') {
@@ -739,39 +621,11 @@ export class FinanceService {
     }
 
     async payOutstandingMonthlyLeviesFromWallet(userId: string) {
-        const { resident } = await this.getResidentWallet(userId);
-        const paid = await this.tryPayOutstandingMonthlyLevies(resident.id);
-        const now = new Date();
-
-        const outstanding = await this.prisma.levyAssignment.findMany({
-            where: {
-                residentId: resident.id,
-                status: {
-                    in: [
-                        LevyStatus.PENDING,
-                        LevyStatus.PARTIALLY_PAID,
-                        LevyStatus.OVERDUE,
-                    ],
-                },
-                levy: {
-                    category: this.monthlyResidentLevyCategory,
-                    dueDate: { lte: now },
-                },
-            },
-            include: { levy: true },
-            orderBy: { levy: { dueDate: 'asc' } },
-        });
-
+        void userId;
         return success(
-            {
-                paid,
-                outstanding,
-                levyCleared: outstanding.length === 0,
-            },
-            outstanding.length ? 'Levy Outstanding' : 'Levy Paid',
-            outstanding.length
-                ? 'Wallet balance is not enough to clear all outstanding monthly levies'
-                : 'Outstanding monthly levies paid successfully',
+            { paid: [], outstanding: [], levyCleared: true },
+            'Monthly Levies On Hold',
+            'Monthly resident levy payment is currently on hold',
         );
     }
 
@@ -1135,7 +989,7 @@ export class FinanceService {
             where: { reference },
             include: {
                 wallet: { include: { resident: true } },
-                levyAssignment: true,
+                levyAssignment: { include: { levy: true } },
             },
         });
 
@@ -1178,6 +1032,7 @@ export class FinanceService {
             ) {
                 const assignment = await tx.levyAssignment.findUnique({
                     where: { id: transaction.levyAssignmentId },
+                    include: { levy: true },
                 });
 
                 if (assignment) {
@@ -1204,6 +1059,16 @@ export class FinanceService {
                         tx,
                         assignment.residentId,
                     );
+
+                    if (this.shouldCreditEstateWallet(assignment.levy)) {
+                        await this.creditEstateWalletForLevyPayment(tx, {
+                            estateId: assignment.levy.estateId,
+                            amount: paidAmount,
+                            levyAssignmentId: assignment.id,
+                            levyTitle: assignment.levy.title,
+                            referencePrefix: 'estate_levy_paystack',
+                        });
+                    }
                 }
             }
             console.log('Transaction update:', updatedTransaction);
@@ -1211,7 +1076,10 @@ export class FinanceService {
             return updatedTransaction;
         });
 
-        if (transaction.type === WalletTransactionType.FUNDING) {
+        if (
+            transaction.type === WalletTransactionType.FUNDING &&
+            transaction.wallet.resident
+        ) {
             await this.tryPayOutstandingMonthlyLevies(
                 transaction.wallet.resident.id,
             );
@@ -1302,7 +1170,9 @@ export class FinanceService {
             });
         });
 
-        await this.tryPayOutstandingMonthlyLevies(wallet.residentId);
+        if (wallet.residentId) {
+            await this.tryPayOutstandingMonthlyLevies(wallet.residentId);
+        }
 
         return success(
             result,
@@ -1328,6 +1198,226 @@ export class FinanceService {
             where: { id: residentId },
             data: { levyCleared: outstandingCount === 0 },
         });
+    }
+
+    async getEstateWallet(userId: string) {
+        const user = await this.getUser(userId);
+
+        if (user.role !== Role.SUPER_ADMIN) {
+            return error(
+                'Forbidden',
+                'Only super admin can access estate wallet',
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        const wallet = await this.getOrCreateEstateWallet(user.estateId);
+
+        const transactions = await this.prisma.walletTransaction.findMany({
+            where: { walletId: wallet.id },
+            include: {
+                levyAssignment: {
+                    include: {
+                        levy: true,
+                        resident: {
+                            select: {
+                                id: true,
+                                first_name: true,
+                                last_name: true,
+                                house_no: true,
+                                block: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 100,
+        });
+
+        return success(
+            {
+                wallet: {
+                    ...wallet,
+                    pinHash: undefined,
+                    hasWithdrawalPin: Boolean(wallet.pinHash),
+                },
+                transactions,
+            },
+            'Estate Wallet',
+            'Estate wallet fetched successfully',
+        );
+    }
+
+    async setEstateWalletPin(userId: string, dto: SetEstateWalletPinDto) {
+        const user = await this.getUser(userId);
+
+        if (user.role !== Role.SUPER_ADMIN) {
+            return error(
+                'Forbidden',
+                'Only super admin can set estate wallet PIN',
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        const wallet = await this.getOrCreateEstateWallet(user.estateId);
+        const pinHash = await bcrypt.hash(dto.pin, 10);
+
+        await this.prisma.wallet.update({
+            where: { id: wallet.id },
+            data: { pinHash },
+        });
+
+        return success(
+            null,
+            'PIN Set',
+            'Estate wallet withdrawal PIN set successfully',
+        );
+    }
+
+    async withdrawFromEstateWallet(
+        userId: string,
+        dto: EstateWalletWithdrawalDto,
+    ) {
+        const user = await this.getUser(userId);
+
+        if (user.role !== Role.SUPER_ADMIN) {
+            return error(
+                'Forbidden',
+                'Only super admin can withdraw from estate wallet',
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        if (!dto.bankCode) {
+            return error(
+                'Bank Code Required',
+                'Bank code is required for estate wallet withdrawal',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        const wallet = await this.getOrCreateEstateWallet(user.estateId);
+
+        if (!wallet.pinHash) {
+            return error(
+                'PIN Required',
+                'Set estate wallet withdrawal PIN before withdrawing',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        const pinMatches = await bcrypt.compare(dto.pin, wallet.pinHash);
+
+        if (!pinMatches) {
+            return error(
+                'Authentication Failed',
+                'Estate wallet PIN is incorrect',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        if (this.toNumber(wallet.balance) < dto.amount) {
+            return error(
+                'Insufficient Balance',
+                'Estate wallet balance is too low for this withdrawal',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        const reference = this.reference('estate_withdrawal');
+        let reserved: any;
+
+        try {
+            reserved = await this.prisma.$transaction(async (tx) => {
+                const latestWallet = await tx.wallet.findUnique({
+                    where: { id: wallet.id },
+                });
+
+                if (
+                    !latestWallet ||
+                    this.toNumber(latestWallet.balance) < dto.amount
+                ) {
+                    throw new Error('INSUFFICIENT_BALANCE');
+                }
+
+                await tx.wallet.update({
+                    where: { id: wallet.id },
+                    data: { balance: { decrement: dto.amount } },
+                });
+
+                return tx.walletTransaction.create({
+                    data: {
+                        walletId: wallet.id,
+                        type: WalletTransactionType.WITHDRAWAL,
+                        status: WalletTransactionStatus.PENDING,
+                        amount: dto.amount,
+                        reference,
+                        description: `Estate wallet withdrawal to ${dto.accountName} (${dto.bankName} ${dto.accountNumber})`,
+                    },
+                });
+            });
+        } catch (err: any) {
+            if (err.message === 'INSUFFICIENT_BALANCE') {
+                return error(
+                    'Insufficient Balance',
+                    'Estate wallet balance is too low for this withdrawal',
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+
+            throw err;
+        }
+
+        try {
+            const recipient = await this.paystack.createTransferRecipient(
+                dto.accountName,
+                dto.accountNumber,
+                dto.bankCode,
+            );
+
+            const transfer = await this.paystack.initiateTransfer(
+                dto.amount,
+                recipient.data.recipient_code,
+                reference,
+                'OderaSafe estate wallet withdrawal',
+            );
+
+            const transaction = await this.prisma.walletTransaction.update({
+                where: { id: reserved.id },
+                data: {
+                    status: WalletTransactionStatus.SUCCESS,
+                    description: `Estate wallet withdrawal sent. Transfer code: ${transfer.data.transfer_code}`,
+                },
+            });
+
+            return success(
+                { transaction, transfer: transfer.data },
+                'Withdrawal Sent',
+                'Estate wallet withdrawal initiated successfully',
+            );
+        } catch (err: any) {
+            await this.prisma.$transaction(async (tx) => {
+                await tx.wallet.update({
+                    where: { id: wallet.id },
+                    data: { balance: { increment: dto.amount } },
+                });
+
+                await tx.walletTransaction.update({
+                    where: { id: reserved.id },
+                    data: {
+                        status: WalletTransactionStatus.FAILED,
+                        description: `Estate wallet withdrawal failed: ${err?.message ?? 'Transfer failed'}`,
+                    },
+                });
+            });
+
+            return error(
+                'Withdrawal Failed',
+                err?.message || 'Unable to process estate wallet withdrawal',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
     }
 
     async createFinanceRecord(userId: string, dto: CreateFinanceRecordDto) {
