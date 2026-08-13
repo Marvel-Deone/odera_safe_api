@@ -425,6 +425,11 @@ enum FinanceRecordType {
   EXPENSE
 }
 
+enum LevyCategory {
+  ADMIN_LEVY
+  MONTHLY_RESIDENT_LEVY
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -1731,7 +1736,8 @@ model Levy {
 
   title       String
   description String?
-  category    String  @default("CUSTOM")
+  // category    String  @default("CUSTOM")
+  category    LevyCategory
   period      String?
 
   amount Decimal
