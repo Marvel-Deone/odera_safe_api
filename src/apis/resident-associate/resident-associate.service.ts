@@ -8,6 +8,8 @@ import {
 } from '@prisma/client';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
+import * as QRCode from 'qrcode';
+import { randomUUID } from 'crypto';
 import { firstValueFrom } from 'rxjs';
 import { error, success } from '../../common/utils/response.util';
 import { PrismaService } from '../../database/prisma/prisma.service';
@@ -84,6 +86,72 @@ export class ResidentAssociateService {
 
     private generateTemporaryPassword() {
         return Math.random().toString(36).slice(-10);
+    }
+
+    private async generateGateCredentials(): Promise<{
+        passcode: string;
+        qrPayload: string;
+        qrCode: string;
+    }> {
+        for (let attempt = 0; attempt < 10; attempt++) {
+            const passcode = Math.floor(
+                100000 + Math.random() * 900000,
+            ).toString();
+            const qrPayload = `CO_RESIDENT:${randomUUID()}`;
+            const existing = await this.prisma.residentAssociate.findFirst({
+                where: { OR: [{ passcode }, { qrPayload }] },
+                select: { id: true },
+            });
+
+            if (!existing) {
+                return {
+                    passcode,
+                    qrPayload,
+                    qrCode: await QRCode.toDataURL(qrPayload),
+                };
+            }
+        }
+
+        error(
+            'Credential Error',
+            'Unable to generate unique co-resident gate credentials',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+
+        return undefined!;
+    }
+
+    private async ensureGateCredentials(associateId: string) {
+        const associate = await this.prisma.residentAssociate.findUnique({
+            where: { id: associateId },
+            select: {
+                passcode: true,
+                qrPayload: true,
+                qrCode: true,
+            },
+        });
+
+        if (!associate) {
+            error(
+                'Not Found',
+                'Co-resident profile not found',
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        if (associate!.passcode && associate!.qrPayload && associate!.qrCode) {
+            return associate!;
+        }
+
+        return this.prisma.residentAssociate.update({
+            where: { id: associateId },
+            data: await this.generateGateCredentials(),
+            select: {
+                passcode: true,
+                qrPayload: true,
+                qrCode: true,
+            },
+        });
     }
 
     private async assertUniqueCoResidentEmail(
@@ -311,6 +379,7 @@ export class ResidentAssociateService {
         }
 
         if (category === ResidentAssociateCategory.CO_RESIDENT) {
+            const gateCredentials = await this.generateGateCredentials();
             const tempPassword = this.generateTemporaryPassword();
             const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
@@ -328,6 +397,7 @@ export class ResidentAssociateService {
                 return tx.residentAssociate.create({
                     data: {
                         ...associateData,
+                        ...gateCredentials,
                         user: { connect: { id: user.id } },
                     },
                 });
@@ -381,6 +451,84 @@ export class ResidentAssociateService {
             associates,
             'Associates Retrieved',
             'Resident associates fetched successfully',
+        );
+    }
+
+    async getCoResidentDashboard(userId: string) {
+        const associate = await this.prisma.residentAssociate.findFirst({
+            where: {
+                userId,
+                category: ResidentAssociateCategory.CO_RESIDENT,
+            },
+            include: {
+                resident: {
+                    include: {
+                        estate: true,
+                        street: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                        apartmentType: true,
+                    },
+                },
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                        role: true,
+                        first_login: true,
+                        createdAt: true,
+                    },
+                },
+            },
+        });
+
+        if (!associate) {
+            return error(
+                'Forbidden',
+                'Only co-residents can access this dashboard',
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        const gateCredentials = await this.ensureGateCredentials(associate.id);
+
+        return success(
+            {
+                associate: {
+                    id: associate.id,
+                    fullName: associate.fullName,
+                    email: associate.email,
+                    phoneNumber: associate.phoneNumber,
+                    role: associate.role,
+                    category: associate.category,
+                    ninVerificationStatus: associate.ninVerificationStatus,
+                    createdAt: associate.createdAt,
+                    updatedAt: associate.updatedAt,
+                },
+                gateAccess: gateCredentials,
+                mainResident: {
+                    id: associate.resident.id,
+                    firstName: associate.resident.first_name,
+                    lastName: associate.resident.last_name,
+                    email: associate.resident.email,
+                    phone: associate.resident.phone,
+                    houseNo: associate.resident.house_no,
+                    block: associate.resident.block,
+                    street: associate.resident.street,
+                    apartmentType: associate.resident.apartmentType,
+                },
+                estate: {
+                    id: associate.resident.estate.id,
+                    name: associate.resident.estate.name,
+                    address: associate.resident.estate.address,
+                },
+                account: associate.user,
+            },
+            'Co-resident Dashboard',
+            'Co-resident dashboard fetched successfully',
         );
     }
 
