@@ -52,10 +52,12 @@ export class CreateResidentAssociateDto {
     role?: string;
 
     @ApiProperty({ example: 'NIN' })
+    @IsOptional()
     @IsString()
     idType?: string;
 
     @ApiProperty({ example: '63184876213' })
+    @IsOptional()
     @IsString()
     idNumber?: string;
 

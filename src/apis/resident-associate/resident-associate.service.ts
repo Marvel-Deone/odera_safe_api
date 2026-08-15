@@ -336,12 +336,12 @@ export class ResidentAssociateService {
             await this.assertUniqueCoResidentEmail(email!);
         }
 
-        const ninVerificationData = this.isNin(dto.idType)
-            ? await this.verifyNin({
-                  idNumber: dto.idNumber!,
-                  photoUrl: dto.faceCapture,
-              })
-            : null;
+        // const ninVerificationData = this.isNin(dto.idType)
+        //     ? await this.verifyNin({
+        //           idNumber: dto.idNumber!,
+        //           photoUrl: dto.faceCapture,
+        //       })
+        //     : null;
 
         const associateData: Prisma.ResidentAssociateCreateInput = {
             resident: { connect: { id: resident.id } },
@@ -368,15 +368,15 @@ export class ResidentAssociateService {
                 category === ResidentAssociateCategory.STAFF
                     ? dto.exitTime
                     : null,
-            ninVerificationStatus: ninVerificationData
-                ? NinVerificationStatus.VERIFIED
-                : NinVerificationStatus.NOT_SUBMITTED,
+            // ninVerificationStatus: ninVerificationData
+            //     ? NinVerificationStatus.VERIFIED
+            //     : NinVerificationStatus.NOT_SUBMITTED,
         };
 
-        if (ninVerificationData) {
-            associateData.ninVerificationData =
-                ninVerificationData as Prisma.InputJsonValue;
-        }
+        // if (ninVerificationData) {
+        //     associateData.ninVerificationData =
+        //         ninVerificationData as Prisma.InputJsonValue;
+        // }
 
         if (category === ResidentAssociateCategory.CO_RESIDENT) {
             const gateCredentials = await this.generateGateCredentials();
