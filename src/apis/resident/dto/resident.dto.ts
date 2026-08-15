@@ -116,16 +116,23 @@ export class CreateResidentDto {
 }
 
 export class NinVerificationDto {
-    @IsOptional()
     @IsString()
-    @Length(0, 13)
+    @Length(11, 13)
     @ApiProperty({ example: '63184876213' })
-    idcard_no?: string;
+    idNumber!: string;
 
-    @IsOptional()
+    @ApiProperty({ example: 'John' })
     @IsString()
-    @ApiProperty({ example: process.env.DEFAULT_FACE_CAPTURE_URL })
-    face_capture?: string;
+    firstname!: string;
+
+    @ApiProperty({ example: 'Doe' })
+    @IsString()
+    lastname!: string;
+
+    // @IsOptional()
+    // @IsString()
+    // @ApiProperty({ example: process.env.DEFAULT_FACE_CAPTURE_URL })
+    // face_capture?: string;
 }
 
 export class CompleteResidentProfileDto {
