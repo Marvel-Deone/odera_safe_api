@@ -1513,7 +1513,6 @@
 //     }
 // }
 
-
 import { HttpStatus, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
@@ -1538,6 +1537,7 @@ import {
     RejectWithdrawalDto,
     RequestWithdrawalDto,
     SetEstateWalletPinDto,
+    UpdateLevyDto,
 } from './dto/finance.dto';
 import { PaystackService } from './paystack.service';
 import {
@@ -1676,13 +1676,12 @@ export class FinanceService {
                 tx,
             );
 
-            const existingAssignment =
-                await tx.levyAssignment.findFirst({
-                    where: {
-                        levyId: levy.id,
-                        residentId: resident.id,
-                    },
-                });
+            const existingAssignment = await tx.levyAssignment.findFirst({
+                where: {
+                    levyId: levy.id,
+                    residentId: resident.id,
+                },
+            });
 
             const assignment = existingAssignment
                 ? await tx.levyAssignment.update({
@@ -1722,11 +1721,10 @@ export class FinanceService {
         const assignments: any[] = [];
 
         for (const resident of residents) {
-            const assignment =
-                await this.ensureMonthlyResidentLevyForResident(
-                    resident.id,
-                    period,
-                );
+            const assignment = await this.ensureMonthlyResidentLevyForResident(
+                resident.id,
+                period,
+            );
 
             if (assignment) {
                 assignments.push(assignment);
@@ -1750,10 +1748,7 @@ export class FinanceService {
         try {
             await this.generateMonthlyResidentLevies();
         } catch (err) {
-            console.error(
-                '[Monthly Resident Levy] Generation failed:',
-                err,
-            );
+            console.error('[Monthly Resident Levy] Generation failed:', err);
         }
     }
 
@@ -1764,9 +1759,7 @@ export class FinanceService {
      */
     private async tryPayOutstandingMonthlyLevies(residentId: string) {
         const assignment =
-            await this.ensureMonthlyResidentLevyForResident(
-                residentId,
-            );
+            await this.ensureMonthlyResidentLevyForResident(residentId);
 
         return assignment ? [assignment] : [];
     }
@@ -1833,6 +1826,87 @@ export class FinanceService {
         return levy.category !== this.monthlyResidentLevyCategory;
     }
 
+    private async getApplyApartmentType(
+        estateId: string,
+        client: PrismaService | Prisma.TransactionClient = this.prisma,
+    ) {
+        const settings = await client.estateSettings.findUnique({
+            where: { estateId },
+            select: { applyApartmentType: true },
+        });
+
+        return settings?.applyApartmentType ?? false;
+    }
+
+    private async buildApartmentTypePriceMap(
+        estateId: string,
+        prices: { apartmentTypeId: string; amount: number }[] | undefined,
+    ) {
+        const apartmentTypes = await this.prisma.apartmentType.findMany({
+            where: { estateId, active: true },
+            select: { id: true, name: true },
+            orderBy: { name: 'asc' },
+        });
+
+        if (apartmentTypes.length === 0) {
+            error(
+                'Apartment Types Required',
+                'Configure apartment types before enabling apartment-type levy pricing',
+                HttpStatus.BAD_REQUEST,
+            );
+            throw new Error('APARTMENT_TYPES_REQUIRED');
+        }
+
+        const expectedIds = new Set(apartmentTypes.map((type) => type.id));
+        const priceMap = new Map<string, number>();
+
+        for (const price of prices ?? []) {
+            if (!expectedIds.has(price.apartmentTypeId)) {
+                error(
+                    'Invalid Apartment Type',
+                    'Apartment type does not belong to this estate or is inactive',
+                    HttpStatus.BAD_REQUEST,
+                );
+                throw new Error('INVALID_APARTMENT_TYPE');
+            }
+
+            if (priceMap.has(price.apartmentTypeId)) {
+                error(
+                    'Duplicate Apartment Type Price',
+                    'Each apartment type can only have one levy price',
+                    HttpStatus.BAD_REQUEST,
+                );
+                throw new Error('DUPLICATE_APARTMENT_TYPE_PRICE');
+            }
+
+            if (!Number.isFinite(price.amount) || price.amount <= 0) {
+                error(
+                    'Invalid Amount',
+                    'Apartment type price must be a valid amount',
+                    HttpStatus.BAD_REQUEST,
+                );
+                throw new Error('INVALID_APARTMENT_TYPE_PRICE');
+            }
+
+            priceMap.set(price.apartmentTypeId, price.amount);
+        }
+
+        const missingTypes = apartmentTypes.filter(
+            (type) => !priceMap.has(type.id),
+        );
+
+        if (missingTypes.length) {
+            error(
+                'Apartment Type Prices Required',
+                `Missing levy price for: ${missingTypes.map((type) => type.name).join(', ')}`,
+                HttpStatus.BAD_REQUEST,
+            );
+            throw new Error('MISSING_APARTMENT_TYPE_PRICES');
+        }
+
+        return { apartmentTypes, priceMap };
+    }
+
     private async creditEstateWalletForLevyPayment(
         tx: Prisma.TransactionClient,
         input: {
@@ -1892,6 +1966,15 @@ export class FinanceService {
 
     async createLevy(userId: string, dto: CreateLevyDto) {
         const user = await this.getUser(userId);
+        const applyApartmentType = await this.getApplyApartmentType(
+            user.estateId,
+        );
+        const apartmentTypePricing = applyApartmentType
+            ? await this.buildApartmentTypePriceMap(
+                  user.estateId,
+                  dto.apartmentTypePrices,
+              )
+            : null;
 
         const residents = await this.prisma.resident.findMany({
             where: {
@@ -1900,8 +1983,21 @@ export class FinanceService {
                     ? { id: { in: dto.residentIds } }
                     : {}),
             },
-            select: { id: true },
+            select: { id: true, apartmentTypeId: true },
         });
+
+        if (dto.residentIds?.length) {
+            const requestedResidentIds = new Set(dto.residentIds);
+
+            if (residents.length !== requestedResidentIds.size) {
+                error(
+                    'Invalid Residents',
+                    'One or more selected residents do not belong to this estate',
+                    HttpStatus.BAD_REQUEST,
+                );
+                throw new Error('INVALID_RESIDENT_IDS');
+            }
+        }
 
         if (residents.length === 0) {
             error(
@@ -1912,7 +2008,37 @@ export class FinanceService {
             throw new Error('NO_RESIDENTS');
         }
 
-        // const levyCategory = (dto as { category?: string }).category;
+        if (applyApartmentType) {
+            const residentsWithoutApartmentType = residents.filter(
+                (resident) => !resident.apartmentTypeId,
+            );
+
+            if (residentsWithoutApartmentType.length) {
+                error(
+                    'Apartment Type Required',
+                    'All assigned residents must have an apartment type before this levy can be created',
+                    HttpStatus.BAD_REQUEST,
+                );
+                throw new Error('RESIDENT_APARTMENT_TYPE_REQUIRED');
+            }
+
+            const residentsWithInvalidApartmentType = residents.filter(
+                (resident) =>
+                    resident.apartmentTypeId &&
+                    !apartmentTypePricing?.priceMap.has(
+                        resident.apartmentTypeId,
+                    ),
+            );
+
+            if (residentsWithInvalidApartmentType.length) {
+                error(
+                    'Invalid Resident Apartment Type',
+                    'One or more assigned residents use an inactive or unpriced apartment type',
+                    HttpStatus.BAD_REQUEST,
+                );
+                throw new Error('INVALID_RESIDENT_APARTMENT_TYPE');
+            }
+        }
 
         const levy = await this.prisma.levy.create({
             data: {
@@ -1921,23 +2047,35 @@ export class FinanceService {
                 title: dto.title,
                 description: dto.description,
                 amount: dto.amount,
-                // Admin-created levies must remain distinguishable from the
-                // system-generated MONTHLY_RESIDENT_LEVY.
-                // category:
-                //     levyCategory === this.monthlyResidentLevyCategory
-                //         ? 'ADMIN_LEVY'
-                //         : (levyCategory ?? 'ADMIN_LEVY'),
                 category: LevyCategory.ADMIN_LEVY,
                 dueDate: new Date(dto.dueDate),
+                apartmentTypePrices: apartmentTypePricing
+                    ? {
+                          create: Array.from(
+                              apartmentTypePricing.priceMap.entries(),
+                          ).map(([apartmentTypeId, amount]) => ({
+                              apartmentTypeId,
+                              amount,
+                          })),
+                      }
+                    : undefined,
                 assignments: {
                     create: residents.map((resident) => ({
                         residentId: resident.id,
-                        amount: dto.amount,
+                        amount:
+                            applyApartmentType &&
+                            resident.apartmentTypeId &&
+                            apartmentTypePricing
+                                ? apartmentTypePricing.priceMap.get(
+                                      resident.apartmentTypeId,
+                                  )!
+                                : dto.amount,
                     })),
                 },
             },
             include: {
                 assignments: true,
+                apartmentTypePrices: { include: { apartmentType: true } },
             },
         });
 
@@ -1956,6 +2094,7 @@ export class FinanceService {
         const levies = await this.prisma.levy.findMany({
             where: { estateId: user.estateId },
             include: {
+                apartmentTypePrices: { include: { apartmentType: true } },
                 assignments: {
                     include: {
                         resident: {
@@ -1965,6 +2104,7 @@ export class FinanceService {
                                 last_name: true,
                                 house_no: true,
                                 block: true,
+                                apartmentType: true,
                             },
                         },
                     },
@@ -1974,6 +2114,124 @@ export class FinanceService {
         });
 
         return success(levies, 'Levies', 'Levies fetched successfully');
+    }
+
+    async getLevy(userId: string, levyId: string) {
+        const user = await this.getUser(userId);
+
+        const levy = await this.prisma.levy.findFirst({
+            where: { id: levyId, estateId: user.estateId },
+            include: {
+                apartmentTypePrices: { include: { apartmentType: true } },
+                assignments: {
+                    include: {
+                        resident: {
+                            select: {
+                                id: true,
+                                first_name: true,
+                                last_name: true,
+                                house_no: true,
+                                block: true,
+                                apartmentType: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!levy) {
+            return error('Not Found', 'Levy not found', HttpStatus.NOT_FOUND);
+        }
+
+        const applyApartmentType = await this.getApplyApartmentType(
+            user.estateId,
+        );
+
+        const activeApartmentTypes = applyApartmentType
+            ? await this.prisma.apartmentType.findMany({
+                  where: { estateId: user.estateId, active: true },
+                  orderBy: { name: 'asc' },
+              })
+            : [];
+
+        const configuredIds = new Set(
+            levy.apartmentTypePrices.map((price) => price.apartmentTypeId),
+        );
+
+        return success(
+            {
+                ...levy,
+                applyApartmentType,
+                missingApartmentTypePrices: activeApartmentTypes.filter(
+                    (type) => !configuredIds.has(type.id),
+                ),
+            },
+            'Levy',
+            'Levy fetched successfully',
+        );
+    }
+
+    async updateLevy(userId: string, levyId: string, dto: UpdateLevyDto) {
+        const user = await this.getUser(userId);
+        const levy = await this.prisma.levy.findFirst({
+            where: { id: levyId, estateId: user.estateId },
+        });
+
+        if (!levy) {
+            return error('Not Found', 'Levy not found', HttpStatus.NOT_FOUND);
+        }
+
+        const applyApartmentType = await this.getApplyApartmentType(
+            user.estateId,
+        );
+        const apartmentTypePricing =
+            applyApartmentType && dto.apartmentTypePrices !== undefined
+                ? await this.buildApartmentTypePriceMap(
+                      user.estateId,
+                      dto.apartmentTypePrices,
+                  )
+                : null;
+
+        const updated = await this.prisma.$transaction(async (tx) => {
+            const updatedLevy = await tx.levy.update({
+                where: { id: levy.id },
+                data: {
+                    ...(dto.title !== undefined ? { title: dto.title } : {}),
+                    ...(dto.description !== undefined
+                        ? { description: dto.description }
+                        : {}),
+                    ...(dto.amount !== undefined ? { amount: dto.amount } : {}),
+                    ...(dto.dueDate !== undefined
+                        ? { dueDate: new Date(dto.dueDate) }
+                        : {}),
+                },
+            });
+
+            if (apartmentTypePricing) {
+                await tx.levyApartmentTypePrice.deleteMany({
+                    where: { levyId: levy.id },
+                });
+
+                await tx.levyApartmentTypePrice.createMany({
+                    data: Array.from(
+                        apartmentTypePricing.priceMap.entries(),
+                    ).map(([apartmentTypeId, amount]) => ({
+                        levyId: levy.id,
+                        apartmentTypeId,
+                        amount,
+                    })),
+                });
+            }
+
+            return updatedLevy;
+        });
+
+        return success(
+            updated,
+            'Levy Updated',
+            'Levy updated successfully. Existing resident charges were not recalculated.',
+        );
     }
 
     async getOutstandingBills(userId: string) {
@@ -2272,10 +2530,9 @@ export class FinanceService {
 
     async payOutstandingMonthlyLeviesFromWallet(userId: string) {
         const { resident } = await this.getResidentWallet(userId);
-        const assignment =
-            await this.ensureMonthlyResidentLevyForResident(
-                resident.id,
-            );
+        const assignment = await this.ensureMonthlyResidentLevyForResident(
+            resident.id,
+        );
 
         return success(
             {

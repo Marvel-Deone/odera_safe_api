@@ -9,8 +9,10 @@ import {
     IsString,
     Matches,
     Min,
+    ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class ResolveAccountDto {
     @ApiProperty({ example: '23450987650' })
@@ -20,6 +22,17 @@ export class ResolveAccountDto {
     @ApiProperty({ example: '092622' })
     @IsString()
     bankCode!: string;
+}
+
+export class LevyApartmentTypePriceDto {
+    @ApiProperty({ example: 'apartment-type-id' })
+    @IsString()
+    apartmentTypeId!: string;
+
+    @ApiProperty({ example: 100000 })
+    @IsNumber()
+    @Min(1)
+    amount!: number;
 }
 
 export class CreateLevyDto {
@@ -50,6 +63,53 @@ export class CreateLevyDto {
     @ArrayMinSize(1)
     @IsString({ each: true })
     residentIds?: string[];
+
+    @ApiProperty({
+        required: false,
+        type: [LevyApartmentTypePriceDto],
+        example: [
+            { apartmentTypeId: 'duplex-id', amount: 100000 },
+            { apartmentTypeId: 'shop-id', amount: 40000 },
+        ],
+    })
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => LevyApartmentTypePriceDto)
+    apartmentTypePrices?: LevyApartmentTypePriceDto[];
+}
+
+export class UpdateLevyDto {
+    @ApiProperty({ example: 'Monthly Service Levy', required: false })
+    @IsOptional()
+    @IsString()
+    title?: string;
+
+    @ApiProperty({ example: 'Updated estate service charge', required: false })
+    @IsOptional()
+    @IsString()
+    description?: string;
+
+    @ApiProperty({ example: 50000, required: false })
+    @IsOptional()
+    @IsNumber()
+    @Min(1)
+    amount?: number;
+
+    @ApiProperty({ example: '2026-07-31T23:59:59.000Z', required: false })
+    @IsOptional()
+    @IsDateString()
+    dueDate?: string;
+
+    @ApiProperty({
+        required: false,
+        type: [LevyApartmentTypePriceDto],
+    })
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => LevyApartmentTypePriceDto)
+    apartmentTypePrices?: LevyApartmentTypePriceDto[];
 }
 
 export class FundWalletDto {

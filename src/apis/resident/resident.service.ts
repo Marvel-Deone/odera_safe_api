@@ -168,7 +168,6 @@
 
 //                     kycStatus: KycStatus.NOT_SUBMITTED,
 
-
 //                     ndprConsentGivenAt: new Date(),
 //                 },
 //             });
@@ -877,7 +876,6 @@
 //     }
 // }
 
-
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import {
@@ -943,6 +941,11 @@ const getResponseStatus = (
     )?.response?.data?.status ||
     fallback;
 
+type ResidentApartmentTypeValidation = {
+    apartmentTypeId?: string;
+    requireWhenEnabled?: boolean;
+};
+
 @Injectable()
 export class ResidentService {
     qore_id_secret = process.env.QORE_ID_SECRET_KEY;
@@ -955,7 +958,52 @@ export class ResidentService {
         private readonly clientsService: ClientService,
         private readonly financeService: FinanceService,
         private readonly emailService: EmailService,
-    ) { }
+    ) {}
+
+    private async validateApartmentTypeForEstate(
+        estateId: string,
+        input: ResidentApartmentTypeValidation,
+    ) {
+        const settings = await this.prisma.estateSettings.findUnique({
+            where: { estateId },
+            select: { applyApartmentType: true },
+        });
+        const applyApartmentType = settings?.applyApartmentType ?? false;
+
+        if (
+            applyApartmentType &&
+            input.requireWhenEnabled !== false &&
+            !input.apartmentTypeId
+        ) {
+            return error(
+                'Apartment Type Required',
+                'Apartment type is required for this estate',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        if (!input.apartmentTypeId) {
+            return null;
+        }
+
+        const apartmentType = await this.prisma.apartmentType.findFirst({
+            where: {
+                id: input.apartmentTypeId,
+                estateId,
+                active: true,
+            },
+        });
+
+        if (!apartmentType) {
+            return error(
+                'Invalid Apartment Type',
+                'Apartment type does not belong to this estate or is inactive',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        return apartmentType;
+    }
 
     async onboardResident(dto: CreateResidentDto) {
         const estate = await this.prisma.estate.findFirst();
@@ -1025,6 +1073,10 @@ export class ResidentService {
             }
         }
 
+        await this.validateApartmentTypeForEstate(estate.id, {
+            apartmentTypeId: dto.apartmentTypeId,
+        });
+
         const result = await this.prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
                 data: {
@@ -1048,19 +1100,20 @@ export class ResidentService {
 
                     kycStatus: KycStatus.NOT_SUBMITTED,
 
-
                     ndprConsentGivenAt: new Date(),
                 },
             });
 
-            const appDownloadLink = process.env.APP_DOWNLOAD_LINK ?? 'https://localhost:3001'
-            const emailDelivery = await this.emailService.sendOnboardingActivationEmail({
-                toEmail: dto.email,
-                fullName: `${dto.first_name} ${dto.last_name}`,
-                houseNumber: dto.house_no,
-                activationCode: tempPassword,
-                appDownloadLink,
-            })
+            const appDownloadLink =
+                process.env.APP_DOWNLOAD_LINK ?? 'https://localhost:3001';
+            const emailDelivery =
+                await this.emailService.sendOnboardingActivationEmail({
+                    toEmail: dto.email,
+                    fullName: `${dto.first_name} ${dto.last_name}`,
+                    houseNumber: dto.house_no,
+                    activationCode: tempPassword,
+                    appDownloadLink,
+                });
 
             return {
                 resident,
@@ -1330,7 +1383,7 @@ export class ResidentService {
                 verify_nin.nin.firstname &&
                 resident.first_name &&
                 verify_nin.nin.firstname.toLowerCase().trim() !==
-                resident.first_name.toLowerCase().trim()
+                    resident.first_name.toLowerCase().trim()
             ) {
                 console.log('[NIN Verification] Failed: First name mismatch', {
                     nin: verify_nin.nin.firstname,
@@ -1352,7 +1405,7 @@ export class ResidentService {
                 verify_nin.nin.lastname &&
                 resident.last_name &&
                 verify_nin.nin.lastname.toLowerCase().trim() !==
-                resident.last_name.toLowerCase().trim()
+                    resident.last_name.toLowerCase().trim()
             ) {
                 console.log('[NIN Verification] Failed: Last name mismatch', {
                     nin: verify_nin.nin.lastname,
@@ -1490,6 +1543,11 @@ export class ResidentService {
                 HttpStatus.BAD_REQUEST,
             );
         }
+
+        await this.validateApartmentTypeForEstate(resident.estateId, {
+            apartmentTypeId:
+                dto.apartmentTypeId ?? resident.apartmentTypeId ?? undefined,
+        });
 
         const updatedResident = await this.prisma.resident.update({
             where: {
@@ -1638,13 +1696,14 @@ export class ResidentService {
         const residents = await this.prisma.resident.findMany({
             where: status
                 ? {
-                    status,
-                }
+                      status,
+                  }
                 : undefined,
 
             include: {
                 user: true,
                 estate: true,
+                apartmentType: true,
             },
 
             orderBy: {
@@ -1675,6 +1734,7 @@ export class ResidentService {
                         name: true,
                     },
                 },
+                apartmentType: true,
             },
         });
 

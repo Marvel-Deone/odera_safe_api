@@ -58,6 +58,29 @@ export class UpdateEstateSettingsDto {
     @IsOptional()
     @IsBoolean()
     applyKycLevyGracePeriod?: boolean;
+
+    @ApiProperty({ example: false, required: false })
+    @IsOptional()
+    @IsBoolean()
+    applyApartmentType?: boolean;
+}
+
+export class CreateApartmentTypeDto {
+    @ApiProperty({ example: 'Duplex' })
+    @IsString()
+    name!: string;
+}
+
+export class UpdateApartmentTypeDto {
+    @ApiProperty({ example: 'Terrace Duplex', required: false })
+    @IsOptional()
+    @IsString()
+    name?: string;
+
+    @ApiProperty({ example: true, required: false })
+    @IsOptional()
+    @IsBoolean()
+    active?: boolean;
 }
 
 export class CreateHeavyVehicleCategoryDto {
