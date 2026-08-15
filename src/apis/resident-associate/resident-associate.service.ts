@@ -62,8 +62,8 @@ export class ResidentAssociateService {
         this.assertValidTimeRange(input.entryTime!, input.exitTime!);
     }
 
-    private isNin(idType: string) {
-        return idType.trim().toUpperCase() === 'NIN';
+    private isNin(idType?: string | null) {
+        return idType?.trim().toUpperCase() === 'NIN';
     }
 
     private async getResident(userId: string) {
@@ -270,7 +270,7 @@ export class ResidentAssociateService {
 
         const ninVerificationData = this.isNin(dto.idType)
             ? await this.verifyNin({
-                  idNumber: dto.idNumber,
+                  idNumber: dto.idNumber!,
                   photoUrl: dto.faceCapture,
               })
             : null;
@@ -419,12 +419,16 @@ export class ResidentAssociateService {
             dto.faceCapture ?? associate.faceCapture ?? undefined;
         const shouldVerifyNin =
             this.isNin(idType) &&
+            Boolean(idNumber) &&
             (dto.idType !== undefined ||
                 dto.idNumber !== undefined ||
                 dto.faceCapture !== undefined);
 
         const ninVerificationData = shouldVerifyNin
-            ? await this.verifyNin({ idNumber, photoUrl: faceCapture })
+            ? await this.verifyNin({
+                  idNumber: idNumber!,
+                  photoUrl: faceCapture,
+              })
             : undefined;
 
         const normalizedEmail = dto.email?.trim().toLowerCase();

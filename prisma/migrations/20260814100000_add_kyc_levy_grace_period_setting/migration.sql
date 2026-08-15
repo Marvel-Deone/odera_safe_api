@@ -1,0 +1,2 @@
+ALTER TABLE "EstateSettings"
+  ADD COLUMN IF NOT EXISTS "applyKycLevyGracePeriod" BOOLEAN NOT NULL DEFAULT true;
