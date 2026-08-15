@@ -53,11 +53,11 @@ export class CreateResidentAssociateDto {
 
     @ApiProperty({ example: 'NIN' })
     @IsString()
-    idType!: string;
+    idType?: string;
 
     @ApiProperty({ example: '63184876213' })
     @IsString()
-    idNumber!: string;
+    idNumber?: string;
 
     @ApiPropertyOptional({
         example: 'https://example.com/face-capture.jpg',

@@ -108,12 +108,7 @@
 //     }
 // }
 
-
-import {
-    CanActivate,
-    ExecutionContext,
-    Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
 import { Reflector } from '@nestjs/core';
 
@@ -124,22 +119,18 @@ import { SKIP_LEVY_CHECK_KEY } from '../decorators/skip-levy-check.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-    private readonly monthlyResidentLevyCategory =
-        'MONTHLY_RESIDENT_LEVY';
+    private readonly monthlyResidentLevyCategory = 'MONTHLY_RESIDENT_LEVY';
 
     constructor(
         private readonly reflector: Reflector,
         private readonly prisma: PrismaService,
     ) {}
 
-    async canActivate(
-        context: ExecutionContext,
-    ): Promise<boolean> {
-        const requiredRoles =
-            this.reflector.getAllAndOverride<Role[]>(
-                ROLES_KEY,
-                [context.getHandler(), context.getClass()],
-            );
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        const requiredRoles = this.reflector.getAllAndOverride<Role[]>(
+            ROLES_KEY,
+            [context.getHandler(), context.getClass()],
+        );
 
         const request = context.switchToHttp().getRequest();
         const { user } = request;
@@ -159,11 +150,10 @@ export class RolesGuard implements CanActivate {
             return true;
         }
 
-        const skipLevyCheck =
-            this.reflector.getAllAndOverride<boolean>(
-                SKIP_LEVY_CHECK_KEY,
-                [context.getHandler(), context.getClass()],
-            );
+        const skipLevyCheck = this.reflector.getAllAndOverride<boolean>(
+            SKIP_LEVY_CHECK_KEY,
+            [context.getHandler(), context.getClass()],
+        );
 
         if (skipLevyCheck) {
             return true;
@@ -181,6 +171,7 @@ export class RolesGuard implements CanActivate {
             },
             select: {
                 id: true,
+                estateId: true,
                 approvedAt: true,
                 kycStatus: true,
                 levyCleared: true,
@@ -194,33 +185,46 @@ export class RolesGuard implements CanActivate {
 
         const now = new Date();
 
-        /*
-         * Resident gets a 24-hour grace period after KYC approval.
-         *
-         * During this period:
-         * - Admin levies may exist.
-         * - Admin levies may even be due.
-         * - Resident still has full access.
-         */
-        const restrictionStartsAt = new Date(
-            resident.approvedAt.getTime() +
-                24 * 60 * 60 * 1000,
-        );
+        const estateSettings = await this.prisma.estateSettings.findUnique({
+            where: {
+                estateId: resident.estateId,
+            },
+            select: {
+                applyKycLevyGracePeriod: true,
+            },
+        });
 
-        if (now < restrictionStartsAt) {
-            // Keep the state consistent during the grace period.
-            if (!resident.levyCleared) {
-                await this.prisma.resident.update({
-                    where: {
-                        id: resident.id,
-                    },
-                    data: {
-                        levyCleared: true,
-                    },
-                });
+        const applyKycLevyGracePeriod =
+            estateSettings?.applyKycLevyGracePeriod ?? true;
+
+        if (applyKycLevyGracePeriod) {
+            /*
+             * Resident gets a 24-hour grace period after KYC approval.
+             *
+             * During this period:
+             * - Admin levies may exist.
+             * - Admin levies may even be due.
+             * - Resident still has full access.
+             */
+            const restrictionStartsAt = new Date(
+                resident.approvedAt.getTime() + 24 * 60 * 60 * 1000,
+            );
+
+            if (now < restrictionStartsAt) {
+                // Keep the state consistent during the grace period.
+                if (!resident.levyCleared) {
+                    await this.prisma.resident.update({
+                        where: {
+                            id: resident.id,
+                        },
+                        data: {
+                            levyCleared: true,
+                        },
+                    });
+                }
+
+                return true;
             }
-
-            return true;
         }
 
         /*
@@ -290,41 +294,27 @@ export class RolesGuard implements CanActivate {
         return false;
     }
 
-    private isLevyAllowedRoute(
-        method: string,
-        path: string,
-    ): boolean {
+    private isLevyAllowedRoute(method: string, path: string): boolean {
         const normalized = path.replace(/^\/+/, '');
 
         // Wallet
-        if (
-            method === 'GET' &&
-            normalized === 'finance/wallet'
-        ) {
+        if (method === 'GET' && normalized === 'finance/wallet') {
             return true;
         }
 
-        if (
-            method === 'POST' &&
-            normalized === 'finance/wallet/fund'
-        ) {
+        if (method === 'POST' && normalized === 'finance/wallet/fund') {
             return true;
         }
 
         // Outstanding levies
-        if (
-            method === 'GET' &&
-            normalized === 'finance/payments/outstanding'
-        ) {
+        if (method === 'GET' && normalized === 'finance/payments/outstanding') {
             return true;
         }
 
         // Levy payment
         if (
             method === 'POST' &&
-            /^finance\/payments\/[^/]+\/(wallet|paystack)$/.test(
-                normalized,
-            )
+            /^finance\/payments\/[^/]+\/(wallet|paystack)$/.test(normalized)
         ) {
             return true;
         }
