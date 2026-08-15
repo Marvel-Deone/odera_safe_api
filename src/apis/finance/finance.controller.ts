@@ -29,6 +29,7 @@ import {
     RequestWithdrawalDto,
     ResolveAccountDto,
     SetEstateWalletPinDto,
+    UpdateLevyDto,
 } from './dto/finance.dto';
 import { FinanceService } from './finance.service';
 import { SkipLevyCheck } from '../auth/decorators/skip-levy-check.decorator';
@@ -103,6 +104,28 @@ export class FinanceController {
     @ApiOperation({ summary: 'Get estate levies' })
     getLevies(@CurrentUser() user: any) {
         return this.financeService.getLevies(user.id);
+    }
+
+    @Get('levies/:levyId')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+    @ApiOperation({ summary: 'Get estate levy by ID' })
+    getLevy(@CurrentUser() user: any, @Param('levyId') levyId: string) {
+        return this.financeService.getLevy(user.id, levyId);
+    }
+
+    @Patch('levies/:levyId')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+    @ApiOperation({ summary: 'Update estate levy' })
+    updateLevy(
+        @CurrentUser() user: any,
+        @Param('levyId') levyId: string,
+        @Body() dto: UpdateLevyDto,
+    ) {
+        return this.financeService.updateLevy(user.id, levyId, dto);
     }
 
     @Get('records')

@@ -3,8 +3,10 @@ import { LogCategory, Role } from '@prisma/client';
 import { error, success } from '../../common/utils/response.util';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import {
+    CreateApartmentTypeDto,
     CreateEstateStreetDto,
     CreateHeavyVehicleCategoryDto,
+    UpdateApartmentTypeDto,
     UpdateEstateDetailsDto,
     UpdateEstateSettingsDto,
     UpdateEstateStreetDto,
@@ -56,6 +58,7 @@ export class EstateConfigService {
             include: {
                 estateSettings: true,
                 streets: { orderBy: { name: 'asc' } },
+                apartmentTypes: { orderBy: { name: 'asc' } },
                 heavyVehicleCategories: { orderBy: { createdAt: 'desc' } },
             },
         });
@@ -107,6 +110,35 @@ export class EstateConfigService {
             streets,
             'Estate Streets',
             'Estate streets fetched successfully',
+        );
+    }
+
+    async getPublicEstateApartmentTypes(estateId: string) {
+        const estate = await this.prisma.estate.findUnique({
+            where: { id: estateId },
+            select: { id: true },
+        });
+
+        if (!estate) {
+            return error('Not Found', 'Estate not found', HttpStatus.NOT_FOUND);
+        }
+
+        const apartmentTypes = await this.prisma.apartmentType.findMany({
+            where: { estateId, active: true },
+            select: {
+                id: true,
+                estateId: true,
+                name: true,
+                active: true,
+                createdAt: true,
+            },
+            orderBy: { name: 'asc' },
+        });
+
+        return success(
+            apartmentTypes,
+            'Apartment Types',
+            'Apartment types fetched successfully',
         );
     }
 
@@ -177,12 +209,16 @@ export class EstateConfigService {
                 ...(dto.applyKycLevyGracePeriod !== undefined
                     ? { applyKycLevyGracePeriod: dto.applyKycLevyGracePeriod }
                     : {}),
+                ...(dto.applyApartmentType !== undefined
+                    ? { applyApartmentType: dto.applyApartmentType }
+                    : {}),
             },
             create: {
                 estateId: admin.estateId,
                 freeVehicleLimit: dto.freeVehicleLimit ?? 1,
                 vehicleRegistrationFee: dto.vehicleRegistrationFee ?? 0,
                 applyKycLevyGracePeriod: dto.applyKycLevyGracePeriod ?? true,
+                applyApartmentType: dto.applyApartmentType ?? false,
             },
         });
 
@@ -234,10 +270,257 @@ export class EstateConfigService {
             });
         }
 
+        if (
+            dto.applyApartmentType !== undefined &&
+            (before?.applyApartmentType ?? false) !== dto.applyApartmentType
+        ) {
+            await this.createActivityLog({
+                estateId: admin.estateId,
+                action: 'APARTMENT_TYPE_SETTING_UPDATED',
+                description: `Apartment type pricing ${dto.applyApartmentType ? 'enabled' : 'disabled'}`,
+                actorId: admin.id,
+                actorRole: admin.role,
+                metadata: { applyApartmentType: dto.applyApartmentType },
+            });
+        }
+
         return success(
             settings,
             'Settings Updated',
             'Estate settings updated successfully',
+        );
+    }
+
+    async createApartmentType(userId: string, dto: CreateApartmentTypeDto) {
+        const admin = await this.getAdmin(userId);
+
+        if (admin.role !== Role.SUPER_ADMIN) {
+            return error(
+                'Forbidden',
+                'Only super admin can create apartment types',
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        const name = dto.name.trim();
+        const existing = await this.prisma.apartmentType.findFirst({
+            where: {
+                estateId: admin.estateId,
+                name: { equals: name, mode: 'insensitive' },
+            },
+        });
+
+        if (existing) {
+            return error(
+                'Duplicate Apartment Type',
+                'Apartment type name already exists for this estate',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        const apartmentType = await this.prisma.apartmentType.create({
+            data: { estateId: admin.estateId, name },
+        });
+
+        await this.createActivityLog({
+            estateId: admin.estateId,
+            action: 'APARTMENT_TYPE_CREATED',
+            description: `Apartment type ${apartmentType.name} created`,
+            actorId: admin.id,
+            actorRole: admin.role,
+            metadata: { apartmentTypeId: apartmentType.id },
+        });
+
+        return success(
+            apartmentType,
+            'Apartment Type Created',
+            'Apartment type created successfully',
+            HttpStatus.CREATED,
+        );
+    }
+
+    async getApartmentTypes(userId: string) {
+        const admin = await this.getAdmin(userId);
+
+        const apartmentTypes = await this.prisma.apartmentType.findMany({
+            where: { estateId: admin.estateId },
+            orderBy: { name: 'asc' },
+        });
+
+        return success(
+            apartmentTypes,
+            'Apartment Types',
+            'Apartment types fetched successfully',
+        );
+    }
+
+    async getApartmentType(userId: string, apartmentTypeId: string) {
+        const admin = await this.getAdmin(userId);
+        const apartmentType = await this.prisma.apartmentType.findFirst({
+            where: { id: apartmentTypeId, estateId: admin.estateId },
+        });
+
+        if (!apartmentType) {
+            return error(
+                'Not Found',
+                'Apartment type not found',
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        return success(
+            apartmentType,
+            'Apartment Type',
+            'Apartment type fetched successfully',
+        );
+    }
+
+    async updateApartmentType(
+        userId: string,
+        apartmentTypeId: string,
+        dto: UpdateApartmentTypeDto,
+    ) {
+        const admin = await this.getAdmin(userId);
+
+        if (admin.role !== Role.SUPER_ADMIN) {
+            return error(
+                'Forbidden',
+                'Only super admin can update apartment types',
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        const apartmentType = await this.prisma.apartmentType.findFirst({
+            where: { id: apartmentTypeId, estateId: admin.estateId },
+        });
+
+        if (!apartmentType) {
+            return error(
+                'Not Found',
+                'Apartment type not found',
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        const name = dto.name?.trim();
+
+        if (name && name.toLowerCase() !== apartmentType.name.toLowerCase()) {
+            const duplicate = await this.prisma.apartmentType.findFirst({
+                where: {
+                    estateId: admin.estateId,
+                    name: { equals: name, mode: 'insensitive' },
+                    id: { not: apartmentType.id },
+                },
+            });
+
+            if (duplicate) {
+                return error(
+                    'Duplicate Apartment Type',
+                    'Apartment type name already exists for this estate',
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+        }
+
+        const updated = await this.prisma.apartmentType.update({
+            where: { id: apartmentType.id },
+            data: {
+                ...(name !== undefined ? { name } : {}),
+                ...(dto.active !== undefined ? { active: dto.active } : {}),
+            },
+        });
+
+        await this.createActivityLog({
+            estateId: admin.estateId,
+            action: 'APARTMENT_TYPE_UPDATED',
+            description: `Apartment type ${updated.name} updated`,
+            actorId: admin.id,
+            actorRole: admin.role,
+            metadata: { apartmentTypeId: updated.id },
+        });
+
+        return success(
+            updated,
+            'Apartment Type Updated',
+            'Apartment type updated successfully',
+        );
+    }
+
+    async deleteApartmentType(userId: string, apartmentTypeId: string) {
+        const admin = await this.getAdmin(userId);
+
+        if (admin.role !== Role.SUPER_ADMIN) {
+            return error(
+                'Forbidden',
+                'Only super admin can delete apartment types',
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        const apartmentType = await this.prisma.apartmentType.findFirst({
+            where: { id: apartmentTypeId, estateId: admin.estateId },
+        });
+
+        if (!apartmentType) {
+            return error(
+                'Not Found',
+                'Apartment type not found',
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        const [residentCount, levyPriceCount] = await Promise.all([
+            this.prisma.resident.count({
+                where: { apartmentTypeId: apartmentType.id },
+            }),
+            this.prisma.levyApartmentTypePrice.count({
+                where: { apartmentTypeId: apartmentType.id },
+            }),
+        ]);
+
+        if (residentCount + levyPriceCount > 0) {
+            const updated = await this.prisma.apartmentType.update({
+                where: { id: apartmentType.id },
+                data: { active: false },
+            });
+
+            await this.createActivityLog({
+                estateId: admin.estateId,
+                action: 'APARTMENT_TYPE_DEACTIVATED',
+                description: `Apartment type ${updated.name} deactivated`,
+                actorId: admin.id,
+                actorRole: admin.role,
+                metadata: {
+                    apartmentTypeId: updated.id,
+                    residentCount,
+                    levyPriceCount,
+                },
+            });
+
+            return success(
+                updated,
+                'Apartment Type Deactivated',
+                'Apartment type is in use, so it was deactivated to preserve history',
+            );
+        }
+
+        await this.prisma.apartmentType.delete({
+            where: { id: apartmentType.id },
+        });
+
+        await this.createActivityLog({
+            estateId: admin.estateId,
+            action: 'APARTMENT_TYPE_DELETED',
+            description: `Apartment type ${apartmentType.name} deleted`,
+            actorId: admin.id,
+            actorRole: admin.role,
+            metadata: { apartmentTypeId: apartmentType.id },
+        });
+
+        return success(
+            null,
+            'Apartment Type Deleted',
+            'Apartment type deleted successfully',
         );
     }
 

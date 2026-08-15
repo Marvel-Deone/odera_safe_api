@@ -454,6 +454,7 @@ model Estate {
   settings                  Json?
   residents                 Resident[]
   residentSelfOnboardings   ResidentSelfOnboarding[]
+  apartmentTypes            ApartmentType[]
   users                     User[]
   visitors                  Visitor[]
   activityLogs              ActivityLog[]
@@ -552,6 +553,7 @@ model Resident {
   gender     String?
   estateId   String
   streetId   String?
+  apartmentTypeId String?
 
   userId String? @unique
 
@@ -614,6 +616,7 @@ model Resident {
 
   estate                Estate                 @relation(fields: [estateId], references: [id])
   street                EstateStreet?          @relation(fields: [streetId], references: [id])
+  apartmentType         ApartmentType?         @relation(fields: [apartmentTypeId], references: [id])
   user                  User?                  @relation(fields: [userId], references: [id])
   visitors              Visitor[]
   incidents             Incident[]
@@ -625,6 +628,8 @@ model Resident {
   heavyVehiclePasses    HeavyVehiclePass[]
   businessRegistrations BusinessRegistration[]
   residentAssociates    ResidentAssociate[]
+
+  @@index([apartmentTypeId])
 }
 
 model ResidentSelfOnboarding {
@@ -702,10 +707,27 @@ model EstateSettings {
   freeVehicleLimit        Int      @default(1)
   vehicleRegistrationFee  Decimal  @default(0)
   applyKycLevyGracePeriod Boolean  @default(true)
+  applyApartmentType      Boolean  @default(false)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
   estate Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+}
+
+model ApartmentType {
+  id        String   @id @default(uuid())
+  estateId  String
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estate      Estate                    @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  residents   Resident[]
+  levyPrices  LevyApartmentTypePrice[]
+
+  @@unique([estateId, name])
+  @@index([estateId, active])
 }
 
 model HeavyVehicleCategory {
@@ -1751,10 +1773,27 @@ model Levy {
 
   createdBy User @relation(fields: [createdById], references: [id])
 
-  assignments LevyAssignment[]
+  assignments           LevyAssignment[]
+  apartmentTypePrices   LevyApartmentTypePrice[]
 
   @@unique([estateId, category, period])
   @@index([estateId])
+}
+
+model LevyApartmentTypePrice {
+  id              String  @id @default(uuid())
+  levyId          String
+  apartmentTypeId String
+  amount          Decimal
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  levy          Levy          @relation(fields: [levyId], references: [id], onDelete: Cascade)
+  apartmentType ApartmentType @relation(fields: [apartmentTypeId], references: [id])
+
+  @@unique([levyId, apartmentTypeId])
+  @@index([apartmentTypeId])
 }
 
 model LevyAssignment {

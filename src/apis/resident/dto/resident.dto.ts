@@ -5,30 +5,30 @@ import {
     IsOptional,
     IsString,
     Length,
-} from 'class-validator'
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { ResidentReviewAction } from '@prisma/client'
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ResidentReviewAction } from '@prisma/client';
 
 export class ResidentSelfOnboardingDto {
     @ApiProperty({ example: 'John' })
     @IsString()
-    first_name!: string
+    first_name!: string;
 
     @ApiProperty({ example: 'Doe' })
     @IsString()
-    last_name!: string
+    last_name!: string;
 
     @ApiProperty({ example: 'Oyo' })
     @IsString()
-    state_of_origin!: string
+    state_of_origin!: string;
 
     @ApiProperty({ example: 'Ogbomoso North' })
     @IsString()
-    lga!: string
+    lga!: string;
 
     @ApiProperty({ example: 'A12' })
     @IsString()
-    houseNumber!: string
+    houseNumber!: string;
 
     // @ApiProperty({ example: '12 Palm Street, Lekki Phase 1' })
     // @IsString()
@@ -40,69 +40,79 @@ export class ResidentSelfOnboardingDto {
     @Length(10, 11, {
         message: 'WhatsApp phone number must be between 10 and 11 characters',
     })
-    whatsappPhone!: string
+    whatsappPhone!: string;
 
     @ApiProperty({ example: 'john@example.com' })
     @IsEmail()
-    email!: string
+    email!: string;
 
     @ApiProperty({ example: 'A' })
     @IsOptional()
     @IsString()
-    block?: string
+    block?: string;
 
     @ApiPropertyOptional({ example: 'estate-street-id' })
     @IsOptional()
     @IsString()
-    streetId?: string
+    streetId?: string;
+
+    @ApiPropertyOptional({ example: 'apartment-type-id' })
+    @IsOptional()
+    @IsString()
+    apartmentTypeId?: string;
 }
 
 export class CreateResidentDto {
     @ApiProperty({ example: 'John' })
     @IsString()
-    first_name!: string
+    first_name!: string;
 
     @ApiProperty({ example: 'Doe' })
     @IsString()
-    last_name!: string
+    last_name!: string;
 
     @ApiProperty({ example: 'john@example.com' })
     @IsEmail()
-    email!: string
+    email!: string;
 
     @ApiProperty({ example: '08012345678' })
     @IsString()
-    phone!: string
+    phone!: string;
 
     @ApiProperty({ example: '12' })
     @IsString()
-    house_no!: string
+    house_no!: string;
 
     @ApiProperty({ example: 'A' })
     @IsString()
-    block!: string
+    block!: string;
 
     @ApiPropertyOptional({ example: 'estate-street-id' })
     @IsOptional()
     @IsString()
-    streetId?: string
+    streetId?: string;
+
+    @ApiPropertyOptional({ example: 'apartment-type-id' })
+    @IsOptional()
+    @IsString()
+    apartmentTypeId?: string;
 
     @ApiPropertyOptional({ example: 'Male' })
     @IsOptional()
     @IsString()
-    gender?: string
+    gender?: string;
 
     @ApiProperty({ example: true })
     @IsBoolean()
-    ndprConsentDataProcessing!: boolean
+    ndprConsentDataProcessing!: boolean;
 
     @ApiProperty({ example: true })
     @IsBoolean()
-    ndprConsentIdentity!: boolean
+    ndprConsentIdentity!: boolean;
 
     @ApiProperty({ example: true })
     @IsBoolean()
-    ndprConsentThirdParty!: boolean
+    ndprConsentThirdParty!: boolean;
 }
 
 export class NinVerificationDto {
@@ -122,108 +132,108 @@ export class CompleteResidentProfileDto {
     @ApiPropertyOptional({ example: 'NIN' })
     @IsOptional()
     @IsString()
-    id_type!: string
+    id_type!: string;
 
     @ApiPropertyOptional({ example: '12345678901' })
     @IsOptional()
     @IsString()
-    id_no!: string
+    id_no!: string;
 
     @ApiPropertyOptional({ example: 'https://cloudinary.com/front.jpg' })
     @IsOptional()
     @IsString()
-    id_document_front?: string
+    id_document_front?: string;
 
     @ApiPropertyOptional({ example: 'https://cloudinary.com/back.jpg' })
     @IsOptional()
     @IsString()
-    id_document_back?: string
+    id_document_back?: string;
 
     @ApiPropertyOptional({ example: '22334455667' })
     @IsOptional()
     @IsString()
-    bvn?: string
+    bvn?: string;
 
     @ApiPropertyOptional({ example: '12345678901' })
     @IsOptional()
     @IsString()
     @Length(11, 11)
-    nin?: string
+    nin?: string;
 
     @ApiPropertyOptional({ example: 'Jane Doe' })
     @IsOptional()
     @IsString()
-    next_of_kin_name?: string
+    next_of_kin_name?: string;
 
     @ApiPropertyOptional({ example: '08011223344' })
     @IsOptional()
     @IsString()
-    next_of_kin_phone?: string
+    next_of_kin_phone?: string;
 
     @ApiPropertyOptional({ example: 'jane@example.com' })
     @IsOptional()
     @IsEmail()
-    next_of_kin_email?: string
+    next_of_kin_email?: string;
 
     @ApiPropertyOptional({ example: 'Sister' })
     @IsOptional()
     @IsString()
-    next_of_kin_relationship?: string
+    next_of_kin_relationship?: string;
 
     @ApiPropertyOptional({ example: 'Mr Adewale' })
     @IsOptional()
     @IsString()
-    guarantor_name?: string
+    guarantor_name?: string;
 
     @ApiPropertyOptional({ example: 'Engineer' })
     @IsOptional()
     @IsString()
-    guarantor_occupation?: string
+    guarantor_occupation?: string;
 
     @ApiPropertyOptional({ example: 'Victoria Island' })
     @IsOptional()
     @IsString()
-    guarantor_work_address?: string
+    guarantor_work_address?: string;
 
     @ApiPropertyOptional({ example: '99887766554' })
     @IsOptional()
     @IsString()
-    guarantor_id_no?: string
+    guarantor_id_no?: string;
 
     @ApiPropertyOptional({ example: 'Uncle' })
     @IsOptional()
     @IsString()
-    guarantor_id_relationship?: string
+    guarantor_id_relationship?: string;
 
     @ApiPropertyOptional({ example: 'https://cloudinary.com/letter.pdf' })
     @IsOptional()
     @IsString()
-    signed_guarantor_letter_upload?: string
+    signed_guarantor_letter_upload?: string;
 
     @ApiPropertyOptional({ example: 'ABC-123XY' })
     @IsOptional()
     @IsString()
-    vehicle_plate_no?: string
+    vehicle_plate_no?: string;
 
     @ApiPropertyOptional({ example: 'Toyota Camry' })
     @IsOptional()
     @IsString()
-    vehicle_make?: string
+    vehicle_make?: string;
 
     @ApiPropertyOptional({ example: 'Black' })
     @IsOptional()
     @IsString()
-    vehicle_color?: string
+    vehicle_color?: string;
 
     @ApiPropertyOptional({ example: 'https://cloudinary.com/proof.pdf' })
     @IsOptional()
     @IsString()
-    proof_of_address_upload?: string
+    proof_of_address_upload?: string;
 
     @ApiPropertyOptional({ example: 'https://cloudinary.com/passport.jpg' })
     @IsOptional()
     @IsString()
-    passport?: string
+    passport?: string;
 
     // @ApiPropertyOptional({ example: 'https://cloudinary.com/tenancy.pdf' })
     // @IsOptional()
@@ -253,23 +263,28 @@ export class CompleteResidentProfileDto {
     @ApiPropertyOptional({ example: '08099887766' })
     @IsOptional()
     @IsString()
-    alternate_phone?: string
+    alternate_phone?: string;
+
+    @ApiPropertyOptional({ example: 'apartment-type-id' })
+    @IsOptional()
+    @IsString()
+    apartmentTypeId?: string;
 
     @ApiProperty({ example: true })
     @IsBoolean()
-    ndprConsentDataProcessing!: boolean
+    ndprConsentDataProcessing!: boolean;
 
     @ApiProperty({ example: true })
     @IsBoolean()
-    ndprConsentIdentity!: boolean
+    ndprConsentIdentity!: boolean;
 
     @ApiProperty({ example: true })
     @IsBoolean()
-    ndprConsentThirdParty!: boolean
+    ndprConsentThirdParty!: boolean;
 
     @ApiProperty({ example: true })
     @IsBoolean()
-    profileDeclaration!: boolean
+    profileDeclaration!: boolean;
 }
 
 export class ReviewResidentKycDto {
@@ -278,12 +293,12 @@ export class ReviewResidentKycDto {
         example: ResidentReviewAction.APPROVE,
     })
     @IsEnum(ResidentReviewAction)
-    action!: ResidentReviewAction
+    action!: ResidentReviewAction;
 
     @ApiPropertyOptional({
         example: 'Uploaded ID document is not readable',
     })
     @IsOptional()
     @IsString()
-    rejectionReason?: string
+    rejectionReason?: string;
 }
