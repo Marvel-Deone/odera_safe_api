@@ -1175,17 +1175,38 @@ export class ResidentService {
     // NIN Verification
     private async verifyNinWithQoreId(user, accessToken) {
         try {
+            if (!user.idNumber || !user.firstname || !user.lastname) {
+                throw new HttpException(
+                    {
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        status: 'error',
+                        title: 'NIN Verification Failed',
+                        message:
+                            'NIN, first name, and last name are required for identity matching',
+                    },
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+
             const headers = {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${accessToken}`,
             };
-            console.log('Sending NIN verification request...');
+            console.log(
+                'Sending NIN verification request...',
+                'userPayload:',
+                user,
+            );
+            console.log(
+                'NIN verification URL:',
+                `${this.qore_id_url}/v1/ng/identities/nin/${user.idNumber}`,
+            );
 
             const enquiry = await this.clientsService.postUrl(
-                `${this.qore_id_url}/v1/ng/identities/face-verification/nin`,
+                `${this.qore_id_url}/v1/ng/identities/nin/${user.idNumber}`,
                 {
-                    idNumber: user.idNumber,
-                    photoUrl: user.photoUrl,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
                 },
                 headers,
             );
@@ -1215,11 +1236,31 @@ export class ResidentService {
 
     // Verify NIN
     async verifyNIN(userData) {
+        console.log('userData:', userData);
+
         try {
+            if (
+                !userData.idNumber ||
+                !userData.firstname ||
+                !userData.lastname
+            ) {
+                throw new HttpException(
+                    {
+                        statusCode: HttpStatus.BAD_REQUEST,
+                        status: 'error',
+                        title: 'NIN Verification Failed',
+                        message:
+                            'NIN, first name, and last name are required for identity matching',
+                    },
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+
             console.log('Starting NIN verification process...');
             const user = {
-                idNumber: userData.idcard_no,
-                photoUrl: userData.face_capture,
+                idNumber: userData.idNumber,
+                firstname: userData.firstname,
+                lastname: userData.lastname,
             };
             console.log('NIN entry created:', user);
 
@@ -1234,6 +1275,7 @@ export class ResidentService {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                 );
             }
+            console.log('NUIN:', user);
 
             const enquiry = await this.verifyNinWithQoreId(
                 user,
@@ -1285,7 +1327,7 @@ export class ResidentService {
 
             const ninExists = await this.prisma.resident.findFirst({
                 where: {
-                    nin: ninData.idcard_no,
+                    nin: ninData.idNumber,
                     userId: { not: user.id },
                 },
             });
@@ -1450,7 +1492,7 @@ export class ResidentService {
             }
 
             // Ensure idcard_no is properly saved with validation
-            if (!ninData.idcard_no) {
+            if (!ninData.idNumber) {
                 throw new HttpException(
                     {
                         status: 'error',
@@ -1462,8 +1504,9 @@ export class ResidentService {
             }
 
             const updateData = {
-                nin: ninData.idcard_no,
-                face_capture: ninData.face_capture,
+                nin: ninData.idNumber,
+                // dob: ninData.birthdate ? dayjs(ninData.birthdate, 'DD-MM-YYYY').toDate() : resident.dob,
+                // face_capture: ninData.face_capture,
                 kycStatus: KycStatus.COMPLETED,
             };
 
