@@ -545,14 +545,14 @@ model PasswordResetOtp {
 model Resident {
   id String @id @default(uuid())
 
-  first_name String
-  last_name  String
-  email      String  @unique
-  phone      String
-  dob        String?
-  gender     String?
-  estateId   String
-  streetId   String?
+  first_name      String
+  last_name       String
+  email           String  @unique
+  phone           String
+  dob             String?
+  gender          String?
+  estateId        String
+  streetId        String?
   apartmentTypeId String?
 
   userId String? @unique
@@ -605,6 +605,7 @@ model Resident {
 
   levyCleared        Boolean @default(false)
   profileDeclaration Boolean @default(false)
+  completeProfile    Boolean @default(false)
 
   approvedAt DateTime?
   rejectedAt DateTime?
@@ -726,9 +727,9 @@ model ApartmentType {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  estate      Estate                    @relation(fields: [estateId], references: [id], onDelete: Cascade)
-  residents   Resident[]
-  levyPrices  LevyApartmentTypePrice[]
+  estate     Estate                   @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  residents  Resident[]
+  levyPrices LevyApartmentTypePrice[]
 
   @@unique([estateId, name])
   @@index([estateId, active])
@@ -1777,8 +1778,8 @@ model Levy {
 
   createdBy User @relation(fields: [createdById], references: [id])
 
-  assignments           LevyAssignment[]
-  apartmentTypePrices   LevyApartmentTypePrice[]
+  assignments         LevyAssignment[]
+  apartmentTypePrices LevyApartmentTypePrice[]
 
   @@unique([estateId, category, period])
   @@index([estateId])
