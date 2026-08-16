@@ -1,0 +1,83 @@
+status,sourceRow,name,houseNo,street,category,apartmentTypeLabel,amount,suggestedResidentId,suggestedResidentName,suggestedHouseNo,suggestedStreet,score,notes
+unmatched,2,MRS OWOLABI OLUBUNMI,1,BOLODEOKU ST,Container,Container,7000,,,,,,no candidate scored >= 50
+unmatched,7,CHUKWU UZOMA ANTHONY,6,AKINTAN (EAST) ST.,RESIDENTIAL,1 Bedroom Flat,22000,,,,,,no candidate scored >= 50
+unmatched,9,AZEEZ ABUBAKAR OLANREWAJU,23A,AKINTAN (WEST) ST.,RESIDENTIAL,1 Bedroom Flat,22000,,,,,,no candidate scored >= 50
+unmatched,11,EMMANUEL ADEGOR IROROMEH,23b,AKINTAN (WEST) ST.,RESIDENTIAL,1 Bedroom Flat,22000,,,,,,no candidate scored >= 50
+unmatched,14,Adeola Oluwabiyi,C3,ORANGE APPT OLADIPO ST,RESIDENTIAL,1 Bedroom Flat,22000,,,,,,no candidate scored >= 50
+unmatched,15,BELLO BOSUN,C4,ORANGE APPT OLADIPO ST,RESIDENTIAL,1 Bedroom Flat,22000,,,,,,no candidate scored >= 50
+unmatched,16,BAMGBOSE OLUKUNLE,A1,ORANGE APPT OLADIPO ST,RESIDENTIAL,1 Bedroom Flat,22000,,,,,,no candidate scored >= 50
+unmatched,19,REGINALD GOGO - PETERS,13,DIDEOLU COURT,RESIDENTIAL,Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,21,TUNDE ABRAHAM,5,BOLODEOKU ST,RESIDENTIAL,2 Bedroom Flat,26000,,,,,,no candidate scored >= 50
+unmatched,22,ADEDIRE,16,ABBEYLAK ESTATE App No  101,RESIDENTIAL,2 Bedroom Flat,26000,,,,,,no candidate scored >= 50
+unmatched,23,AYENI GABRIEL,A6,ORANGE APPT OLADIPO ST,RESIDENTIAL,2 Bedroom Flat,26000,,,,,,no candidate scored >= 50
+unmatched,24,ONYEGBU DON,B6,ORANGE APPT OLADIPO ST,RESIDENTIAL,2 Bedroom Flat,26000,,,,,,no candidate scored >= 50
+unmatched,25,SHOLA ROEBUCK,A9,ORANGE APPT OLADIPO ST,RESIDENTIAL,2 Bedroom Flat,26000,,,,,,no candidate scored >= 50
+unmatched,26,EKENO EYO,B2,ORANGE APPT OLADIPO ST,RESIDENTIAL,2 Bedroom Flat,26000,,,,,,no candidate scored >= 50
+unmatched,28,FILANI ADEBAYO,5,AKINTAN (EAST) ST.,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,29,OLUFUNSHO AJONGBADI,5,AKINTAN (EAST) ST.,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,32,MRS YEYE ABAYOMI,30,AKINTAN (WEST) ST.,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,33,E.O TAIWO,30,AKINTAN (WEST) ST.,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,34,ADEPOJU DEMILADE GABRIEL,1,BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,35,MRS OWOLABI OLUBUNMI,1,BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,46,Ckukwudi Collins,4b,,,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,49,AGUDA AYODELE,3- Bedroom flat,ORANGE APPT OLADIPO ST,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,50,Grace Ogundipe,C10,,,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,51,O.O ANJORIN,9b,DIDEOLU COURT,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,52,O.O ANJORIN,9a,DIDEOLU COURT,RESIDENTIAL,3 Bedroom Flat,30000,,,,,,no candidate scored >= 50
+unmatched,54,ITORO BRIGHT &IBOM SOUP shop,15,BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat + Shop,40000,,,,,,no candidate scored >= 50
+unmatched,55,Bello Ogunbo,A3&A4,ORANGE APPT OLADIPO ST,RESIDENTIAL,1 Bedroom Flat x2,44000,,,,,,no candidate scored >= 50
+unmatched,56,ALHAJI TAJUDEEN JINADU,5,AKINTAN (EAST) ST.,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,58,MRS KOWE OLUFUNMILAYO,9,AKINTAN (EAST) ST.,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,59,OYINLOYE ADETUNJI,11,AKINTAN (EAST) ST.,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,60,OSUNBADE ADESINA,14,AKINTAN (EAST) ST.,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,66,Somadina Oliver,7b,BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,67,TALABI OWEN,20B,BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,69,SHOBIYE ABIODUN,5,OLUFUNMILAYO ST.,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,75,OTUNBA OLUMOKO,30b,OLUFUNMILAYO ST.,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,77,MUYIWA OLAOSHUN,2A,OLADIPO ST,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,78,MR OSAGHALE Ehimare,4B,OLADIPO ST,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,79,ANYA CHIMA,6b,OLADIPO ST,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,80,MR AKEREDOLU,8,KEJI CLOSE,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,81,CHRIS MOGEKWU,5,DIDEOLU COURT,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,82,DR BABATUNDE AMANERIMI,13,DIDEOLU COURT,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,,,,,,no candidate scored >= 50
+unmatched,84,GRACE ALABA  EDU,16,ABBEYLAK ESTATE App No 2O1 & 204,RESIDENTIAL,2 Bedroom Flat,52000,,,,,,no candidate scored >= 50
+unmatched,85,Tonbass Global Ventures,B1,ORANGE APPT OLADIPO ST,RESIDENTIAL,2 Bedroom Flat,52000,,,,,,no candidate scored >= 50
+unmatched,86,MR AMURE,18,AKINTAN (WEST) ST.,RESIDENTIAL,2 Bedroom Flat,59000,,,,,,no candidate scored >= 50
+unmatched,87,ABIJO ADEYEMI,"C8,C2 &B11",ORANGE APPT OLADIPO ST,RESIDENTIAL,Full Compound,78000,,,,,,no candidate scored >= 50
+unmatched,88,DR ISHOLA ISMAIL,36,AKINTAN (WEST) ST.,RESIDENTIAL,Full Compound,79000,,,,,,no candidate scored >= 50
+unmatched,90,LEKAN OWODUNI(STRONG TOWER),15,BOLODEOKU ST,RESIDENTIAL,Full Compound,79000,,,,,,no candidate scored >= 50
+unmatched,91,MR AKERELE(BELAUAH HOUSE),1b,OLUFUNMILAYO ST.,RESIDENTIAL,Full Compound,79000,,,,,,no candidate scored >= 50
+unmatched,92,MRS ESTHER OGUNLOWO,24,OLUFUNMILAYO ST.,RESIDENTIAL,Full Compound,79000,,,,,,no candidate scored >= 50
+unmatched,96,OLIVE CARE MONTESORI,4,AKINTAN (EAST) ST.,COMMERCIAL (SCHOOL),,80000,,,,,,no candidate scored >= 50
+unmatched,98,INTERNATIONAL PRESS CENTRE,13,DIDEOLU COURT,Commercial,,105000,,,,,,no candidate scored >= 50
+unmatched,99,HIS TOWER,,,Commercial,,198351.57,,,,,,no candidate scored >= 50
+unmatched,100,OAKDALE INFANT &JUN MIXED SCHOOL,2/4,BOLODEOKU ST,Commercial,,265000,,,,,,no candidate scored >= 50
+ambiguous,6,IKE ESTHER IFEYINWA,10,BOLODEOKU ST,RESIDENTIAL,Self contained,11000,56b1b1c7-a307-49a9-9915-b4e3ba71d86c,Theophilus Akatugba,10,Bolodeoku,60,choose this residentId if correct
+ambiguous,6,IKE ESTHER IFEYINWA,10,BOLODEOKU ST,RESIDENTIAL,Self contained,11000,9e9b95eb-356f-4c39-937d-03bf4ffe984f,OLUWAKEMI AKINYEMI ,10,Bolodeoku,60,choose this residentId if correct
+ambiguous,8,Mrs Bamson Marian Gbemisola,10,AKINTAN (EAST) ST.,RESIDENTIAL,1 Bedroom Flat,22000,ced99503-a589-4883-aec4-5b4bf6bf23c2,Isaac Agbo,10,Akintan East,60,choose this residentId if correct
+ambiguous,8,Mrs Bamson Marian Gbemisola,10,AKINTAN (EAST) ST.,RESIDENTIAL,1 Bedroom Flat,22000,5ae98c0a-a80a-4c2c-9349-3e56173c7fa4,Awwal Ajao,10,Akintan East,60,choose this residentId if correct
+ambiguous,8,Mrs Bamson Marian Gbemisola,10,AKINTAN (EAST) ST.,RESIDENTIAL,1 Bedroom Flat,22000,ab3cf864-1e99-4d81-a69b-dd9b117983a7,Oluwasanmi  Waleola,10,Akintan East,60,choose this residentId if correct
+ambiguous,8,Mrs Bamson Marian Gbemisola,10,AKINTAN (EAST) ST.,RESIDENTIAL,1 Bedroom Flat,22000,5160e95a-3aa3-4e33-a0d4-a228c09d5a4b,Joel Ojo,10,Akintan East,60,choose this residentId if correct
+ambiguous,8,Mrs Bamson Marian Gbemisola,10,AKINTAN (EAST) ST.,RESIDENTIAL,1 Bedroom Flat,22000,15e93668-a786-4e15-a4b9-ceec7725a864,Bashir Olawoyin,10,Akintan East,60,choose this residentId if correct
+ambiguous,39,FRANCIS NSEABASI EFFANGA,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,62d4f164-171c-4761-822c-70e4ea861f3a,Dr. Mike  OSUNKOYA,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,39,FRANCIS NSEABASI EFFANGA,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,0a9eef7f-81e8-4360-b761-5f195c2fa475,Olatokun Oshinusi,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,39,FRANCIS NSEABASI EFFANGA,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,6b23530e-cfad-4302-bdb5-0b7fba5ec081,Emmanuel Ik Ibegbu,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,39,FRANCIS NSEABASI EFFANGA,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,cf99b79c-b505-47c7-9767-e1d63abd7be3,Ifeyinwa Anyibe,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,39,FRANCIS NSEABASI EFFANGA,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,2e5dce4d-0359-4884-b1c6-b554df0fc327,Bilikisu  Labisi-Aliyu ,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,40,ALHAJA MARYAM ALEGE,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,62d4f164-171c-4761-822c-70e4ea861f3a,Dr. Mike  OSUNKOYA,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,40,ALHAJA MARYAM ALEGE,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,0a9eef7f-81e8-4360-b761-5f195c2fa475,Olatokun Oshinusi,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,40,ALHAJA MARYAM ALEGE,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,6b23530e-cfad-4302-bdb5-0b7fba5ec081,Emmanuel Ik Ibegbu,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,40,ALHAJA MARYAM ALEGE,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,cf99b79c-b505-47c7-9767-e1d63abd7be3,Ifeyinwa Anyibe,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,40,ALHAJA MARYAM ALEGE,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,2e5dce4d-0359-4884-b1c6-b554df0fc327,Bilikisu  Labisi-Aliyu ,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,42,EMMANANUEL IKENNA IGBEGBU,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,62d4f164-171c-4761-822c-70e4ea861f3a,Dr. Mike  OSUNKOYA,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,42,EMMANANUEL IKENNA IGBEGBU,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,0a9eef7f-81e8-4360-b761-5f195c2fa475,Olatokun Oshinusi,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,42,EMMANANUEL IKENNA IGBEGBU,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,6b23530e-cfad-4302-bdb5-0b7fba5ec081,Emmanuel Ik Ibegbu,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,42,EMMANANUEL IKENNA IGBEGBU,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,cf99b79c-b505-47c7-9767-e1d63abd7be3,Ifeyinwa Anyibe,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,42,EMMANANUEL IKENNA IGBEGBU,11,ALIYU ESTATE BOLODEOKU ST,RESIDENTIAL,3 Bedroom Flat,30000,2e5dce4d-0359-4884-b1c6-b554df0fc327,Bilikisu  Labisi-Aliyu ,11,Bolodeoku,60,choose this residentId if correct
+ambiguous,44,TOSAN MERO  ASAGBA,22/24,"A1SAFRON, 22/24 BOLODEOKU",RESIDENTIAL,3 Bedroom Flat,30000,33a36829-a3fe-4867-af50-ce47e54df47b,Seun Famoroti,22/24,Bolodeoku,60,choose this residentId if correct
+ambiguous,44,TOSAN MERO  ASAGBA,22/24,"A1SAFRON, 22/24 BOLODEOKU",RESIDENTIAL,3 Bedroom Flat,30000,cf591c95-d6c0-4190-a401-93d96aebb5e3,Adeseun Omolara,22/24,Bolodeoku,60,choose this residentId if correct
+ambiguous,44,TOSAN MERO  ASAGBA,22/24,"A1SAFRON, 22/24 BOLODEOKU",RESIDENTIAL,3 Bedroom Flat,30000,2fac375b-686d-4aef-ad29-df05aa826bd8,Oluwadamilola Adewusi,22/ 24,Bolodeoku,60,choose this residentId if correct
+ambiguous,48,PATRICK NWACHI,2B,OLADIPO ST,RESIDENTIAL,3 Bedroom Flat,30000,9dfc3859-d965-4695-b5ba-b8257841f223,Musliu Akeem,2B,Oladipo,60,choose this residentId if correct
+ambiguous,48,PATRICK NWACHI,2B,OLADIPO ST,RESIDENTIAL,3 Bedroom Flat,30000,0986361d-7911-49bf-a521-ab8277966113,Patrick  Nwachi ,8034080064,Oladipo,60,choose this residentId if correct
+ambiguous,61,NIYI DOPAMU,16,AKINTAN (EAST) ST.,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,f449a3a5-533b-417e-afb1-26ef059f2c52,Olaniyi Dopamu,16,Akintan West,60,choose this residentId if correct
+ambiguous,61,NIYI DOPAMU,16,AKINTAN (EAST) ST.,RESIDENTIAL,3 Bedroom Flat/ Duplex,49000,c91f68b9-8ac4-4502-92e6-b223b01b2eb6,Olaniyi Dopamu,16,Akintan West,60,choose this residentId if correct

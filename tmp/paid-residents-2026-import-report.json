@@ -1,0 +1,2640 @@
+{
+  "summary": {
+    "mode": "commit",
+    "estateId": "33bc186f-5c22-4859-88ef-6b3d616db98d",
+    "sourceRows": 99,
+    "reviewedMappings": 0,
+    "matchedRows": 38,
+    "uniqueMatchedResidents": 30,
+    "unmatchedRows": 53,
+    "ambiguousRows": 8,
+    "matchedAmount": 1552833.33,
+    "uniqueResidentAmount": 1552833.33
+  },
+  "matched": [
+    {
+      "row": {
+        "sourceRow": 3,
+        "serialNumber": "2",
+        "name": "Oluwakemi Sokoya",
+        "houseNo": "28",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Self contained",
+        "amount": 11000
+      },
+      "residentId": "5fafca85-f368-4d99-8cf2-9f8364993ff4",
+      "residentName": "Oluwatomi Odunlami",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "9d5d51ff-9185-47a6-874e-1b709333f06c"
+    },
+    {
+      "row": {
+        "sourceRow": 4,
+        "serialNumber": "3",
+        "name": "EBIPADE GBEDI G",
+        "houseNo": "40",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Self contained",
+        "amount": 11000
+      },
+      "residentId": "f7a9915f-a7ac-4fbe-84d6-3e175d4034a2",
+      "residentName": "Ebipade  Gbedi G ",
+      "score": 100,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "9d5d51ff-9185-47a6-874e-1b709333f06c"
+    },
+    {
+      "row": {
+        "sourceRow": 5,
+        "serialNumber": "4",
+        "name": "ELUEMELEM AGATHA IFEOLUWA",
+        "houseNo": "40",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Self contained",
+        "amount": 11000
+      },
+      "residentId": "bbe7a5cd-4fe9-4d45-b6ef-3ee317587beb",
+      "residentName": "Agatha  Eluemelem ",
+      "score": 87,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.67"
+      ],
+      "apartmentTypeId": "9d5d51ff-9185-47a6-874e-1b709333f06c"
+    },
+    {
+      "row": {
+        "sourceRow": 10,
+        "serialNumber": "9",
+        "name": "ARANNILEWA PRAISE",
+        "houseNo": "23",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "residentId": "228211b4-5184-42d9-add4-febeb338a44b",
+      "residentName": "OLUWASEGUN RAIMI",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "07e33120-4f9c-43cd-83ea-2aa368ffbb81"
+    },
+    {
+      "row": {
+        "sourceRow": 12,
+        "serialNumber": "11",
+        "name": "MIMI DODO AGWABI",
+        "houseNo": "28",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "residentId": "5fafca85-f368-4d99-8cf2-9f8364993ff4",
+      "residentName": "Oluwatomi Odunlami",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "07e33120-4f9c-43cd-83ea-2aa368ffbb81"
+    },
+    {
+      "row": {
+        "sourceRow": 13,
+        "serialNumber": "12",
+        "name": "NAOMI OLUWASEUN AWOTUNDE",
+        "houseNo": "28",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "residentId": "5fafca85-f368-4d99-8cf2-9f8364993ff4",
+      "residentName": "Oluwatomi Odunlami",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "07e33120-4f9c-43cd-83ea-2aa368ffbb81"
+    },
+    {
+      "row": {
+        "sourceRow": 17,
+        "serialNumber": "16",
+        "name": "ADEOLU SOYELE",
+        "houseNo": "A2",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "residentId": "1e5c03cc-8283-44a0-b67f-f63dd2d3e9c8",
+      "residentName": "Adeolu Soyele",
+      "score": 80,
+      "reasons": [
+        "house",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "07e33120-4f9c-43cd-83ea-2aa368ffbb81"
+    },
+    {
+      "row": {
+        "sourceRow": 18,
+        "serialNumber": "17",
+        "name": "DELE OLAOYE",
+        "houseNo": "4",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22500
+      },
+      "residentId": "7dc8cb44-4f3f-4ecd-8400-9f07448ed283",
+      "residentName": "Moses Olaoye",
+      "score": 80,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.50"
+      ],
+      "apartmentTypeId": "07e33120-4f9c-43cd-83ea-2aa368ffbb81"
+    },
+    {
+      "row": {
+        "sourceRow": 20,
+        "serialNumber": "19",
+        "name": "Omojeso Adebola",
+        "houseNo": "3",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 26000
+      },
+      "residentId": "885b7506-d65d-4484-bc3e-57f1ae4dd5fe",
+      "residentName": "Adebola Deborah",
+      "score": 80,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.50"
+      ],
+      "apartmentTypeId": "f79d7105-679b-4dde-9a73-f84d9c56de33"
+    },
+    {
+      "row": {
+        "sourceRow": 27,
+        "serialNumber": "26",
+        "name": "AJANI SHITTU AKINSOLA",
+        "houseNo": "4",
+        "street": "KEJI CLOSE",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 26000
+      },
+      "residentId": "d96120a3-db5c-46d0-9e2f-e861c4266314",
+      "residentName": "Akinsola Ajani-Shittu",
+      "score": 110,
+      "reasons": [
+        "house",
+        "street-exact",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "f79d7105-679b-4dde-9a73-f84d9c56de33"
+    },
+    {
+      "row": {
+        "sourceRow": 30,
+        "serialNumber": "29",
+        "name": "PHILIP ADE EKHAIYE",
+        "houseNo": "28",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "5fafca85-f368-4d99-8cf2-9f8364993ff4",
+      "residentName": "Oluwatomi Odunlami",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 31,
+        "serialNumber": "30",
+        "name": "ODUNLAMI TOMI",
+        "houseNo": "28",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "5fafca85-f368-4d99-8cf2-9f8364993ff4",
+      "residentName": "Oluwatomi Odunlami",
+      "score": 80,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.50"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 36,
+        "serialNumber": "35",
+        "name": "JULIANA AMADI",
+        "houseNo": "3",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "885b7506-d65d-4484-bc3e-57f1ae4dd5fe",
+      "residentName": "Adebola Deborah",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 37,
+        "serialNumber": "36",
+        "name": "KAKA AJIBOLA",
+        "houseNo": "3",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "885b7506-d65d-4484-bc3e-57f1ae4dd5fe",
+      "residentName": "Adebola Deborah",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 38,
+        "serialNumber": "37",
+        "name": "Dele Aleshinloye",
+        "houseNo": "3",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "885b7506-d65d-4484-bc3e-57f1ae4dd5fe",
+      "residentName": "Adebola Deborah",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 41,
+        "serialNumber": "40",
+        "name": "ALHAJA LABISI ALIYU",
+        "houseNo": "11",
+        "street": "ALIYU ESTATE BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "2e5dce4d-0359-4884-b1c6-b554df0fc327",
+      "residentName": "Bilikisu  Labisi-Aliyu ",
+      "score": 87,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.67"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 43,
+        "serialNumber": "42",
+        "name": "DR. MIKE OSUNKOYA",
+        "houseNo": "11",
+        "street": "ALIYU ESTATE BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "62d4f164-171c-4761-822c-70e4ea861f3a",
+      "residentName": "Dr. Mike  OSUNKOYA",
+      "score": 100,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 45,
+        "serialNumber": "44",
+        "name": "SEUN FAMOROTI",
+        "houseNo": "22/24",
+        "street": "A7 SAFRON, 22/24 BOLODEOKU",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "33a36829-a3fe-4867-af50-ce47e54df47b",
+      "residentName": "Seun Famoroti",
+      "score": 100,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 47,
+        "serialNumber": "46",
+        "name": "AYODEJI OLABIWONNU",
+        "houseNo": "9A",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "residentId": "173536bc-ae6b-4802-b28f-0bffbb12153f",
+      "residentName": "Ayodeji Olabiwonnu ",
+      "score": 60,
+      "reasons": [
+        "street-partial",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 53,
+        "serialNumber": "52",
+        "name": "CHRIS ODEDIRAN",
+        "houseNo": "16",
+        "street": "ABBEYLAK ESTATE App No 103",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 33333.33
+      },
+      "residentId": "9195af14-2152-4213-8bfe-97cf7d902486",
+      "residentName": "Christopher Odediran",
+      "score": 60,
+      "reasons": [
+        "house",
+        "name:0.50"
+      ],
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef"
+    },
+    {
+      "row": {
+        "sourceRow": 57,
+        "serialNumber": "56",
+        "name": "OLUSEYI WHENU SEWEDO",
+        "houseNo": "8a",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "82b09433-27f6-45a1-abb1-6b1e038f240b",
+      "residentName": "Sewedo  Whenu ",
+      "score": 87,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.67"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 62,
+        "serialNumber": "61",
+        "name": "MR WALE ADEBAJO",
+        "houseNo": "18b",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "15e3647a-a72d-499d-8af1-87d379ea8fd3",
+      "residentName": "Wale Adebajo",
+      "score": 67,
+      "reasons": [
+        "house",
+        "name:0.67"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 63,
+        "serialNumber": "62",
+        "name": "ADEYEMI JULIE",
+        "houseNo": "25",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "cb44a4dd-a051-4b6c-96f5-00cf87a7fa6e",
+      "residentName": "TAIWO ONI",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 64,
+        "serialNumber": "63",
+        "name": "TEMIDAYO STAVELY",
+        "houseNo": "28",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "5fafca85-f368-4d99-8cf2-9f8364993ff4",
+      "residentName": "Oluwatomi Odunlami",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 65,
+        "serialNumber": "64",
+        "name": "JOSHUA DUNMOYE",
+        "houseNo": "7c",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "f50192cd-8b1d-4b3c-b1f5-3b96f53db6ba",
+      "residentName": "Joshua Dunmoye",
+      "score": 100,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 68,
+        "serialNumber": "67",
+        "name": "ABIODUN ALAKA",
+        "houseNo": "2B",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "a7fdd563-c3e2-4efb-a366-9515126e5ae4",
+      "residentName": "Rukayat  Opeyemi",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 70,
+        "serialNumber": "69",
+        "name": "CAPTAIN CONRAD ELOM",
+        "houseNo": "5b",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "acd752bc-fc77-44ee-a55b-88b4929df859",
+      "residentName": "Conrad  Elom",
+      "score": 87,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.67"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 71,
+        "serialNumber": "70",
+        "name": "KINGSLEY IGWEBUIKE",
+        "houseNo": "7b",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "8448faf4-8e01-464a-a238-8f5a2d31b951",
+      "residentName": "Kingsley  Igwebuike ",
+      "score": 100,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 72,
+        "serialNumber": "71",
+        "name": "MR SALAMI/ PASTOR ABIODUN OWOLABI",
+        "houseNo": "14A",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "ea7f6201-4861-4009-b0bb-9bc2468fa04c",
+      "residentName": "Abiodun Owolabi",
+      "score": 76,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.40"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 73,
+        "serialNumber": "72",
+        "name": "Oladipupo Aremu",
+        "houseNo": "18c",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "315b20d9-be40-490b-b3ec-075ec269d625",
+      "residentName": "Emmanuel Aremu",
+      "score": 80,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.50"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 74,
+        "serialNumber": "73",
+        "name": "FRANCIS AJILORE",
+        "houseNo": "22",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "afebc138-ed35-45a8-8ee3-c26e65064ab1",
+      "residentName": "Francis  Ajilore",
+      "score": 100,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:1.00"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 76,
+        "serialNumber": "75",
+        "name": "ENGR DON ONYEGBU",
+        "houseNo": "32b",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "residentId": "74af2145-e3fb-442a-b7a8-f8bc423d0cf5",
+      "residentName": "Don Onyegbu",
+      "score": 87,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.67"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    },
+    {
+      "row": {
+        "sourceRow": 83,
+        "serialNumber": "82",
+        "name": "ABIMBOLA ADEYINKA",
+        "houseNo": "12",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 52000
+      },
+      "residentId": "076bc5d7-a78f-4ab6-99a7-9107b3592847",
+      "residentName": "Funmi Aina",
+      "score": 60,
+      "reasons": [
+        "house",
+        "street-partial"
+      ],
+      "apartmentTypeId": "f79d7105-679b-4dde-9a73-f84d9c56de33"
+    },
+    {
+      "row": {
+        "sourceRow": 89,
+        "serialNumber": "88",
+        "name": "Mrs Gbemi Shonekan",
+        "houseNo": "36b",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 79000
+      },
+      "residentId": "5fb0e5d8-3915-431a-9580-c78ee8cc9d12",
+      "residentName": "Shonekan Gbemisola",
+      "score": 73,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.33"
+      ],
+      "apartmentTypeId": "dec627b1-73bf-45de-bfa8-d660713fa36a"
+    },
+    {
+      "row": {
+        "sourceRow": 93,
+        "serialNumber": "92",
+        "name": "ALHAJA MORIAM BELLO",
+        "houseNo": "26",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 79000
+      },
+      "residentId": "e08ee92d-44e2-4c2a-8500-18c49ea23fd9",
+      "residentName": "Bello Azeez",
+      "score": 53,
+      "reasons": [
+        "house",
+        "name:0.33"
+      ],
+      "apartmentTypeId": "dec627b1-73bf-45de-bfa8-d660713fa36a"
+    },
+    {
+      "row": {
+        "sourceRow": 94,
+        "serialNumber": "93",
+        "name": "ADETUBERU",
+        "houseNo": "1",
+        "street": "OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 79000
+      },
+      "residentId": "34ed23d4-016d-4858-87ea-587bff900b32",
+      "residentName": "Oluwatoyin  Adetuberu ",
+      "score": 80,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.50"
+      ],
+      "apartmentTypeId": "dec627b1-73bf-45de-bfa8-d660713fa36a"
+    },
+    {
+      "row": {
+        "sourceRow": 95,
+        "serialNumber": "94",
+        "name": "PASTOR GLENN O BOTU",
+        "houseNo": "3",
+        "street": "OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 79000
+      },
+      "residentId": "ebfeb437-680b-4576-8585-da6acda3fd63",
+      "residentName": "Glen Omotayo BOTU",
+      "score": 73,
+      "reasons": [
+        "house",
+        "street-partial",
+        "name:0.33"
+      ],
+      "apartmentTypeId": "dec627b1-73bf-45de-bfa8-d660713fa36a"
+    },
+    {
+      "row": {
+        "sourceRow": 97,
+        "serialNumber": "96",
+        "name": "Mr & Mrs Odumade",
+        "houseNo": "2c",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Duplex+49,000 overpayment to be in wallet till 2027",
+        "amount": 98000
+      },
+      "residentId": "2980d768-18f6-4344-9caa-54db03b6fb65",
+      "residentName": "Olubunmi Odumade",
+      "score": 50,
+      "reasons": [
+        "house",
+        "name:0.25"
+      ],
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f"
+    }
+  ],
+  "aggregatedAssignments": [
+    {
+      "residentId": "5fafca85-f368-4d99-8cf2-9f8364993ff4",
+      "residentName": "Oluwatomi Odunlami",
+      "amount": 164000,
+      "apartmentTypeId": "9d5d51ff-9185-47a6-874e-1b709333f06c",
+      "rows": [
+        {
+          "sourceRow": 3,
+          "serialNumber": "2",
+          "name": "Oluwakemi Sokoya",
+          "houseNo": "28",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "Self contained",
+          "amount": 11000
+        },
+        {
+          "sourceRow": 12,
+          "serialNumber": "11",
+          "name": "MIMI DODO AGWABI",
+          "houseNo": "28",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "1 Bedroom Flat",
+          "amount": 22000
+        },
+        {
+          "sourceRow": 13,
+          "serialNumber": "12",
+          "name": "NAOMI OLUWASEUN AWOTUNDE",
+          "houseNo": "28",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "1 Bedroom Flat",
+          "amount": 22000
+        },
+        {
+          "sourceRow": 30,
+          "serialNumber": "29",
+          "name": "PHILIP ADE EKHAIYE",
+          "houseNo": "28",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        },
+        {
+          "sourceRow": 31,
+          "serialNumber": "30",
+          "name": "ODUNLAMI TOMI",
+          "houseNo": "28",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        },
+        {
+          "sourceRow": 64,
+          "serialNumber": "63",
+          "name": "TEMIDAYO STAVELY",
+          "houseNo": "28",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        3,
+        12,
+        13,
+        30,
+        31,
+        64
+      ]
+    },
+    {
+      "residentId": "f7a9915f-a7ac-4fbe-84d6-3e175d4034a2",
+      "residentName": "Ebipade  Gbedi G ",
+      "amount": 11000,
+      "apartmentTypeId": "9d5d51ff-9185-47a6-874e-1b709333f06c",
+      "rows": [
+        {
+          "sourceRow": 4,
+          "serialNumber": "3",
+          "name": "EBIPADE GBEDI G",
+          "houseNo": "40",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "Self contained",
+          "amount": 11000
+        }
+      ],
+      "sourceRows": [
+        4
+      ]
+    },
+    {
+      "residentId": "bbe7a5cd-4fe9-4d45-b6ef-3ee317587beb",
+      "residentName": "Agatha  Eluemelem ",
+      "amount": 11000,
+      "apartmentTypeId": "9d5d51ff-9185-47a6-874e-1b709333f06c",
+      "rows": [
+        {
+          "sourceRow": 5,
+          "serialNumber": "4",
+          "name": "ELUEMELEM AGATHA IFEOLUWA",
+          "houseNo": "40",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "Self contained",
+          "amount": 11000
+        }
+      ],
+      "sourceRows": [
+        5
+      ]
+    },
+    {
+      "residentId": "228211b4-5184-42d9-add4-febeb338a44b",
+      "residentName": "OLUWASEGUN RAIMI",
+      "amount": 22000,
+      "apartmentTypeId": "07e33120-4f9c-43cd-83ea-2aa368ffbb81",
+      "rows": [
+        {
+          "sourceRow": 10,
+          "serialNumber": "9",
+          "name": "ARANNILEWA PRAISE",
+          "houseNo": "23",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "1 Bedroom Flat",
+          "amount": 22000
+        }
+      ],
+      "sourceRows": [
+        10
+      ]
+    },
+    {
+      "residentId": "1e5c03cc-8283-44a0-b67f-f63dd2d3e9c8",
+      "residentName": "Adeolu Soyele",
+      "amount": 22000,
+      "apartmentTypeId": "07e33120-4f9c-43cd-83ea-2aa368ffbb81",
+      "rows": [
+        {
+          "sourceRow": 17,
+          "serialNumber": "16",
+          "name": "ADEOLU SOYELE",
+          "houseNo": "A2",
+          "street": "ORANGE APPT OLADIPO ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "1 Bedroom Flat",
+          "amount": 22000
+        }
+      ],
+      "sourceRows": [
+        17
+      ]
+    },
+    {
+      "residentId": "7dc8cb44-4f3f-4ecd-8400-9f07448ed283",
+      "residentName": "Moses Olaoye",
+      "amount": 22500,
+      "apartmentTypeId": "07e33120-4f9c-43cd-83ea-2aa368ffbb81",
+      "rows": [
+        {
+          "sourceRow": 18,
+          "serialNumber": "17",
+          "name": "DELE OLAOYE",
+          "houseNo": "4",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "1 Bedroom Flat",
+          "amount": 22500
+        }
+      ],
+      "sourceRows": [
+        18
+      ]
+    },
+    {
+      "residentId": "885b7506-d65d-4484-bc3e-57f1ae4dd5fe",
+      "residentName": "Adebola Deborah",
+      "amount": 116000,
+      "apartmentTypeId": "f79d7105-679b-4dde-9a73-f84d9c56de33",
+      "rows": [
+        {
+          "sourceRow": 20,
+          "serialNumber": "19",
+          "name": "Omojeso Adebola",
+          "houseNo": "3",
+          "street": "BOLODEOKU ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "2 Bedroom Flat",
+          "amount": 26000
+        },
+        {
+          "sourceRow": 36,
+          "serialNumber": "35",
+          "name": "JULIANA AMADI",
+          "houseNo": "3",
+          "street": "BOLODEOKU ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        },
+        {
+          "sourceRow": 37,
+          "serialNumber": "36",
+          "name": "KAKA AJIBOLA",
+          "houseNo": "3",
+          "street": "BOLODEOKU ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        },
+        {
+          "sourceRow": 38,
+          "serialNumber": "37",
+          "name": "Dele Aleshinloye",
+          "houseNo": "3",
+          "street": "BOLODEOKU ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        }
+      ],
+      "sourceRows": [
+        20,
+        36,
+        37,
+        38
+      ]
+    },
+    {
+      "residentId": "d96120a3-db5c-46d0-9e2f-e861c4266314",
+      "residentName": "Akinsola Ajani-Shittu",
+      "amount": 26000,
+      "apartmentTypeId": "f79d7105-679b-4dde-9a73-f84d9c56de33",
+      "rows": [
+        {
+          "sourceRow": 27,
+          "serialNumber": "26",
+          "name": "AJANI SHITTU AKINSOLA",
+          "houseNo": "4",
+          "street": "KEJI CLOSE",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "2 Bedroom Flat",
+          "amount": 26000
+        }
+      ],
+      "sourceRows": [
+        27
+      ]
+    },
+    {
+      "residentId": "2e5dce4d-0359-4884-b1c6-b554df0fc327",
+      "residentName": "Bilikisu  Labisi-Aliyu ",
+      "amount": 30000,
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef",
+      "rows": [
+        {
+          "sourceRow": 41,
+          "serialNumber": "40",
+          "name": "ALHAJA LABISI ALIYU",
+          "houseNo": "11",
+          "street": "ALIYU ESTATE BOLODEOKU ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        }
+      ],
+      "sourceRows": [
+        41
+      ]
+    },
+    {
+      "residentId": "62d4f164-171c-4761-822c-70e4ea861f3a",
+      "residentName": "Dr. Mike  OSUNKOYA",
+      "amount": 30000,
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef",
+      "rows": [
+        {
+          "sourceRow": 43,
+          "serialNumber": "42",
+          "name": "DR. MIKE OSUNKOYA",
+          "houseNo": "11",
+          "street": "ALIYU ESTATE BOLODEOKU ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        }
+      ],
+      "sourceRows": [
+        43
+      ]
+    },
+    {
+      "residentId": "33a36829-a3fe-4867-af50-ce47e54df47b",
+      "residentName": "Seun Famoroti",
+      "amount": 30000,
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef",
+      "rows": [
+        {
+          "sourceRow": 45,
+          "serialNumber": "44",
+          "name": "SEUN FAMOROTI",
+          "houseNo": "22/24",
+          "street": "A7 SAFRON, 22/24 BOLODEOKU",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        }
+      ],
+      "sourceRows": [
+        45
+      ]
+    },
+    {
+      "residentId": "173536bc-ae6b-4802-b28f-0bffbb12153f",
+      "residentName": "Ayodeji Olabiwonnu ",
+      "amount": 30000,
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef",
+      "rows": [
+        {
+          "sourceRow": 47,
+          "serialNumber": "46",
+          "name": "AYODEJI OLABIWONNU",
+          "houseNo": "9A",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 30000
+        }
+      ],
+      "sourceRows": [
+        47
+      ]
+    },
+    {
+      "residentId": "9195af14-2152-4213-8bfe-97cf7d902486",
+      "residentName": "Christopher Odediran",
+      "amount": 33333.33,
+      "apartmentTypeId": "ba27fe92-0e16-48d9-8795-397fc77159ef",
+      "rows": [
+        {
+          "sourceRow": 53,
+          "serialNumber": "52",
+          "name": "CHRIS ODEDIRAN",
+          "houseNo": "16",
+          "street": "ABBEYLAK ESTATE App No 103",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat",
+          "amount": 33333.33
+        }
+      ],
+      "sourceRows": [
+        53
+      ]
+    },
+    {
+      "residentId": "82b09433-27f6-45a1-abb1-6b1e038f240b",
+      "residentName": "Sewedo  Whenu ",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 57,
+          "serialNumber": "56",
+          "name": "OLUSEYI WHENU SEWEDO",
+          "houseNo": "8a",
+          "street": "AKINTAN (EAST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        57
+      ]
+    },
+    {
+      "residentId": "15e3647a-a72d-499d-8af1-87d379ea8fd3",
+      "residentName": "Wale Adebajo",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 62,
+          "serialNumber": "61",
+          "name": "MR WALE ADEBAJO",
+          "houseNo": "18b",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        62
+      ]
+    },
+    {
+      "residentId": "cb44a4dd-a051-4b6c-96f5-00cf87a7fa6e",
+      "residentName": "TAIWO ONI",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 63,
+          "serialNumber": "62",
+          "name": "ADEYEMI JULIE",
+          "houseNo": "25",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        63
+      ]
+    },
+    {
+      "residentId": "f50192cd-8b1d-4b3c-b1f5-3b96f53db6ba",
+      "residentName": "Joshua Dunmoye",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 65,
+          "serialNumber": "64",
+          "name": "JOSHUA DUNMOYE",
+          "houseNo": "7c",
+          "street": "BOLODEOKU ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        65
+      ]
+    },
+    {
+      "residentId": "a7fdd563-c3e2-4efb-a366-9515126e5ae4",
+      "residentName": "Rukayat  Opeyemi",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 68,
+          "serialNumber": "67",
+          "name": "ABIODUN ALAKA",
+          "houseNo": "2B",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        68
+      ]
+    },
+    {
+      "residentId": "acd752bc-fc77-44ee-a55b-88b4929df859",
+      "residentName": "Conrad  Elom",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 70,
+          "serialNumber": "69",
+          "name": "CAPTAIN CONRAD ELOM",
+          "houseNo": "5b",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        70
+      ]
+    },
+    {
+      "residentId": "8448faf4-8e01-464a-a238-8f5a2d31b951",
+      "residentName": "Kingsley  Igwebuike ",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 71,
+          "serialNumber": "70",
+          "name": "KINGSLEY IGWEBUIKE",
+          "houseNo": "7b",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        71
+      ]
+    },
+    {
+      "residentId": "ea7f6201-4861-4009-b0bb-9bc2468fa04c",
+      "residentName": "Abiodun Owolabi",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 72,
+          "serialNumber": "71",
+          "name": "MR SALAMI/ PASTOR ABIODUN OWOLABI",
+          "houseNo": "14A",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        72
+      ]
+    },
+    {
+      "residentId": "315b20d9-be40-490b-b3ec-075ec269d625",
+      "residentName": "Emmanuel Aremu",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 73,
+          "serialNumber": "72",
+          "name": "Oladipupo Aremu",
+          "houseNo": "18c",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        73
+      ]
+    },
+    {
+      "residentId": "afebc138-ed35-45a8-8ee3-c26e65064ab1",
+      "residentName": "Francis  Ajilore",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 74,
+          "serialNumber": "73",
+          "name": "FRANCIS AJILORE",
+          "houseNo": "22",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        74
+      ]
+    },
+    {
+      "residentId": "74af2145-e3fb-442a-b7a8-f8bc423d0cf5",
+      "residentName": "Don Onyegbu",
+      "amount": 49000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 76,
+          "serialNumber": "75",
+          "name": "ENGR DON ONYEGBU",
+          "houseNo": "32b",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+          "amount": 49000
+        }
+      ],
+      "sourceRows": [
+        76
+      ]
+    },
+    {
+      "residentId": "076bc5d7-a78f-4ab6-99a7-9107b3592847",
+      "residentName": "Funmi Aina",
+      "amount": 52000,
+      "apartmentTypeId": "f79d7105-679b-4dde-9a73-f84d9c56de33",
+      "rows": [
+        {
+          "sourceRow": 83,
+          "serialNumber": "82",
+          "name": "ABIMBOLA ADEYINKA",
+          "houseNo": "12",
+          "street": "BOLODEOKU ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "2 Bedroom Flat",
+          "amount": 52000
+        }
+      ],
+      "sourceRows": [
+        83
+      ]
+    },
+    {
+      "residentId": "5fb0e5d8-3915-431a-9580-c78ee8cc9d12",
+      "residentName": "Shonekan Gbemisola",
+      "amount": 79000,
+      "apartmentTypeId": "dec627b1-73bf-45de-bfa8-d660713fa36a",
+      "rows": [
+        {
+          "sourceRow": 89,
+          "serialNumber": "88",
+          "name": "Mrs Gbemi Shonekan",
+          "houseNo": "36b",
+          "street": "AKINTAN (WEST) ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "Full Compound",
+          "amount": 79000
+        }
+      ],
+      "sourceRows": [
+        89
+      ]
+    },
+    {
+      "residentId": "e08ee92d-44e2-4c2a-8500-18c49ea23fd9",
+      "residentName": "Bello Azeez",
+      "amount": 79000,
+      "apartmentTypeId": "dec627b1-73bf-45de-bfa8-d660713fa36a",
+      "rows": [
+        {
+          "sourceRow": 93,
+          "serialNumber": "92",
+          "name": "ALHAJA MORIAM BELLO",
+          "houseNo": "26",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "Full Compound",
+          "amount": 79000
+        }
+      ],
+      "sourceRows": [
+        93
+      ]
+    },
+    {
+      "residentId": "34ed23d4-016d-4858-87ea-587bff900b32",
+      "residentName": "Oluwatoyin  Adetuberu ",
+      "amount": 79000,
+      "apartmentTypeId": "dec627b1-73bf-45de-bfa8-d660713fa36a",
+      "rows": [
+        {
+          "sourceRow": 94,
+          "serialNumber": "93",
+          "name": "ADETUBERU",
+          "houseNo": "1",
+          "street": "OLADIPO ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "Full Compound",
+          "amount": 79000
+        }
+      ],
+      "sourceRows": [
+        94
+      ]
+    },
+    {
+      "residentId": "ebfeb437-680b-4576-8585-da6acda3fd63",
+      "residentName": "Glen Omotayo BOTU",
+      "amount": 79000,
+      "apartmentTypeId": "dec627b1-73bf-45de-bfa8-d660713fa36a",
+      "rows": [
+        {
+          "sourceRow": 95,
+          "serialNumber": "94",
+          "name": "PASTOR GLENN O BOTU",
+          "houseNo": "3",
+          "street": "OLADIPO ST",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "Full Compound",
+          "amount": 79000
+        }
+      ],
+      "sourceRows": [
+        95
+      ]
+    },
+    {
+      "residentId": "2980d768-18f6-4344-9caa-54db03b6fb65",
+      "residentName": "Olubunmi Odumade",
+      "amount": 98000,
+      "apartmentTypeId": "cd2c765b-208d-4d6d-8616-0f78e8cd2c0f",
+      "rows": [
+        {
+          "sourceRow": 97,
+          "serialNumber": "96",
+          "name": "Mr & Mrs Odumade",
+          "houseNo": "2c",
+          "street": "OLUFUNMILAYO ST.",
+          "category": "RESIDENTIAL",
+          "apartmentTypeLabel": "Duplex+49,000 overpayment to be in wallet till 2027",
+          "amount": 98000
+        }
+      ],
+      "sourceRows": [
+        97
+      ]
+    }
+  ],
+  "unmatched": [
+    {
+      "row": {
+        "sourceRow": 2,
+        "serialNumber": "1",
+        "name": "MRS OWOLABI OLUBUNMI",
+        "houseNo": "1",
+        "street": "BOLODEOKU ST",
+        "category": "Container",
+        "apartmentTypeLabel": "Container",
+        "amount": 7000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 7,
+        "serialNumber": "6",
+        "name": "CHUKWU UZOMA ANTHONY",
+        "houseNo": "6",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 9,
+        "serialNumber": "8",
+        "name": "AZEEZ ABUBAKAR OLANREWAJU",
+        "houseNo": "23A",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 11,
+        "serialNumber": "10",
+        "name": "EMMANUEL ADEGOR IROROMEH",
+        "houseNo": "23b",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 14,
+        "serialNumber": "13",
+        "name": "Adeola Oluwabiyi",
+        "houseNo": "C3",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 15,
+        "serialNumber": "14",
+        "name": "BELLO BOSUN",
+        "houseNo": "C4",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 16,
+        "serialNumber": "15",
+        "name": "BAMGBOSE OLUKUNLE",
+        "houseNo": "A1",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 19,
+        "serialNumber": "18",
+        "name": "REGINALD GOGO - PETERS",
+        "houseNo": "13",
+        "street": "DIDEOLU COURT",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 21,
+        "serialNumber": "20",
+        "name": "TUNDE ABRAHAM",
+        "houseNo": "5",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 26000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 22,
+        "serialNumber": "21",
+        "name": "ADEDIRE",
+        "houseNo": "16",
+        "street": "ABBEYLAK ESTATE App No  101",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 26000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 23,
+        "serialNumber": "22",
+        "name": "AYENI GABRIEL",
+        "houseNo": "A6",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 26000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 24,
+        "serialNumber": "23",
+        "name": "ONYEGBU DON",
+        "houseNo": "B6",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 26000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 25,
+        "serialNumber": "24",
+        "name": "SHOLA ROEBUCK",
+        "houseNo": "A9",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 26000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 26,
+        "serialNumber": "25",
+        "name": "EKENO EYO",
+        "houseNo": "B2",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 26000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 28,
+        "serialNumber": "27",
+        "name": "FILANI ADEBAYO",
+        "houseNo": "5",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 29,
+        "serialNumber": "28",
+        "name": "OLUFUNSHO AJONGBADI",
+        "houseNo": "5",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 32,
+        "serialNumber": "31",
+        "name": "MRS YEYE ABAYOMI",
+        "houseNo": "30",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 33,
+        "serialNumber": "32",
+        "name": "E.O TAIWO",
+        "houseNo": "30",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 34,
+        "serialNumber": "33",
+        "name": "ADEPOJU DEMILADE GABRIEL",
+        "houseNo": "1",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 35,
+        "serialNumber": "34",
+        "name": "MRS OWOLABI OLUBUNMI",
+        "houseNo": "1",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 46,
+        "serialNumber": "45",
+        "name": "Ckukwudi Collins",
+        "houseNo": "4b",
+        "street": null,
+        "category": null,
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 49,
+        "serialNumber": "48",
+        "name": "AGUDA AYODELE",
+        "houseNo": "3- Bedroom flat",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 50,
+        "serialNumber": "49",
+        "name": "Grace Ogundipe",
+        "houseNo": "C10",
+        "street": null,
+        "category": null,
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 51,
+        "serialNumber": "50",
+        "name": "O.O ANJORIN",
+        "houseNo": "9b",
+        "street": "DIDEOLU COURT",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 52,
+        "serialNumber": "51",
+        "name": "O.O ANJORIN",
+        "houseNo": "9a",
+        "street": "DIDEOLU COURT",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 54,
+        "serialNumber": "53",
+        "name": "ITORO BRIGHT &IBOM SOUP shop",
+        "houseNo": "15",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat + Shop",
+        "amount": 40000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 55,
+        "serialNumber": "54",
+        "name": "Bello Ogunbo",
+        "houseNo": "A3&A4",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat x2",
+        "amount": 44000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 56,
+        "serialNumber": "55",
+        "name": "ALHAJI TAJUDEEN JINADU",
+        "houseNo": "5",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 58,
+        "serialNumber": "57",
+        "name": "MRS KOWE OLUFUNMILAYO",
+        "houseNo": "9",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 59,
+        "serialNumber": "58",
+        "name": "OYINLOYE ADETUNJI",
+        "houseNo": "11",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 60,
+        "serialNumber": "59",
+        "name": "OSUNBADE ADESINA",
+        "houseNo": "14",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 66,
+        "serialNumber": "65",
+        "name": "Somadina Oliver",
+        "houseNo": "7b",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 67,
+        "serialNumber": "66",
+        "name": "TALABI OWEN",
+        "houseNo": "20B",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 69,
+        "serialNumber": "68",
+        "name": "SHOBIYE ABIODUN",
+        "houseNo": "5",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 75,
+        "serialNumber": "74",
+        "name": "OTUNBA OLUMOKO",
+        "houseNo": "30b",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 77,
+        "serialNumber": "76",
+        "name": "MUYIWA OLAOSHUN",
+        "houseNo": "2A",
+        "street": "OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 78,
+        "serialNumber": "77",
+        "name": "MR OSAGHALE Ehimare",
+        "houseNo": "4B",
+        "street": "OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 79,
+        "serialNumber": "78",
+        "name": "ANYA CHIMA",
+        "houseNo": "6b",
+        "street": "OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 80,
+        "serialNumber": "79",
+        "name": "MR AKEREDOLU",
+        "houseNo": "8",
+        "street": "KEJI CLOSE",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 81,
+        "serialNumber": "80",
+        "name": "CHRIS MOGEKWU",
+        "houseNo": "5",
+        "street": "DIDEOLU COURT",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 82,
+        "serialNumber": "81",
+        "name": "DR BABATUNDE AMANERIMI",
+        "houseNo": "13",
+        "street": "DIDEOLU COURT",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 84,
+        "serialNumber": "83",
+        "name": "GRACE ALABA  EDU",
+        "houseNo": "16",
+        "street": "ABBEYLAK ESTATE App No 2O1 & 204",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 52000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 85,
+        "serialNumber": "84",
+        "name": "Tonbass Global Ventures",
+        "houseNo": "B1",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 52000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 86,
+        "serialNumber": "85",
+        "name": "MR AMURE",
+        "houseNo": "18",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "2 Bedroom Flat",
+        "amount": 59000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 87,
+        "serialNumber": "86",
+        "name": "ABIJO ADEYEMI",
+        "houseNo": "C8,C2 &B11",
+        "street": "ORANGE APPT OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 78000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 88,
+        "serialNumber": "87",
+        "name": "DR ISHOLA ISMAIL",
+        "houseNo": "36",
+        "street": "AKINTAN (WEST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 79000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 90,
+        "serialNumber": "89",
+        "name": "LEKAN OWODUNI(STRONG TOWER)",
+        "houseNo": "15",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 79000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 91,
+        "serialNumber": "90",
+        "name": "MR AKERELE(BELAUAH HOUSE)",
+        "houseNo": "1b",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 79000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 92,
+        "serialNumber": "91",
+        "name": "MRS ESTHER OGUNLOWO",
+        "houseNo": "24",
+        "street": "OLUFUNMILAYO ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Full Compound",
+        "amount": 79000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 96,
+        "serialNumber": "95",
+        "name": "OLIVE CARE MONTESORI",
+        "houseNo": "4",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "COMMERCIAL (SCHOOL)",
+        "apartmentTypeLabel": null,
+        "amount": 80000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 98,
+        "serialNumber": "97",
+        "name": "INTERNATIONAL PRESS CENTRE",
+        "houseNo": "13",
+        "street": "DIDEOLU COURT",
+        "category": "Commercial",
+        "apartmentTypeLabel": null,
+        "amount": 105000
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 99,
+        "serialNumber": "98",
+        "name": "HIS TOWER",
+        "houseNo": null,
+        "street": null,
+        "category": "Commercial",
+        "apartmentTypeLabel": null,
+        "amount": 198351.57
+      },
+      "reason": "no candidate scored >= 50"
+    },
+    {
+      "row": {
+        "sourceRow": 100,
+        "serialNumber": "99",
+        "name": "OAKDALE INFANT &JUN MIXED SCHOOL",
+        "houseNo": "2/4",
+        "street": "BOLODEOKU ST",
+        "category": "Commercial",
+        "apartmentTypeLabel": null,
+        "amount": 265000
+      },
+      "reason": "no candidate scored >= 50"
+    }
+  ],
+  "ambiguous": [
+    {
+      "row": {
+        "sourceRow": 6,
+        "serialNumber": "5",
+        "name": "IKE ESTHER IFEYINWA",
+        "houseNo": "10",
+        "street": "BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "Self contained",
+        "amount": 11000
+      },
+      "candidates": [
+        {
+          "residentId": "56b1b1c7-a307-49a9-9915-b4e3ba71d86c",
+          "name": "Theophilus Akatugba",
+          "houseNo": "10",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "9e9b95eb-356f-4c39-937d-03bf4ffe984f",
+          "name": "OLUWAKEMI AKINYEMI ",
+          "houseNo": "10",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        }
+      ]
+    },
+    {
+      "row": {
+        "sourceRow": 8,
+        "serialNumber": "7",
+        "name": "Mrs Bamson Marian Gbemisola",
+        "houseNo": "10",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "1 Bedroom Flat",
+        "amount": 22000
+      },
+      "candidates": [
+        {
+          "residentId": "ced99503-a589-4883-aec4-5b4bf6bf23c2",
+          "name": "Isaac Agbo",
+          "houseNo": "10",
+          "street": "Akintan East",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "5ae98c0a-a80a-4c2c-9349-3e56173c7fa4",
+          "name": "Awwal Ajao",
+          "houseNo": "10",
+          "street": "Akintan East",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "ab3cf864-1e99-4d81-a69b-dd9b117983a7",
+          "name": "Oluwasanmi  Waleola",
+          "houseNo": "10",
+          "street": "Akintan East",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "5160e95a-3aa3-4e33-a0d4-a228c09d5a4b",
+          "name": "Joel Ojo",
+          "houseNo": "10",
+          "street": "Akintan East",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "15e93668-a786-4e15-a4b9-ceec7725a864",
+          "name": "Bashir Olawoyin",
+          "houseNo": "10",
+          "street": "Akintan East",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        }
+      ]
+    },
+    {
+      "row": {
+        "sourceRow": 39,
+        "serialNumber": "38",
+        "name": "FRANCIS NSEABASI EFFANGA",
+        "houseNo": "11",
+        "street": "ALIYU ESTATE BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "candidates": [
+        {
+          "residentId": "62d4f164-171c-4761-822c-70e4ea861f3a",
+          "name": "Dr. Mike  OSUNKOYA",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "0a9eef7f-81e8-4360-b761-5f195c2fa475",
+          "name": "Olatokun Oshinusi",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "6b23530e-cfad-4302-bdb5-0b7fba5ec081",
+          "name": "Emmanuel Ik Ibegbu",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "cf99b79c-b505-47c7-9767-e1d63abd7be3",
+          "name": "Ifeyinwa Anyibe",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "2e5dce4d-0359-4884-b1c6-b554df0fc327",
+          "name": "Bilikisu  Labisi-Aliyu ",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        }
+      ]
+    },
+    {
+      "row": {
+        "sourceRow": 40,
+        "serialNumber": "39",
+        "name": "ALHAJA MARYAM ALEGE",
+        "houseNo": "11",
+        "street": "ALIYU ESTATE BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "candidates": [
+        {
+          "residentId": "62d4f164-171c-4761-822c-70e4ea861f3a",
+          "name": "Dr. Mike  OSUNKOYA",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "0a9eef7f-81e8-4360-b761-5f195c2fa475",
+          "name": "Olatokun Oshinusi",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "6b23530e-cfad-4302-bdb5-0b7fba5ec081",
+          "name": "Emmanuel Ik Ibegbu",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "cf99b79c-b505-47c7-9767-e1d63abd7be3",
+          "name": "Ifeyinwa Anyibe",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "2e5dce4d-0359-4884-b1c6-b554df0fc327",
+          "name": "Bilikisu  Labisi-Aliyu ",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        }
+      ]
+    },
+    {
+      "row": {
+        "sourceRow": 42,
+        "serialNumber": "41",
+        "name": "EMMANANUEL IKENNA IGBEGBU",
+        "houseNo": "11",
+        "street": "ALIYU ESTATE BOLODEOKU ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "candidates": [
+        {
+          "residentId": "62d4f164-171c-4761-822c-70e4ea861f3a",
+          "name": "Dr. Mike  OSUNKOYA",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "0a9eef7f-81e8-4360-b761-5f195c2fa475",
+          "name": "Olatokun Oshinusi",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "6b23530e-cfad-4302-bdb5-0b7fba5ec081",
+          "name": "Emmanuel Ik Ibegbu",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "cf99b79c-b505-47c7-9767-e1d63abd7be3",
+          "name": "Ifeyinwa Anyibe",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "2e5dce4d-0359-4884-b1c6-b554df0fc327",
+          "name": "Bilikisu  Labisi-Aliyu ",
+          "houseNo": "11",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        }
+      ]
+    },
+    {
+      "row": {
+        "sourceRow": 44,
+        "serialNumber": "43",
+        "name": "TOSAN MERO  ASAGBA",
+        "houseNo": "22/24",
+        "street": "A1SAFRON, 22/24 BOLODEOKU",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "candidates": [
+        {
+          "residentId": "33a36829-a3fe-4867-af50-ce47e54df47b",
+          "name": "Seun Famoroti",
+          "houseNo": "22/24",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "cf591c95-d6c0-4190-a401-93d96aebb5e3",
+          "name": "Adeseun Omolara",
+          "houseNo": "22/24",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "2fac375b-686d-4aef-ad29-df05aa826bd8",
+          "name": "Oluwadamilola Adewusi",
+          "houseNo": "22/ 24",
+          "street": "Bolodeoku",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        }
+      ]
+    },
+    {
+      "row": {
+        "sourceRow": 48,
+        "serialNumber": "47",
+        "name": "PATRICK NWACHI",
+        "houseNo": "2B",
+        "street": "OLADIPO ST",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat",
+        "amount": 30000
+      },
+      "candidates": [
+        {
+          "residentId": "9dfc3859-d965-4695-b5ba-b8257841f223",
+          "name": "Musliu Akeem",
+          "houseNo": "2B",
+          "street": "Oladipo",
+          "score": 60,
+          "reasons": [
+            "house",
+            "street-partial"
+          ]
+        },
+        {
+          "residentId": "0986361d-7911-49bf-a521-ab8277966113",
+          "name": "Patrick  Nwachi ",
+          "houseNo": "8034080064",
+          "street": "Oladipo",
+          "score": 60,
+          "reasons": [
+            "street-partial",
+            "name:1.00"
+          ]
+        }
+      ]
+    },
+    {
+      "row": {
+        "sourceRow": 61,
+        "serialNumber": "60",
+        "name": "NIYI DOPAMU",
+        "houseNo": "16",
+        "street": "AKINTAN (EAST) ST.",
+        "category": "RESIDENTIAL",
+        "apartmentTypeLabel": "3 Bedroom Flat/ Duplex",
+        "amount": 49000
+      },
+      "candidates": [
+        {
+          "residentId": "f449a3a5-533b-417e-afb1-26ef059f2c52",
+          "name": "Olaniyi Dopamu",
+          "houseNo": "16",
+          "street": "Akintan West",
+          "score": 60,
+          "reasons": [
+            "house",
+            "name:0.50"
+          ]
+        },
+        {
+          "residentId": "c91f68b9-8ac4-4502-92e6-b223b01b2eb6",
+          "name": "Olaniyi Dopamu",
+          "houseNo": "16",
+          "street": "Akintan West",
+          "score": 60,
+          "reasons": [
+            "house",
+            "name:0.50"
+          ]
+        }
+      ]
+    }
+  ]
+}
