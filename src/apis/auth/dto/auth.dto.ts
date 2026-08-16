@@ -16,6 +16,152 @@ export class LoginDto {
   password!: string
 }
 
+export class UpdateProfileDto {
+
+  @ApiPropertyOptional({
+
+    example: 'John',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  first_name?: string
+
+  @ApiPropertyOptional({
+
+    example: 'Doe',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  last_name?: string
+
+  @ApiPropertyOptional({
+
+    example: '08012345678',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  @Matches(/^[0-9+\-\s()]{7,20}$/, {
+
+    message: 'Please provide a valid phone number',
+
+  })
+
+  phone?: string
+
+  @ApiPropertyOptional({
+
+    example: 'Male'
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  gender?: string
+
+  @ApiPropertyOptional({
+
+    example: '12A',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  house_no?: string
+
+  @ApiPropertyOptional({
+
+    example: 'Block A',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  block?: string
+
+  @ApiPropertyOptional({
+
+    example: '12A Block A, Banana Estate',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  home_address?: string
+
+  @ApiPropertyOptional({
+
+    example: 'Lagos',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  state_of_origin?: string
+
+  @ApiPropertyOptional({
+
+    example: 'Ikeja',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  lga?: string
+
+  @ApiPropertyOptional({
+
+    example: '08123456789',
+
+  })
+
+  @IsOptional()
+
+  @IsString()
+
+  @Matches(/^[0-9+\-\s()]{7,20}$/, {
+
+    message: 'Please provide a valid phone number',
+
+  })
+
+  alternate_phone?: string
+
+  @ApiPropertyOptional({
+
+    example: 'uuid-of-apartment-type',
+
+  })
+
+  @IsOptional()
+
+  @IsUUID()
+
+  apartmentTypeId?: string
+}
+
 export class ChangePasswordDto {
   @ApiProperty({
     example: 'Password123',
