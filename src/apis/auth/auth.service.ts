@@ -196,40 +196,6 @@ export class AuthService {
         );
     }
 
-    // Check if email is being changed
-    if (dto.email && dto.email !== user.email) {
-        const existingUser = await this.prisma.user.findUnique({
-            where: {
-                email: dto.email,
-            },
-        });
-
-        if (existingUser && existingUser.id !== userId) {
-            return error(
-                'Conflict',
-                'Email address is already in use',
-                HttpStatus.CONFLICT,
-            );
-        }
-
-        const existingResident = await this.prisma.resident.findUnique({
-            where: {
-                email: dto.email,
-            },
-        });
-
-        if (
-            existingResident &&
-            existingResident.userId !== userId
-        ) {
-            return error(
-                'Conflict',
-                'Email address is already in use',
-                HttpStatus.CONFLICT,
-            );
-        }
-    }
-
     // Validate apartment type if supplied
     if (dto.apartmentTypeId) {
         const apartmentType =
@@ -252,18 +218,6 @@ export class AuthService {
 
     const updatedUser = await this.prisma.$transaction(
         async (tx) => {
-            // Update User
-            await tx.user.update({
-                where: {
-                    id: userId,
-                },
-                data: dto.email
-                    ? {
-                          email: dto.email,
-                      }
-                    : {},
-            });
-
             // Update Resident
             await tx.resident.update({
                 where: {
@@ -278,16 +232,8 @@ export class AuthService {
                         last_name: dto.last_name,
                     }),
 
-                    ...(dto.email !== undefined && {
-                        email: dto.email,
-                    }),
-
                     ...(dto.phone !== undefined && {
                         phone: dto.phone,
-                    }),
-
-                    ...(dto.dob !== undefined && {
-                        dob: dto.dob,
                     }),
 
                     ...(dto.gender !== undefined && {
