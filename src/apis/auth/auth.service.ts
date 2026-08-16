@@ -11,6 +11,7 @@ import {
     ResetPasswordDto,
     ResetPinDto,
     VerifyForgotPasswordOtpDto,
+    UpdateProfileDto,
 } from './dto/auth.dto';
 import { EmailService } from '../../shared/email.service';
 
