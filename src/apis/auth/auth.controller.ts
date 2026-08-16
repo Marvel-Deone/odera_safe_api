@@ -17,7 +17,7 @@ import {
 } from '@nestjs/swagger'
 
 import { AuthService } from './auth.service'
-import { ChangePasswordDto, ChangePinDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, ResetPinDto, VerifyForgotPasswordOtpDto } from './dto/auth.dto'
+import { ChangePasswordDto, ChangePinDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, ResetPinDto, VerifyForgotPasswordOtpDto, UpdateProfileDto } from './dto/auth.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { CurrentUser } from './decorators/current-user.decorator'
 
