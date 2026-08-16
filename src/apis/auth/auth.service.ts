@@ -170,6 +170,188 @@ export class AuthService {
     );
 }
 
+    async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+        include: {
+            resident: true,
+        },
+    });
+
+    if (!user) {
+        return error(
+            'Not Found',
+            'User not found',
+            HttpStatus.NOT_FOUND,
+        );
+    }
+
+    if (!user.resident) {
+        return error(
+            'Not Found',
+            'Resident profile not found',
+            HttpStatus.NOT_FOUND,
+        );
+    }
+
+    // Check if email is being changed
+    if (dto.email && dto.email !== user.email) {
+        const existingUser = await this.prisma.user.findUnique({
+            where: {
+                email: dto.email,
+            },
+        });
+
+        if (existingUser && existingUser.id !== userId) {
+            return error(
+                'Conflict',
+                'Email address is already in use',
+                HttpStatus.CONFLICT,
+            );
+        }
+
+        const existingResident = await this.prisma.resident.findUnique({
+            where: {
+                email: dto.email,
+            },
+        });
+
+        if (
+            existingResident &&
+            existingResident.userId !== userId
+        ) {
+            return error(
+                'Conflict',
+                'Email address is already in use',
+                HttpStatus.CONFLICT,
+            );
+        }
+    }
+
+    // Validate apartment type if supplied
+    if (dto.apartmentTypeId) {
+        const apartmentType =
+            await this.prisma.apartmentType.findFirst({
+                where: {
+                    id: dto.apartmentTypeId,
+                    estateId: user.estateId,
+                    active: true,
+                },
+            });
+
+        if (!apartmentType) {
+            return error(
+                'Bad Request',
+                'Invalid apartment type',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+    }
+
+    const updatedUser = await this.prisma.$transaction(
+        async (tx) => {
+            // Update User
+            await tx.user.update({
+                where: {
+                    id: userId,
+                },
+                data: dto.email
+                    ? {
+                          email: dto.email,
+                      }
+                    : {},
+            });
+
+            // Update Resident
+            await tx.resident.update({
+                where: {
+                    userId: userId,
+                },
+                data: {
+                    ...(dto.first_name !== undefined && {
+                        first_name: dto.first_name,
+                    }),
+
+                    ...(dto.last_name !== undefined && {
+                        last_name: dto.last_name,
+                    }),
+
+                    ...(dto.email !== undefined && {
+                        email: dto.email,
+                    }),
+
+                    ...(dto.phone !== undefined && {
+                        phone: dto.phone,
+                    }),
+
+                    ...(dto.dob !== undefined && {
+                        dob: dto.dob,
+                    }),
+
+                    ...(dto.gender !== undefined && {
+                        gender: dto.gender,
+                    }),
+
+                    ...(dto.house_no !== undefined && {
+                        house_no: dto.house_no,
+                    }),
+
+                    ...(dto.block !== undefined && {
+                        block: dto.block,
+                    }),
+
+                    ...(dto.home_address !== undefined && {
+                        home_address: dto.home_address,
+                    }),
+
+                    ...(dto.state_of_origin !== undefined && {
+                        state_of_origin: dto.state_of_origin,
+                    }),
+
+                    ...(dto.lga !== undefined && {
+                        lga: dto.lga,
+                    }),
+
+                    ...(dto.alternate_phone !== undefined && {
+                        alternate_phone: dto.alternate_phone,
+                    }),
+
+                    ...(dto.apartmentTypeId !== undefined && {
+                        apartmentTypeId: dto.apartmentTypeId,
+                    }),
+                },
+            });
+
+            return tx.user.findUnique({
+                where: {
+                    id: userId,
+                },
+                include: {
+                    resident: {
+                        include: {
+                            apartmentType: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                },
+                            },
+                        },
+                    },
+                    residentAssociate: true,
+                },
+            });
+        },
+    );
+
+    return success(
+        updatedUser,
+        'Profile Updated',
+        'User profile updated successfully',
+    );
+}
+
     async forgotPassword(dto: ForgotPasswordDto) {
         const email = dto.email.trim().toLowerCase();
 
