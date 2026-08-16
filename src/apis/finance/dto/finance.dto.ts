@@ -100,6 +100,16 @@ export class UpdateLevyDto {
     @IsOptional()
     @IsDateString()
     dueDate?: string;
+    @ApiProperty({
+        example: ['resident-id-1', 'resident-id-2'],
+        required: false,
+    })
+
+    @IsOptional()
+    @IsArray()
+    @ArrayMinSize(1)
+    @IsString({ each: true })
+    residentIds?: string[];
 
     @ApiProperty({
         required: false,
