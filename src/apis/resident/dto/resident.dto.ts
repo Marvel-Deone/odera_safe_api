@@ -139,12 +139,12 @@ export class CompleteResidentProfileDto {
     @ApiPropertyOptional({ example: 'NIN' })
     @IsOptional()
     @IsString()
-    id_type!: string;
+    id_type?: string;
 
     @ApiPropertyOptional({ example: '12345678901' })
     @IsOptional()
     @IsString()
-    id_no!: string;
+    id_no?: string;
 
     @ApiPropertyOptional({ example: 'https://cloudinary.com/front.jpg' })
     @IsOptional()
