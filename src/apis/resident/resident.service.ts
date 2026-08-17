@@ -870,13 +870,13 @@ export class ResidentService {
       return success(updatedResident, 'Rejected', 'Resident KYC rejected');
     }
 
-    if (resident.kycStatus !== KycStatus.PENDING) {
-      return error(
-        'Invalid State',
-        'Resident has not completed KYC profile',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    // if (resident.kycStatus !== KycStatus.PENDING) {
+    //   return error(
+    //     'Invalid State',
+    //     'Resident has not completed KYC profile',
+    //     HttpStatus.BAD_REQUEST,
+    //   );
+    // }
 
     const completeProfile = await this.isResidentProfileComplete({
       estateId: resident.estateId,
