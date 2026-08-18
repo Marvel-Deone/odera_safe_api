@@ -430,6 +430,26 @@ enum LevyCategory {
   MONTHLY_RESIDENT_LEVY
 }
 
+enum SupportTicketStatus {
+  OPEN
+  RESOLVED
+  CANCELLED
+}
+
+enum SupportTicketCategory {
+  APP_ISSUE
+  BUG
+  ACCOUNT
+  PAYMENT
+  OTHER
+}
+
+enum SupportTicketTimelineEvent {
+  CREATED
+  RESOLVED
+  CANCELLED
+}
+
 // model EstateSettings {
 //   id               String  @id @default(uuid())
 //   estateId         String  @unique
@@ -484,6 +504,7 @@ model Estate {
   emergencyContacts         EmergencyContact[]
   emergencyContactActions   EmergencyContactAction[]
   estateFinanceRecords      EstateFinanceRecord[]
+  supportTickets            SupportTicket[]
 }
 
 model User {
@@ -495,32 +516,39 @@ model User {
   first_login Boolean  @default(true)
   createdAt   DateTime @default(now())
 
-  estateId                 String
-  estate                   Estate                    @relation(fields: [estateId], references: [id])
-  resident                 Resident?
-  residentAssociate        ResidentAssociate?
-  gateLogs                 GateLog[]
-  guard                    Guard?
-  assignedIncidents        Incident[]                @relation("AssignedIncidentUser")
-  announcements            Announcement[]
-  announcementComments     AnnouncementComment[]
-  announcementLikes        AnnouncementLike[]
-  chatMessages             ChatMessage[]
-  polls                    Poll[]
-  pollVotes                PollVote[]
-  committeeMembers         CommitteeMember[]
-  createdLevies            Levy[]
-  approvedWithdrawals      WithdrawalRequest[]       @relation("WithdrawalApprover")
-  approvedVehicles         Vehicle[]                 @relation("VehicleApprover")
-  approvedHeavyVehicles    HeavyVehiclePass[]        @relation("HeavyVehicleApprover")
-  shortletAccessLogs       ShortletAccessLog[]       @relation("ShortletAccessVerifier")
-  businessAccessLogs       BusinessAccessLog[]
-  incidentChatParticipants IncidentChatParticipant[]
-  emergencyNotifications   EmergencyNotification[]
-  emergencyContactActions  EmergencyContactAction[]
-  incidentTimelineEntries  IncidentTimelineEntry[]
-  estateFinanceRecords     EstateFinanceRecord[]
-  passwordResetOtps        PasswordResetOtp[]
+  estateId                     String
+  estate                       Estate                       @relation(fields: [estateId], references: [id])
+  resident                     Resident?
+  residentAssociate            ResidentAssociate?
+  gateLogs                     GateLog[]
+  guard                        Guard?
+  assignedIncidents            Incident[]                   @relation("AssignedIncidentUser")
+  announcements                Announcement[]
+  announcementComments         AnnouncementComment[]
+  announcementLikes            AnnouncementLike[]
+  chatMessages                 ChatMessage[]
+  polls                        Poll[]
+  pollVotes                    PollVote[]
+  committeeMembers             CommitteeMember[]
+  createdLevies                Levy[]
+  approvedWithdrawals          WithdrawalRequest[]          @relation("WithdrawalApprover")
+  approvedVehicles             Vehicle[]                    @relation("VehicleApprover")
+  approvedHeavyVehicles        HeavyVehiclePass[]           @relation("HeavyVehicleApprover")
+  shortletAccessLogs           ShortletAccessLog[]          @relation("ShortletAccessVerifier")
+  businessAccessLogs           BusinessAccessLog[]
+  incidentChatParticipants     IncidentChatParticipant[]
+  emergencyNotifications       EmergencyNotification[]
+  emergencyContactActions      EmergencyContactAction[]
+  incidentTimelineEntries      IncidentTimelineEntry[]
+  estateFinanceRecords         EstateFinanceRecord[]
+  passwordResetOtps            PasswordResetOtp[]
+  supportTickets               SupportTicket[]
+  // relation fields for support tickets
+  createdSupportTickets   SupportTicket[] @relation("SupportTicketCreator")
+  resolvedSupportTickets  SupportTicket[] @relation("SupportTicketResolver")
+  cancelledSupportTickets SupportTicket[] @relation("SupportTicketCanceller")
+  supportTicketTimelineEntries SupportTicketTimelineEntry[]
+  
 }
 
 model PasswordResetOtp {
@@ -1481,6 +1509,61 @@ model GuardLocation {
 
   @@index([guardId, recordedAt])
   @@index([estateId, recordedAt])
+}
+
+model SupportTicket {
+  id String @id @default(uuid())
+
+  estateId      String
+  createdById   String
+  resolvedById  String?
+  cancelledById String?
+
+  reference   String                @unique
+  title       String
+  description String
+  category    SupportTicketCategory
+  priority    TicketPriority        @default(P3_ROUTINE)
+  status      SupportTicketStatus   @default(OPEN)
+
+  resolutionNote   String?
+  cancellationNote String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resolvedAt  DateTime?
+  cancelledAt DateTime?
+
+  estate      Estate @relation(fields: [estateId], references: [id], onDelete: Cascade)
+  createdBy   User   @relation("SupportTicketCreator", fields: [createdById], references: [id])
+  resolvedBy  User?  @relation("SupportTicketResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  cancelledBy User?  @relation("SupportTicketCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
+
+  timeline SupportTicketTimelineEntry[]
+  user     User?                        @relation(fields: [userId], references: [id])
+  userId   String?
+
+  @@index([estateId])
+  @@index([estateId, status])
+  @@index([createdById])
+  @@index([createdAt])
+}
+
+model SupportTicketTimelineEntry {
+  id String @id @default(uuid())
+
+  supportTicketId String
+  event           SupportTicketTimelineEvent
+  actorId         String?
+  actorRole       Role?
+  note            String?
+
+  createdAt DateTime @default(now())
+
+  supportTicket SupportTicket @relation(fields: [supportTicketId], references: [id], onDelete: Cascade)
+  actor         User?         @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([supportTicketId, createdAt])
 }
 
 model Announcement {
