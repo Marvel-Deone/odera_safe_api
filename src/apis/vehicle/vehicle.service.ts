@@ -45,6 +45,9 @@ export class VehicleService {
 
   private async getResident(userId: string) {
     const user = await this.getUser(userId)
+    // const resident = await this.prisma.resolveResidentForUser(userId, {
+    //   wallet: true,
+    // })
 
     if (!user.resident) {
       error('Resident Not Found', 'Resident profile not found', HttpStatus.FORBIDDEN)
@@ -76,36 +79,6 @@ export class VehicleService {
       },
     })
   }
-
-  // async createVehicle(userId: string, dto: CreateVehicleDto) {
-  //   const { user, resident } = await this.getResident(userId)
-
-  //   const vehicle = await this.prisma.vehicle.create({
-  //     data: {
-  //       residentId: resident.id,
-  //       plateNumber: this.normalizePlate(dto.plateNumber),
-  //       vehicleType: dto.vehicleType,
-  //       make: dto.make,
-  //       model: dto.model,
-  //       color: dto.color,
-  //       year: dto.year,
-  //       registrationDocUrl: dto.registrationDocUrl,
-  //       vehiclePhotoUrl: dto.vehiclePhotoUrl,
-  //       status: VehicleStatus.PENDING,
-  //     },
-  //   })
-
-  //   await this.log(this.prisma, {
-  //     estateId: resident.estateId,
-  //     action: 'VEHICLE_REGISTERED',
-  //     description: `Resident registered vehicle ${vehicle.plateNumber}`,
-  //     actorId: user.id,
-  //     actorRole: Role.RESIDENT,
-  //     metadata: { vehicleId: vehicle.id, residentId: resident.id },
-  //   })
-
-  //   return success(vehicle, 'Vehicle Registered', 'Vehicle submitted for admin review')
-  // }
 
   async createVehicle(userId: string, dto: CreateVehicleDto) {
     try {

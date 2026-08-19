@@ -20,6 +20,9 @@ import { AuthService } from './auth.service'
 import { ChangePasswordDto, ChangePinDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, ResetPinDto, VerifyForgotPasswordOtpDto } from './dto/auth.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { CurrentUser } from './decorators/current-user.decorator'
+import { RolesGuard } from './guards/roles.guard'
+import { Roles } from './decorators/roles.decorator'
+import { Role } from '@prisma/client'
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -127,7 +130,8 @@ export class AuthController {
 
     // CHANGE PIN
     @Post('change-pin')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.RESIDENT)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({
@@ -155,7 +159,8 @@ export class AuthController {
 
     // RESET PIN
     @Post('reset-pin')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.RESIDENT)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({

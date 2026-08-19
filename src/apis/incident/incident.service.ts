@@ -152,9 +152,7 @@ export class IncidentService {
         let reportedByGuardId: string | null = null;
 
         if (user.role === Role.RESIDENT) {
-            const resident = await this.prisma.resident.findFirst({
-                where: { userId },
-            });
+            const resident = await this.prisma.resolveResidentForUser(userId);
 
             reportedByResidentId = resident?.id ?? null;
         }
@@ -337,9 +335,7 @@ export class IncidentService {
 
     // Resident incident list
     async getResidentIncidents(userId: string) {
-        const resident = await this.prisma.resident.findFirst({
-            where: { userId },
-        });
+        const resident = await this.prisma.resolveResidentForUser(userId);
 
         if (!resident) {
             return error(

@@ -175,9 +175,8 @@ export class SosService {
         const actor = await this.getActor(userId);
         this.policy.assertCanCreate(actor, SosType.RESIDENT);
 
-        const resident = await this.prisma.resident.findUnique({
-            where: { userId },
-            include: { street: true },
+        const resident = await this.prisma.resolveResidentForUser(userId, {
+            street: true,
         });
 
         if (!resident) {
@@ -741,6 +740,7 @@ export class SosService {
             include: {
                 guard: true,
                 resident: true,
+                residentAssociate: true,
             },
         });
 
@@ -759,6 +759,7 @@ export class SosService {
             displayName:
                 user.guard?.full_name ??
                 residentName ??
+                user.residentAssociate?.fullName ??
                 user.email,
         };
     }

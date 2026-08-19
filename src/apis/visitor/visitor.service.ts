@@ -42,9 +42,7 @@ export class VisitorService {
     // resident: create visitor
     async createVisitor(userId: string, dto: CreateVisitorDto,) {
         const resident =
-            await this.prisma.resident.findFirst({
-                where: { userId },
-            })
+            await this.prisma.resolveResidentForUser(userId)
 
         if (!resident) {
             return error(
@@ -181,9 +179,7 @@ export class VisitorService {
         userId: string,
     ) {
         const resident =
-            await this.prisma.resident.findFirst({
-                where: { userId },
-            })
+            await this.prisma.resolveResidentForUser(userId)
 
         if (!resident) {
             return error(
@@ -213,9 +209,7 @@ export class VisitorService {
 
     async getResidentVisitorById(userId: string, visitorId: string) {
         const resident =
-            await this.prisma.resident.findFirst({
-                where: { userId },
-            })
+            await this.prisma.resolveResidentForUser(userId)
 
         if (!resident) {
             return error(
@@ -278,9 +272,7 @@ export class VisitorService {
         dto: UpdateVisitorDto,
     ) {
         const resident =
-            await this.prisma.resident.findFirst({
-                where: { userId },
-            })
+            await this.prisma.resolveResidentForUser(userId)
 
         if (!resident) {
             return error(
@@ -419,9 +411,7 @@ export class VisitorService {
         userId: string,
     ) {
         const resident =
-            await this.prisma.resident.findFirst({
-                where: { userId },
-            })
+            await this.prisma.resolveResidentForUser(userId)
 
         if (!resident) {
             return error(
@@ -1291,9 +1281,7 @@ export class VisitorService {
         userId: string,
     ) {
         const resident =
-            await this.prisma.resident.findFirst({
-                where: { userId },
-            })
+            await this.prisma.resolveResidentForUser(userId)
 
         if (!resident) {
             return error(
