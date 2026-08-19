@@ -5,6 +5,7 @@ import {
     HttpCode,
     HttpStatus,
     Post,
+    Patch,
     UseGuards,
 } from '@nestjs/common'
 
@@ -17,7 +18,7 @@ import {
 } from '@nestjs/swagger'
 
 import { AuthService } from './auth.service'
-import { ChangePasswordDto, ChangePinDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, ResetPinDto, VerifyForgotPasswordOtpDto } from './dto/auth.dto'
+import { ChangePasswordDto, ChangePinDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, ResetPinDto, VerifyForgotPasswordOtpDto, UpdateProfileDto } from './dto/auth.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { CurrentUser } from './decorators/current-user.decorator'
 import { RolesGuard } from './guards/roles.guard'
@@ -69,6 +70,18 @@ export class AuthController {
     async profile(@CurrentUser() user: any) {
         return this.authService.profile(user.id)
     }
+
+@Patch('profile')
+@ApiBearerAuth()
+@ApiOperation({
+    summary: 'Update user profile',
+})
+async updateProfile(
+    @CurrentUser() user: { id: string },
+    @Body() dto: UpdateProfileDto,
+) {
+    return this.authService.updateProfile(user.id, dto);
+}
 
     // change password
     @Post('change-password')
