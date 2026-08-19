@@ -71,17 +71,17 @@ export class AuthController {
         return this.authService.profile(user.id)
     }
 
-@Patch('profile')
-@ApiBearerAuth()
-@ApiOperation({
-    summary: 'Update user profile',
-})
-async updateProfile(
-    @CurrentUser() user: { id: string },
-    @Body() dto: UpdateProfileDto,
-) {
-    return this.authService.updateProfile(user.id, dto);
-}
+    @Patch('profile')
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Update user profile',
+    })
+    async updateProfile(
+        @CurrentUser() user: { id: string },
+        @Body() dto: UpdateProfileDto,
+    ) {
+        return this.authService.updateProfile(user.id, dto);
+    }
 
     // change password
     @Post('change-password')
