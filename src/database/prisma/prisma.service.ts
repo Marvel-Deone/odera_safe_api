@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, ResidentAssociateCategory } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 // import { PrismaClient } from '../../../generated/prisma';
@@ -40,5 +40,43 @@ export class PrismaService
     async onModuleDestroy() {
         await this.$disconnect();
         await this.pool.end(); 
+    }
+
+    async resolveResidentForUser(
+        userId: string,
+        include?: Prisma.ResidentInclude,
+    ): Promise<any | null> {
+        const resident = await this.resident.findFirst({
+            where: { userId },
+            ...(include ? { include } : {}),
+        });
+
+        if (resident) {
+            return resident;
+        }
+
+        const associate = await this.residentAssociate.findFirst({
+            where: {
+                userId,
+                category: ResidentAssociateCategory.CO_RESIDENT,
+            },
+            include: {
+                resident: include ? { include } : true,
+            },
+        });
+
+        return associate?.resident ?? null;
+    }
+
+    async isCoResidentUser(userId: string) {
+        const associate = await this.residentAssociate.findFirst({
+            where: {
+                userId,
+                category: ResidentAssociateCategory.CO_RESIDENT,
+            },
+            select: { id: true },
+        });
+
+        return Boolean(associate);
     }
 }

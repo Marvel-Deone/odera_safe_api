@@ -27,7 +27,7 @@ export class ResidentAssociateService {
         private readonly http: HttpService,
         private readonly emailService: EmailService,
         private readonly financeService: FinanceService,
-    ) {}
+    ) { }
 
     private qoreIdSecret = process.env.QORE_ID_SECRET_KEY;
     private qoreIdClientId = process.env.QORE_ID_CLIENT_ID;
@@ -574,9 +574,9 @@ export class ResidentAssociateService {
 
         const ninVerificationData = shouldVerifyNin
             ? await this.verifyNin({
-                  idNumber: idNumber!,
-                  photoUrl: faceCapture,
-              })
+                idNumber: idNumber!,
+                photoUrl: faceCapture,
+            })
             : undefined;
 
         const normalizedEmail = dto.email?.trim().toLowerCase();
@@ -596,7 +596,7 @@ export class ResidentAssociateService {
             ...(dto.category !== undefined ? { category: dto.category } : {}),
             ...(dto.fullName !== undefined ? { fullName: dto.fullName } : {}),
             ...(dto.email !== undefined &&
-            category === ResidentAssociateCategory.CO_RESIDENT
+                category === ResidentAssociateCategory.CO_RESIDENT
                 ? { email: normalizedEmail }
                 : {}),
             ...(dto.phoneNumber !== undefined
@@ -610,45 +610,45 @@ export class ResidentAssociateService {
                 : {}),
             ...(category === ResidentAssociateCategory.STAFF
                 ? {
-                      ...(dto.workingDays !== undefined
-                          ? { workingDays: dto.workingDays }
-                          : {}),
-                      ...(dto.entryTime !== undefined
-                          ? { entryTime: dto.entryTime }
-                          : {}),
-                      ...(dto.exitTime !== undefined
-                          ? { exitTime: dto.exitTime }
-                          : {}),
-                  }
+                    ...(dto.workingDays !== undefined
+                        ? { workingDays: dto.workingDays }
+                        : {}),
+                    ...(dto.entryTime !== undefined
+                        ? { entryTime: dto.entryTime }
+                        : {}),
+                    ...(dto.exitTime !== undefined
+                        ? { exitTime: dto.exitTime }
+                        : {}),
+                }
                 : { workingDays: [], entryTime: null, exitTime: null }),
             ...(ninVerificationData !== undefined
                 ? {
-                      ninVerificationStatus: NinVerificationStatus.VERIFIED,
-                      ninVerificationData:
-                          ninVerificationData as Prisma.InputJsonValue,
-                  }
+                    ninVerificationStatus: NinVerificationStatus.VERIFIED,
+                    ninVerificationData:
+                        ninVerificationData as Prisma.InputJsonValue,
+                }
                 : {}),
         };
 
         const updated =
             normalizedEmail &&
-            category === ResidentAssociateCategory.CO_RESIDENT &&
-            associate.userId
+                category === ResidentAssociateCategory.CO_RESIDENT &&
+                associate.userId
                 ? await this.prisma.$transaction(async (tx) => {
-                      await tx.user.update({
-                          where: { id: associate.userId! },
-                          data: { email: normalizedEmail },
-                      });
+                    await tx.user.update({
+                        where: { id: associate.userId! },
+                        data: { email: normalizedEmail },
+                    });
 
-                      return tx.residentAssociate.update({
-                          where: { id: associate.id },
-                          data: updateData,
-                      });
-                  })
+                    return tx.residentAssociate.update({
+                        where: { id: associate.id },
+                        data: updateData,
+                    });
+                })
                 : await this.prisma.residentAssociate.update({
-                      where: { id: associate.id },
-                      data: updateData,
-                  });
+                    where: { id: associate.id },
+                    data: updateData,
+                });
 
         // Monthly resident levy is currently on hold.
 

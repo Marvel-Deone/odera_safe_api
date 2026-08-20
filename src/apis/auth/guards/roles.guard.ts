@@ -150,6 +150,12 @@ export class RolesGuard implements CanActivate {
             return true;
         }
 
+        const isCoResident = await this.prisma.isCoResidentUser(user.id);
+
+        if (isCoResident && this.isResidentFinanceRoute(request.path)) {
+            return false;
+        }
+
         const skipLevyCheck = this.reflector.getAllAndOverride<boolean>(
             SKIP_LEVY_CHECK_KEY,
             [context.getHandler(), context.getClass()],
@@ -295,7 +301,7 @@ export class RolesGuard implements CanActivate {
     }
 
     private isLevyAllowedRoute(method: string, path: string): boolean {
-        const normalized = path.replace(/^\/+/, '');
+        const normalized = this.normalizeRoutePath(path);
 
         // Wallet
         if (method === 'GET' && normalized === 'finance/wallet') {
@@ -320,5 +326,27 @@ export class RolesGuard implements CanActivate {
         }
 
         return false;
+    }
+
+    private isResidentFinanceRoute(path: string): boolean {
+        const normalized = this.normalizeRoutePath(path);
+
+        return (
+            normalized === 'finance/payments/outstanding' ||
+            normalized === 'finance/monthly-levies/pay-outstanding' ||
+            normalized === 'finance/wallet' ||
+            normalized === 'finance/wallet/fund' ||
+            normalized === 'finance/withdrawals' ||
+            normalized === 'auth/change-pin' ||
+            normalized === 'auth/reset-pin' ||
+            /^finance\/payments\/[^/]+\/(wallet|paystack)$/.test(normalized)
+        );
+    }
+
+    private normalizeRoutePath(path: string): string {
+        return path
+            .replace(/^\/+/, '')
+            .replace(/^_dds8\/+/, '')
+            .replace(/^v\d+\/+/, '');
     }
 }
