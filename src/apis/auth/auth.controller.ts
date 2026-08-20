@@ -21,6 +21,9 @@ import { AuthService } from './auth.service'
 import { ChangePasswordDto, ChangePinDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, ResetPinDto, VerifyForgotPasswordOtpDto, UpdateProfileDto } from './dto/auth.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { CurrentUser } from './decorators/current-user.decorator'
+import { RolesGuard } from './guards/roles.guard'
+import { Roles } from './decorators/roles.decorator'
+import { Role } from '@prisma/client'
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -68,17 +71,17 @@ export class AuthController {
         return this.authService.profile(user.id)
     }
 
-@Patch('profile')
-@ApiBearerAuth()
-@ApiOperation({
-    summary: 'Update user profile',
-})
-async updateProfile(
-    @CurrentUser() user: { id: string },
-    @Body() dto: UpdateProfileDto,
-) {
-    return this.authService.updateProfile(user.id, dto);
-}
+    @Patch('profile')
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Update user profile',
+    })
+    async updateProfile(
+        @CurrentUser() user: { id: string },
+        @Body() dto: UpdateProfileDto,
+    ) {
+        return this.authService.updateProfile(user.id, dto);
+    }
 
     // change password
     @Post('change-password')
@@ -140,7 +143,8 @@ async updateProfile(
 
     // CHANGE PIN
     @Post('change-pin')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.RESIDENT)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({
@@ -168,7 +172,8 @@ async updateProfile(
 
     // RESET PIN
     @Post('reset-pin')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.RESIDENT)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({
