@@ -41,8 +41,7 @@ export class VisitorService {
 
     // resident: create visitor
     async createVisitor(userId: string, dto: CreateVisitorDto,) {
-        const resident =
-            await this.prisma.resolveResidentForUser(userId)
+        const resident = await this.prisma.resolveResidentForUser(userId)
 
         if (!resident) {
             return error(
