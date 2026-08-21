@@ -809,7 +809,7 @@ export class FinanceService {
         console.log('[WalletTraction]:', 'creating wallet transaction');
 
         const payment = await this.paystack.initializeTransaction(
-            resident.email || user.email,
+            user.email,
             dto.amount,
             reference,
             {
@@ -872,7 +872,7 @@ export class FinanceService {
         });
 
         const payment = await this.paystack.initializeTransaction(
-            resident.email || user.email,
+            user.email,
             outstandingAmount,
             reference,
             {

@@ -171,7 +171,7 @@ export class ResidentService {
       virtualAccountName: string | null;
       virtualBankName: string | null;
     } | null;
-  }): Promise<WalletAccountData> {
+  }, user_email): Promise<WalletAccountData> {
     const shouldCreateDedicatedAccount =
       !resident.wallet?.paystackCustomerCode ||
       !resident.wallet?.virtualAccountNumber ||
@@ -183,7 +183,7 @@ export class ResidentService {
     }
 
     const paystackCustomer = await this.paystack.createCustomer(
-      resident.email,
+      user_email,
       resident.first_name,
       resident.last_name,
       resident.phone,
@@ -685,7 +685,7 @@ export class ResidentService {
         ndprConsentThirdParty: resident.ndprConsentThirdParty,
         profileDeclaration: resident.profileDeclaration,
       });
-      const walletAccountData = await this.getWalletAccountData(resident);
+      const walletAccountData = await this.getWalletAccountData(resident, latestUser.email);
       const approvedAt = resident.approvedAt ?? new Date();
 
       const updateData = {
@@ -836,6 +836,7 @@ export class ResidentService {
       },
       include: {
         wallet: true,
+        user: true,
       },
     });
 
@@ -870,14 +871,6 @@ export class ResidentService {
       return success(updatedResident, 'Rejected', 'Resident KYC rejected');
     }
 
-    // if (resident.kycStatus !== KycStatus.PENDING) {
-    //   return error(
-    //     'Invalid State',
-    //     'Resident has not completed KYC profile',
-    //     HttpStatus.BAD_REQUEST,
-    //   );
-    // }
-
     const completeProfile = await this.isResidentProfileComplete({
       estateId: resident.estateId,
       apartmentTypeId: resident.apartmentTypeId,
@@ -886,7 +879,7 @@ export class ResidentService {
       ndprConsentThirdParty: resident.ndprConsentThirdParty,
       profileDeclaration: resident.profileDeclaration,
     });
-    const walletAccountData = await this.getWalletAccountData(resident);
+    const walletAccountData = await this.getWalletAccountData(resident, resident.user?.email);
 
     const approvedAt = new Date();
 
