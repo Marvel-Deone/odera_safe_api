@@ -544,11 +544,10 @@ model User {
   passwordResetOtps            PasswordResetOtp[]
   supportTickets               SupportTicket[]
   // relation fields for support tickets
-  createdSupportTickets   SupportTicket[] @relation("SupportTicketCreator")
-  resolvedSupportTickets  SupportTicket[] @relation("SupportTicketResolver")
-  cancelledSupportTickets SupportTicket[] @relation("SupportTicketCanceller")
+  createdSupportTickets        SupportTicket[]              @relation("SupportTicketCreator")
+  resolvedSupportTickets       SupportTicket[]              @relation("SupportTicketResolver")
+  cancelledSupportTickets      SupportTicket[]              @relation("SupportTicketCanceller")
   supportTicketTimelineEntries SupportTicketTimelineEntry[]
-  
 }
 
 model PasswordResetOtp {
@@ -625,6 +624,9 @@ model Resident {
   tenancy_ownership_doc   String?
 
   wallet_pin String?
+  passcode   String? @unique
+  qrPayload  String? @unique
+  qrCode     String?
 
   ndprConsentDataProcessing Boolean   @default(false)
   ndprConsentIdentity       Boolean   @default(false)
@@ -659,6 +661,7 @@ model Resident {
   residentAssociates    ResidentAssociate[]
 
   @@index([apartmentTypeId])
+  @@index([qrPayload])
 }
 
 model ResidentSelfOnboarding {

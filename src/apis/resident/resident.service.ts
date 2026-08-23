@@ -19,6 +19,8 @@ import { ClientService } from '../../shared/client/client.service';
 import dayjs from 'dayjs';
 import { FinanceService } from '../finance/finance.service';
 import { EmailService } from '../../shared/email.service';
+import * as QRCode from 'qrcode';
+import { randomUUID } from 'crypto';
 
 const getErrorMessage = (err: unknown, fallback = 'Unknown error') =>
   err instanceof Error
@@ -160,6 +162,7 @@ export class ResidentService {
     );
   }
 
+<<<<<<< Updated upstream
   private async getWalletAccountData(resident: {
     email: string;
     first_name: string;
@@ -172,6 +175,23 @@ export class ResidentService {
       virtualBankName: string | null;
     } | null;
   }): Promise<WalletAccountData> {
+=======
+  private async getWalletAccountData(
+    resident: {
+      email: string;
+      first_name: string;
+      last_name: string;
+      phone: string;
+      wallet?: {
+        paystackCustomerCode: string | null;
+        virtualAccountNumber: string | null;
+        virtualAccountName: string | null;
+        virtualBankName: string | null;
+      } | null;
+    },
+    user_email,
+  ): Promise<WalletAccountData> {
+>>>>>>> Stashed changes
     const shouldCreateDedicatedAccount =
       !resident.wallet?.paystackCustomerCode ||
       !resident.wallet?.virtualAccountNumber ||
@@ -199,6 +219,73 @@ export class ResidentService {
       virtualAccountName: dedicatedAccount.data.account_name,
       virtualBankName: dedicatedAccount.data.bank.name,
     };
+  }
+
+  private async generateGateCredentials(): Promise<{
+    passcode: string;
+    qrPayload: string;
+    qrCode: string;
+  }> {
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const passcode = Math.floor(100000 + Math.random() * 900000).toString();
+      const qrPayload = `RESIDENT:${randomUUID()}`;
+
+      const [resident, associate] = await Promise.all([
+        this.prisma.resident.findFirst({
+          where: { OR: [{ passcode }, { qrPayload }] },
+          select: { id: true },
+        }),
+        this.prisma.residentAssociate.findFirst({
+          where: { OR: [{ passcode }, { qrPayload }] },
+          select: { id: true },
+        }),
+      ]);
+
+      if (!resident && !associate) {
+        return {
+          passcode,
+          qrPayload,
+          qrCode: await QRCode.toDataURL(qrPayload),
+        };
+      }
+    }
+
+    error(
+      'Credential Error',
+      'Unable to generate unique resident gate credentials',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+
+    return undefined!;
+  }
+
+  private async ensureGateCredentials(residentId: string) {
+    const resident = await this.prisma.resident.findUnique({
+      where: { id: residentId },
+      select: {
+        passcode: true,
+        qrPayload: true,
+        qrCode: true,
+      },
+    });
+
+    if (!resident) {
+      return error('Not Found', 'Resident not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (resident.passcode && resident.qrPayload && resident.qrCode) {
+      return resident;
+    }
+
+    return this.prisma.resident.update({
+      where: { id: residentId },
+      data: await this.generateGateCredentials(),
+      select: {
+        passcode: true,
+        qrPayload: true,
+        qrCode: true,
+      },
+    });
   }
 
   async onboardResident(dto: CreateResidentDto) {
@@ -685,7 +772,18 @@ export class ResidentService {
         ndprConsentThirdParty: resident.ndprConsentThirdParty,
         profileDeclaration: resident.profileDeclaration,
       });
+<<<<<<< Updated upstream
       const walletAccountData = await this.getWalletAccountData(resident);
+=======
+      const walletAccountData = await this.getWalletAccountData(
+        resident,
+        latestUser.email,
+      );
+      const gateCredentials =
+        resident.passcode && resident.qrPayload && resident.qrCode
+          ? {}
+          : await this.generateGateCredentials();
+>>>>>>> Stashed changes
       const approvedAt = resident.approvedAt ?? new Date();
 
       const updateData = {
@@ -699,6 +797,7 @@ export class ResidentService {
         rejectionReason: null,
         levyCleared: true,
         completeProfile,
+        ...gateCredentials,
       };
 
       console.log('[NIN Verification] Updating user with data:', updateData);
@@ -746,6 +845,11 @@ export class ResidentService {
           resident: result.updatedResident,
           wallet: result.wallet,
           monthlyLevy,
+          gateCredentials: {
+            passcode: result.updatedResident.passcode,
+            qrPayload: result.updatedResident.qrPayload,
+            qrCode: result.updatedResident.qrCode,
+          },
           completeProfile,
           nin_verification: verify_nin,
         },
@@ -886,7 +990,18 @@ export class ResidentService {
       ndprConsentThirdParty: resident.ndprConsentThirdParty,
       profileDeclaration: resident.profileDeclaration,
     });
+<<<<<<< Updated upstream
     const walletAccountData = await this.getWalletAccountData(resident);
+=======
+    const walletAccountData = await this.getWalletAccountData(
+      resident,
+      resident.user?.email ?? resident.email,
+    );
+    const gateCredentials =
+      resident.passcode && resident.qrPayload && resident.qrCode
+        ? {}
+        : await this.generateGateCredentials();
+>>>>>>> Stashed changes
 
     const approvedAt = new Date();
 
@@ -903,6 +1018,8 @@ export class ResidentService {
           levyCleared: true,
 
           completeProfile,
+
+          ...gateCredentials,
 
           approvedAt,
 
@@ -939,9 +1056,51 @@ export class ResidentService {
         resident: result.updatedResident,
         wallet: result.wallet,
         monthlyLevy,
+        gateCredentials: {
+          passcode: result.updatedResident.passcode,
+          qrPayload: result.updatedResident.qrPayload,
+          qrCode: result.updatedResident.qrCode,
+        },
       },
       'Approved',
       'Resident approved successfully',
+    );
+  }
+
+  async getGateCredentials(userId: string) {
+    const resident = await this.prisma.resident.findUnique({
+      where: {
+        userId,
+      },
+      select: {
+        id: true,
+        status: true,
+        kycStatus: true,
+      },
+    });
+
+    if (!resident) {
+      return error('Not Found', 'Resident not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (
+      resident.status !== ResidentStatus.ACTIVE ||
+      resident.kycStatus !== KycStatus.COMPLETED
+    ) {
+      return error(
+        'Not Active',
+        'Gate credentials are available after resident approval',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const gateCredentials = await this.ensureGateCredentials(resident.id);
+
+    return success(
+      gateCredentials,
+      'Gate Credentials',
+      'Resident gate credentials fetched successfully',
+      HttpStatus.OK,
     );
   }
 
