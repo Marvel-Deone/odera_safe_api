@@ -543,7 +543,6 @@ model User {
   estateFinanceRecords         EstateFinanceRecord[]
   passwordResetOtps            PasswordResetOtp[]
   supportTickets               SupportTicket[]
-  // relation fields for support tickets
   createdSupportTickets        SupportTicket[]              @relation("SupportTicketCreator")
   resolvedSupportTickets       SupportTicket[]              @relation("SupportTicketResolver")
   cancelledSupportTickets      SupportTicket[]              @relation("SupportTicketCanceller")
@@ -645,10 +644,10 @@ model Resident {
 
   createdAt DateTime @default(now())
 
-  estate                Estate                 @relation(fields: [estateId], references: [id])
-  street                EstateStreet?          @relation(fields: [streetId], references: [id])
-  apartmentType         ApartmentType?         @relation(fields: [apartmentTypeId], references: [id])
-  user                  User?                  @relation(fields: [userId], references: [id])
+  estate                Estate                    @relation(fields: [estateId], references: [id])
+  street                EstateStreet?             @relation(fields: [streetId], references: [id])
+  apartmentType         ApartmentType?            @relation(fields: [apartmentTypeId], references: [id])
+  user                  User?                     @relation(fields: [userId], references: [id])
   visitors              Visitor[]
   incidents             Incident[]
   wallet                Wallet?

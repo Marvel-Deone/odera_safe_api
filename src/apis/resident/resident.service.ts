@@ -162,20 +162,6 @@ export class ResidentService {
     );
   }
 
-<<<<<<< Updated upstream
-  private async getWalletAccountData(resident: {
-    email: string;
-    first_name: string;
-    last_name: string;
-    phone: string;
-    wallet?: {
-      paystackCustomerCode: string | null;
-      virtualAccountNumber: string | null;
-      virtualAccountName: string | null;
-      virtualBankName: string | null;
-    } | null;
-  }): Promise<WalletAccountData> {
-=======
   private async getWalletAccountData(
     resident: {
       email: string;
@@ -191,7 +177,6 @@ export class ResidentService {
     },
     user_email,
   ): Promise<WalletAccountData> {
->>>>>>> Stashed changes
     const shouldCreateDedicatedAccount =
       !resident.wallet?.paystackCustomerCode ||
       !resident.wallet?.virtualAccountNumber ||
@@ -772,9 +757,6 @@ export class ResidentService {
         ndprConsentThirdParty: resident.ndprConsentThirdParty,
         profileDeclaration: resident.profileDeclaration,
       });
-<<<<<<< Updated upstream
-      const walletAccountData = await this.getWalletAccountData(resident);
-=======
       const walletAccountData = await this.getWalletAccountData(
         resident,
         latestUser.email,
@@ -783,7 +765,6 @@ export class ResidentService {
         resident.passcode && resident.qrPayload && resident.qrCode
           ? {}
           : await this.generateGateCredentials();
->>>>>>> Stashed changes
       const approvedAt = resident.approvedAt ?? new Date();
 
       const updateData = {
@@ -940,6 +921,7 @@ export class ResidentService {
       },
       include: {
         wallet: true,
+        user: true
       },
     });
 
@@ -990,9 +972,6 @@ export class ResidentService {
       ndprConsentThirdParty: resident.ndprConsentThirdParty,
       profileDeclaration: resident.profileDeclaration,
     });
-<<<<<<< Updated upstream
-    const walletAccountData = await this.getWalletAccountData(resident);
-=======
     const walletAccountData = await this.getWalletAccountData(
       resident,
       resident.user?.email ?? resident.email,
@@ -1001,7 +980,6 @@ export class ResidentService {
       resident.passcode && resident.qrPayload && resident.qrCode
         ? {}
         : await this.generateGateCredentials();
->>>>>>> Stashed changes
 
     const approvedAt = new Date();
 
