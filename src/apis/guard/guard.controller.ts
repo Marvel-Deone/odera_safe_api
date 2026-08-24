@@ -131,6 +131,21 @@ export class GuardController {
     )
   }
 
+  @Post('guards/self-onboarding')
+  @Roles(Role.SUPER_GUARD, Role.GUARD)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Create guard',
+  })
+  async guardselfonboarding(
+    @CurrentUser() user: any,
+
+    @Body()
+    dto: CreateGuardDto,
+  ) {
+    return this.guardsService.guardSelfOnboarding(dto)
+  }
+
   @Get('guards/dashboard')
   @Roles(
     Role.GUARD,

@@ -6,6 +6,7 @@ import { GuardService } from './guard.service'
 
 import { PrismaService } from '../../database/prisma/prisma.service'
 import { PatrolMonitoringService } from '../patrol-monitoring/patrol-monitoring.service'
+import { EmailService } from '../../shared/email.service'
 
 @Module({
   controllers: [GuardController],
@@ -14,6 +15,7 @@ import { PatrolMonitoringService } from '../patrol-monitoring/patrol-monitoring.
     GuardService,
     PrismaService,
     PatrolMonitoringService,
+    EmailService,
   ],
 })
 export class GuardModule {}
