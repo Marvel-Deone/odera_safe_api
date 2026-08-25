@@ -31,12 +31,7 @@ import { CreateGuardDto } from './dto/guard.dto'
 
 @ApiTags('Guards')
 @ApiBearerAuth()
-
-@UseGuards(
-  JwtAuthGuard,
-  RolesGuard,
-)
-
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class GuardController {
   constructor(
@@ -129,21 +124,6 @@ export class GuardController {
       user.id,
       guardId,
     )
-  }
-
-  @Post('guards/self-onboarding')
-  @Roles(Role.SUPER_GUARD, Role.GUARD)
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Create guard',
-  })
-  async guardselfonboarding(
-    @CurrentUser() user: any,
-
-    @Body()
-    dto: CreateGuardDto,
-  ) {
-    return this.guardsService.guardSelfOnboarding(dto)
   }
 
   @Get('guards/dashboard')
@@ -511,3 +491,24 @@ export class GuardController {
   }
 }
 
+@ApiTags('Public Guards')
+@UseGuards(RolesGuard)
+@Controller('guards')
+export class PublicGuardController {
+    constructor(private readonly guardsService: GuardService,) {}
+    
+  @Post('self-onboarding')
+  @Roles(Role.SUPER_GUARD, Role.GUARD)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Create guard',
+  })
+  async guardselfonboarding(
+    @CurrentUser() user: any,
+
+    @Body()
+    dto: CreateGuardDto,
+  ) {
+    return this.guardsService.guardSelfOnboarding(dto)
+  }
+}
