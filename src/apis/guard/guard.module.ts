@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 
-import { GuardController } from './guard.controller'
+import { GuardController, PublicGuardController } from './guard.controller'
 
 import { GuardService } from './guard.service'
 
@@ -9,7 +9,7 @@ import { PatrolMonitoringService } from '../patrol-monitoring/patrol-monitoring.
 import { EmailService } from '../../shared/email.service'
 
 @Module({
-  controllers: [GuardController],
+  controllers: [GuardController, PublicGuardController],
 
   providers: [
     GuardService,

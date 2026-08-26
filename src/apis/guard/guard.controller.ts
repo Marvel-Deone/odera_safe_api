@@ -492,13 +492,11 @@ export class GuardController {
 }
 
 @ApiTags('Public Guards')
-@UseGuards(RolesGuard)
 @Controller('guards')
 export class PublicGuardController {
-    constructor(private readonly guardsService: GuardService,) {}
-    
+  constructor(private readonly guardsService: GuardService,) { }
+
   @Post('self-onboarding')
-  @Roles(Role.SUPER_GUARD, Role.GUARD)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Create guard',

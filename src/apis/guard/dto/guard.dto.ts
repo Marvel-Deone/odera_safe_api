@@ -16,6 +16,7 @@ export class CreateGuardDto {
     @ApiProperty({
         example: '5478828829999999999',
     })
+    @IsOptional()
     estateId?: string
 
     @ApiProperty({
