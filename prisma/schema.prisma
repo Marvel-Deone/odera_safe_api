@@ -405,6 +405,12 @@ enum ResidentAssociateCategory {
   CO_RESIDENT
 }
 
+enum ResidentAssociateApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum NinVerificationStatus {
   NOT_SUBMITTED
   VERIFIED
@@ -644,10 +650,10 @@ model Resident {
 
   createdAt DateTime @default(now())
 
-  estate                Estate                    @relation(fields: [estateId], references: [id])
-  street                EstateStreet?             @relation(fields: [streetId], references: [id])
-  apartmentType         ApartmentType?            @relation(fields: [apartmentTypeId], references: [id])
-  user                  User?                     @relation(fields: [userId], references: [id])
+  estate                Estate                 @relation(fields: [estateId], references: [id])
+  street                EstateStreet?          @relation(fields: [streetId], references: [id])
+  apartmentType         ApartmentType?         @relation(fields: [apartmentTypeId], references: [id])
+  user                  User?                  @relation(fields: [userId], references: [id])
   visitors              Visitor[]
   incidents             Incident[]
   wallet                Wallet?
@@ -690,27 +696,31 @@ model ResidentSelfOnboarding {
 }
 
 model ResidentAssociate {
-  id                    String                    @id @default(uuid())
+  id                    String                          @id @default(uuid())
   residentId            String
-  userId                String?                   @unique
-  category              ResidentAssociateCategory @default(CO_RESIDENT)
+  userId                String?                         @unique
+  category              ResidentAssociateCategory       @default(CO_RESIDENT)
   fullName              String
-  email                 String?                   @unique
+  email                 String?                         @unique
   phoneNumber           String
-  role                  String                    @default("Co-resident")
+  role                  String                          @default("Co-resident")
   idType                String?
   idNumber              String?
   faceCapture           String?
   workingDays           Weekday[]
   entryTime             String?
   exitTime              String?
-  passcode              String?                   @unique
-  qrPayload             String?                   @unique
+  passcode              String?                         @unique
+  qrPayload             String?                         @unique
   qrCode                String?
-  ninVerificationStatus NinVerificationStatus     @default(NOT_SUBMITTED)
+  ninVerificationStatus NinVerificationStatus           @default(NOT_SUBMITTED)
   ninVerificationData   Json?
-  createdAt             DateTime                  @default(now())
-  updatedAt             DateTime                  @updatedAt
+  approvalStatus        ResidentAssociateApprovalStatus @default(PENDING)
+  approvedAt            DateTime?
+  approvedById          String?
+  rejectionReason       String?
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
 
   resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
   user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)

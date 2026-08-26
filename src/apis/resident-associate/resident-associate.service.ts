@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import {
     NinVerificationStatus,
     Prisma,
+    ResidentAssociateApprovalStatus,
     ResidentAssociateCategory,
     Role,
 } from '@prisma/client';
@@ -19,6 +20,7 @@ import {
     UpdateResidentAssociateDto,
 } from './dto/resident-associate.dto';
 import { EmailService } from '../../shared/email.service';
+import { ResidentAssociateCredentialsService } from './resident-associate-credentials.service';
 
 @Injectable()
 export class ResidentAssociateService {
@@ -27,6 +29,7 @@ export class ResidentAssociateService {
         private readonly http: HttpService,
         private readonly emailService: EmailService,
         private readonly financeService: FinanceService,
+        private readonly credentialsService: ResidentAssociateCredentialsService,
     ) { }
 
     private qoreIdSecret = process.env.QORE_ID_SECRET_KEY;
@@ -82,76 +85,6 @@ export class ResidentAssociateService {
         }
 
         return resident!;
-    }
-
-    private generateTemporaryPassword() {
-        return Math.random().toString(36).slice(-10);
-    }
-
-    private async generateGateCredentials(): Promise<{
-        passcode: string;
-        qrPayload: string;
-        qrCode: string;
-    }> {
-        for (let attempt = 0; attempt < 10; attempt++) {
-            const passcode = Math.floor(
-                100000 + Math.random() * 900000,
-            ).toString();
-            const qrPayload = `CO_RESIDENT:${randomUUID()}`;
-            const existing = await this.prisma.residentAssociate.findFirst({
-                where: { OR: [{ passcode }, { qrPayload }] },
-                select: { id: true },
-            });
-
-            if (!existing) {
-                return {
-                    passcode,
-                    qrPayload,
-                    qrCode: await QRCode.toDataURL(qrPayload),
-                };
-            }
-        }
-
-        error(
-            'Credential Error',
-            'Unable to generate unique co-resident gate credentials',
-            HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-
-        return undefined!;
-    }
-
-    private async ensureGateCredentials(associateId: string) {
-        const associate = await this.prisma.residentAssociate.findUnique({
-            where: { id: associateId },
-            select: {
-                passcode: true,
-                qrPayload: true,
-                qrCode: true,
-            },
-        });
-
-        if (!associate) {
-            error(
-                'Not Found',
-                'Co-resident profile not found',
-                HttpStatus.NOT_FOUND,
-            );
-        }
-
-        if (associate!.passcode && associate!.qrPayload && associate!.qrCode) {
-            return associate!;
-        }
-
-        return this.prisma.residentAssociate.update({
-            where: { id: associateId },
-            data: await this.generateGateCredentials(),
-            select: {
-                passcode: true,
-                qrPayload: true,
-                qrCode: true,
-            },
-        });
     }
 
     private async assertUniqueCoResidentEmail(
@@ -336,13 +269,6 @@ export class ResidentAssociateService {
             await this.assertUniqueCoResidentEmail(email!);
         }
 
-        // const ninVerificationData = this.isNin(dto.idType)
-        //     ? await this.verifyNin({
-        //           idNumber: dto.idNumber!,
-        //           photoUrl: dto.faceCapture,
-        //       })
-        //     : null;
-
         const associateData: Prisma.ResidentAssociateCreateInput = {
             resident: { connect: { id: resident.id } },
             category,
@@ -368,62 +294,54 @@ export class ResidentAssociateService {
                 category === ResidentAssociateCategory.STAFF
                     ? dto.exitTime
                     : null,
-            // ninVerificationStatus: ninVerificationData
-            //     ? NinVerificationStatus.VERIFIED
-            //     : NinVerificationStatus.NOT_SUBMITTED,
         };
 
-        // if (ninVerificationData) {
-        //     associateData.ninVerificationData =
-        //         ninVerificationData as Prisma.InputJsonValue;
-        // }
-
         if (category === ResidentAssociateCategory.CO_RESIDENT) {
-            const gateCredentials = await this.generateGateCredentials();
-            const tempPassword = this.generateTemporaryPassword();
-            const hashedPassword = await bcrypt.hash(tempPassword, 10);
+            // const gateCredentials = await this.generateGateCredentials();
+            // const tempPassword = this.generateTemporaryPassword();
+            // const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-            const associate = await this.prisma.$transaction(async (tx) => {
-                const user = await tx.user.create({
-                    data: {
-                        email: email!,
-                        password: hashedPassword,
-                        role: Role.RESIDENT,
-                        first_login: true,
-                        estateId: resident.estateId,
-                    },
-                });
+            // const associate = await this.prisma.$transaction(async (tx) => {
+            //     const user = await tx.user.create({
+            //         data: {
+            //             email: email!,
+            //             password: hashedPassword,
+            //             role: Role.RESIDENT,
+            //             first_login: true,
+            //             estateId: resident.estateId,
+            //         },
+            //     });
 
-                return tx.residentAssociate.create({
-                    data: {
-                        ...associateData,
-                        ...gateCredentials,
-                        user: { connect: { id: user.id } },
-                    },
-                });
+            //     return tx.residentAssociate.create({
+            //         data: {
+            //             ...associateData,
+            //             ...gateCredentials,
+            //             user: { connect: { id: user.id } },
+            //         },
+            //     });
+            // });
+            const associate = await this.prisma.residentAssociate.create({
+                data: associateData,
             });
 
-            const appLoginLink =
-                process.env.APP_LOGIN_LINK ??
-                process.env.APP_DOWNLOAD_LINK ??
-                'https://oderasafe.ddsafe.tech';
-            const emailDelivery =
-                await this.emailService.sendCoResidentWelcomeEmail({
-                    toEmail: email!,
-                    fullName: dto.fullName,
-                    temporaryPassword: tempPassword,
-                    appLoginLink,
-                });
+            // const appLoginLink =
+            //     process.env.APP_LOGIN_LINK ??
+            //     process.env.APP_DOWNLOAD_LINK ??
+            //     'https://oderasafe.ddsafe.tech';
+            // const emailDelivery =
+            //     await this.emailService.sendCoResidentWelcomeEmail({
+            //         toEmail: email!,
+            //         fullName: dto.fullName,
+            //         temporaryPassword: tempPassword,
+            //         appLoginLink,
+            //     });
 
             return success(
                 {
                     associate,
-                    emailDelivery,
-                    // Monthly resident levy is currently on hold.
-                    monthlyLevy: null,
                 },
                 'Associate Created',
-                'Co-resident created successfully and welcome email sent',
+                'Co-resident created successfully, waiting for admin approval',
                 HttpStatus.CREATED,
             );
         }
@@ -459,6 +377,7 @@ export class ResidentAssociateService {
             where: {
                 userId,
                 category: ResidentAssociateCategory.CO_RESIDENT,
+                 approvalStatus: ResidentAssociateApprovalStatus.APPROVED,
             },
             include: {
                 resident: {
@@ -493,7 +412,7 @@ export class ResidentAssociateService {
             );
         }
 
-        const gateCredentials = await this.ensureGateCredentials(associate.id);
+        const gateCredentials = await this.credentialsService.ensureGateCredentials(associate.id);
 
         return success(
             {
