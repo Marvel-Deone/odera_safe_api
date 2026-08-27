@@ -1,31 +1,3 @@
--- DO $$
--- BEGIN
---     IF NOT EXISTS (
---         SELECT 1
---         FROM pg_type
---         WHERE typname = 'LevyCategory'
---     ) THEN
---         CREATE TYPE "LevyCategory" AS ENUM (
---             'ADMIN_LEVY',
---             'MONTHLY_RESIDENT_LEVY'
---         );
---     END IF;
--- END
--- $$;
-
--- ALTER TABLE "Levy"
--- ALTER COLUMN "category" DROP DEFAULT;
-
--- ALTER TABLE "Levy"
--- ALTER COLUMN "category" TYPE "LevyCategory"
--- USING (
---     CASE
---         WHEN "category" = 'MONTHLY_RESIDENT_LEVY'
---             THEN 'MONTHLY_RESIDENT_LEVY'::"LevyCategory"
---         ELSE 'ADMIN_LEVY'::"LevyCategory"
---     END
--- );
-
 /*
   Warnings:
 

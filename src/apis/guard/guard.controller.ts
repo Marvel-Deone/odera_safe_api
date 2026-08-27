@@ -14,6 +14,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger'
 
@@ -28,15 +29,11 @@ import { Roles } from '../auth/decorators/roles.decorator'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 import { GuardService } from './guard.service'
 import { CreateGuardDto } from './dto/guard.dto'
+import { NinVerificationDto } from '../identity/dto/verify-nin.dto'
 
 @ApiTags('Guards')
 @ApiBearerAuth()
-
-@UseGuards(
-  JwtAuthGuard,
-  RolesGuard,
-)
-
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class GuardController {
   constructor(
@@ -137,6 +134,23 @@ export class GuardController {
     Role.ADMIN,
     Role.SUPER_ADMIN,
   )
+
+   @Post('guards/verify-nin')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+      summary: 'Verify NIN with NIN no',
+      description: "Verifies user's NIN through QoreID",
+    })
+    @ApiResponse({
+      status: 200,
+      description: 'NIN verification successful',
+    })
+    async verifyNinOnly(
+      @CurrentUser() user: any,
+      @Body() ninData: NinVerificationDto,
+    ) {
+      return await this.guardsService.verifyNinOnly(user, ninData);
+    }
 
   @ApiOperation({
     summary: 'Guard dashboard',
@@ -496,3 +510,22 @@ export class GuardController {
   }
 }
 
+@ApiTags('Public Guards')
+@Controller('guards')
+export class PublicGuardController {
+  constructor(private readonly guardsService: GuardService,) { }
+
+  @Post('self-onboarding')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Create guard',
+  })
+  async guardselfonboarding(
+    @CurrentUser() user: any,
+
+    @Body()
+    dto: CreateGuardDto,
+  ) {
+    return this.guardsService.guardSelfOnboarding(dto)
+  }
+}

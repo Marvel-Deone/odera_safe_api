@@ -1,4 +1,5 @@
 import {
+    HttpException,
     HttpStatus,
     Injectable,
 } from '@nestjs/common'
@@ -7,6 +8,7 @@ import {
     GateAction,
     GuardRole,
     IncidentStatus,
+    KycStatus,
     LogCategory,
     Role,
     ShiftStatus,
@@ -26,10 +28,22 @@ import {
 } from '../../common/utils/response.util'
 import { CreateIncidentDto } from './dto/create-incident.dto'
 import { CreateGuardDto } from './dto/guard.dto'
+import { EmailService } from '../../shared/email.service'
+import { NinVerificationDto } from '../identity/dto/verify-nin.dto'
+import { IdentityService } from '../identity/identity.service'
+
+const getErrorMessage = (err: unknown, fallback = 'Unknown error') =>
+  err instanceof Error
+    ? err.message
+    : (err as { message?: string })?.message || fallback;
 
 @Injectable()
 export class GuardService {
-    constructor(private prisma: PrismaService,) { }
+    constructor(
+        private prisma: PrismaService,
+        private readonly emailService: EmailService,
+        private readonly identityService: IdentityService,
+    ) { }
 
     async createGuard(
         userId: string,
@@ -74,170 +88,6 @@ export class GuardService {
                 10,
             )
 
-        // const user =
-        //     await this.prisma.user.create({
-        //         data: {
-        //             email: dto.email,
-        //             password:
-        //                 hashedPassword,
-        //             role: Role.GUARD,
-        //             first_login: true,
-        //             estateId: admin.estateId,
-        //         },
-        //     })
-
-        // const guard =
-        //     await this.prisma.guard.create({
-        //         data: {
-        // userId: user.id,
-        // estateId:
-        //     admin.estateId,
-
-        // role: dto.role,
-
-        // full_name:
-        //     dto.full_name,
-
-        // phone: dto.phone,
-
-        // email: dto.email,
-
-        // zone_assignment:
-        //     dto.zone_assignment,
-
-        // shift_pattern:
-        //     dto.shift_pattern,
-
-        // duty_cycle:
-        //     dto.duty_cycle,
-
-        // resumption_date:
-        //     dto.resumption_date
-        //         ? new Date(
-        //             dto.resumption_date,
-        //         )
-        //         : null,
-
-        // government_id_type:
-        //     dto.government_id_type,
-
-        // government_id_no:
-        //     dto.government_id_no,
-
-        // nin: dto.nin,
-
-        // height:
-        //     dto.height,
-
-        // build:
-        //     dto.build,
-
-        // distinguishing_marks:
-        //     dto.distinguishing_marks,
-
-        // nok_name:
-        //     dto.nok_name,
-
-        // nok_phone:
-        //     dto.nok_phone,
-
-        // nok_relationship:
-        //     dto.nok_relationship,
-
-        // guarantor_name:
-        //     dto.guarantor_name,
-
-        // guarantor_phone:
-        //     dto.guarantor_phone,
-
-        // guarantor_occupation:
-        //     dto.guarantor_occupation,
-
-        // guarantor_work_address:
-        //     dto.guarantor_work_address,
-
-        // guarantor_nin:
-        //     dto.guarantor_nin,
-
-        // guarantor_relationship:
-        //     dto.guarantor_relationship,
-
-        // salary_band:
-        //     dto.salary_band,
-
-        // bank_name:
-        //     dto.bank_name,
-
-        // account_number:
-        //     dto.account_number,
-
-        // account_name:
-        //     dto.account_name,
-
-        // first_aid:
-        //     dto.first_aid ??
-        //     false,
-
-        // fire_safety:
-        //     dto.fire_safety ??
-        //     false,
-
-        // qr_gate_ops:
-        //     dto.qr_gate_ops ??
-        //     false,
-
-        // biometric_capture:
-        //     dto.biometric_capture ??
-        //     false,
-
-        // crisis_response:
-        //     dto.crisis_response ??
-        //     false,
-
-        // female_screening:
-        //     dto.female_screening ??
-        //     false,
-
-        // self_defence:
-        //     dto.self_defence ??
-        //     false,
-
-        // cctv_operation:
-        //     dto.cctv_operation ??
-        //     false,
-        //         },
-        //     })
-
-        // await this.createActivityLog({
-        //     estateId:
-        //         admin.estateId,
-
-        //     category:
-        //         LogCategory.SECURITY,
-
-        //     action: 'GUARD_CREATED',
-
-        //     description: `Guard profile created for ${guard.full_name}`,
-
-        //     actorId: userId,
-
-        //     actorRole:
-        //         Role.ADMIN,
-
-        //     metadata: {
-        //         guardId: guard.id,
-        //     },
-        // })
-
-        // return success(
-        //     {
-        //         guard,
-        //         temporaryPassword:
-        //             tempPassword,
-        //     },
-        //     'Guard Created',
-        //     'Guard created successfully',
-        // )
         let guard
         try {
             const result =
@@ -247,139 +97,97 @@ export class GuardService {
                             await tx.user.create({
                                 data: {
                                     email: dto.email,
-                                    password:
-                                        hashedPassword,
+                                    password: hashedPassword,
                                     role:
                                         dto.role === GuardRole.SUPER_GUARD
                                             ? Role.SUPER_GUARD
                                             : Role.GUARD,
                                     first_login: true,
-                                    estateId:
-                                        admin.estateId,
+                                    estateId: admin.estateId,
                                 },
                             })
 
-                        guard =
-                            await tx.guard.create({
-                                data: {
-                                    userId: user.id,
-                                    estateId:
-                                        admin.estateId,
+                        guard = await tx.guard.create({
+                            data: {
+                                userId: user.id,
+                                estateId: admin.estateId,
 
-                                    role: dto.role,
+                                role: dto.role,
 
-                                    full_name:
-                                        dto.full_name,
+                                full_name: dto.full_name,
 
-                                    phone: dto.phone,
+                                phone: dto.phone,
 
-                                    email: dto.email,
+                                email: dto.email,
 
-                                    zone_assignment:
-                                        dto.zone_assignment,
+                                zone_assignment: dto.zone_assignment,
 
-                                    shift_pattern:
-                                        dto.shift_pattern,
+                                shift_pattern: dto.shift_pattern,
 
-                                    duty_cycle:
-                                        dto.duty_cycle,
+                                duty_cycle: dto.duty_cycle,
 
-                                    resumption_date:
-                                        dto.resumption_date
-                                            ? new Date(
-                                                dto.resumption_date,
-                                            )
-                                            : null,
+                                resumption_date:
+                                    dto.resumption_date
+                                        ? new Date(
+                                            dto.resumption_date,
+                                        )
+                                        : null,
 
-                                    government_id_type:
-                                        dto.government_id_type,
+                                government_id_type: dto.government_id_type,
 
-                                    government_id_no:
-                                        dto.government_id_no,
+                                government_id_no: dto.government_id_no,
 
-                                    nin: dto.nin,
+                                // nin: dto.nin,
 
-                                    height:
-                                        dto.height,
+                                height: dto.height,
 
-                                    build:
-                                        dto.build,
+                                build: dto.build,
 
-                                    distinguishing_marks:
-                                        dto.distinguishing_marks,
+                                distinguishing_marks: dto.distinguishing_marks,
 
-                                    nok_name:
-                                        dto.nok_name,
+                                nok_name: dto.nok_name,
 
-                                    nok_phone:
-                                        dto.nok_phone,
+                                nok_phone: dto.nok_phone,
 
-                                    nok_relationship:
-                                        dto.nok_relationship,
+                                nok_relationship: dto.nok_relationship,
 
-                                    guarantor_name:
-                                        dto.guarantor_name,
+                                guarantor_name: dto.guarantor_name,
 
-                                    guarantor_phone:
-                                        dto.guarantor_phone,
+                                guarantor_phone: dto.guarantor_phone,
 
-                                    guarantor_occupation:
-                                        dto.guarantor_occupation,
+                                guarantor_occupation: dto.guarantor_occupation,
 
-                                    guarantor_work_address:
-                                        dto.guarantor_work_address,
+                                guarantor_work_address: dto.guarantor_work_address,
 
-                                    guarantor_nin:
-                                        dto.guarantor_nin,
+                                guarantor_nin: dto.guarantor_nin,
 
-                                    guarantor_relationship:
-                                        dto.guarantor_relationship,
+                                guarantor_relationship: dto.guarantor_relationship,
 
-                                    salary_band:
-                                        dto.salary_band,
+                                salary_band: dto.salary_band,
 
-                                    bank_name:
-                                        dto.bank_name,
+                                bank_name: dto.bank_name,
 
-                                    account_number:
-                                        dto.account_number,
+                                account_number: dto.account_number,
 
-                                    account_name:
-                                        dto.account_name,
+                                account_name: dto.account_name,
 
-                                    first_aid:
-                                        dto.first_aid ??
-                                        false,
+                                first_aid: dto.first_aid ?? false,
 
-                                    fire_safety:
-                                        dto.fire_safety ??
-                                        false,
+                                fire_safety: dto.fire_safety ?? false,
 
-                                    qr_gate_ops:
-                                        dto.qr_gate_ops ??
-                                        false,
+                                qr_gate_ops: dto.qr_gate_ops ?? false,
 
-                                    biometric_capture:
-                                        dto.biometric_capture ??
-                                        false,
+                                biometric_capture: dto.biometric_capture ?? false,
 
-                                    crisis_response:
-                                        dto.crisis_response ??
-                                        false,
+                                crisis_response: dto.crisis_response ?? false,
 
-                                    female_screening:
-                                        dto.female_screening ??
-                                        false,
+                                female_screening: dto.female_screening ?? false,
 
-                                    self_defence:
-                                        dto.self_defence ??
-                                        false,
+                                self_defence: dto.self_defence ?? false,
 
-                                    cctv_operation:
-                                        dto.cctv_operation ??
-                                        false,
-                                },
-                            })
+                                cctv_operation: dto.cctv_operation ?? false,
+                            },
+                        })
 
                         return {
                             user,
@@ -389,11 +197,9 @@ export class GuardService {
                 )
 
             await this.createActivityLog({
-                estateId:
-                    admin.estateId,
+                estateId: admin.estateId,
 
-                category:
-                    LogCategory.SECURITY,
+                category: LogCategory.SECURITY,
 
                 action: 'GUARD_CREATED',
 
@@ -401,8 +207,7 @@ export class GuardService {
 
                 actorId: userId,
 
-                actorRole:
-                    Role.ADMIN,
+                actorRole: Role.ADMIN,
 
                 metadata: {
                     guardId: guard.id,
@@ -428,6 +233,384 @@ export class GuardService {
             )
         }
     }
+
+    async guardSelfOnboarding(
+        dto: CreateGuardDto,
+    ) {
+        const estate =
+            await this.prisma.estate.findFirst({
+                where: {
+                    id: dto.estateId,
+                },
+            })
+
+        if (!estate) {
+            return error(
+                'Unauthorized',
+                'Estate not found',
+                HttpStatus.NOT_FOUND,
+            )
+        }
+
+        const existingUser =
+            await this.prisma.user.findFirst({
+                where: {
+                    email: dto.email,
+                },
+            })
+
+        if (existingUser) {
+            return error(
+                'Conflict',
+                'User already exists',
+                HttpStatus.CONFLICT,
+            )
+        }
+
+        const tempPassword =
+            this.generateTempPassword()
+
+        const hashedPassword =
+            await bcrypt.hash(
+                tempPassword,
+                10,
+            )
+
+        let guard
+        try {
+            const result =
+                await this.prisma.$transaction(
+                    async (tx) => {
+                        const user =
+                            await tx.user.create({
+                                data: {
+                                    email: dto.email,
+                                    password: hashedPassword,
+                                    role:
+                                        dto.role === GuardRole.SUPER_GUARD
+                                            ? Role.SUPER_GUARD
+                                            : Role.GUARD,
+                                    first_login: true,
+                                    estateId: dto.estateId!,
+                                },
+                            })
+
+                        guard = await tx.guard.create({
+                            data: {
+                                userId: user.id,
+                                estateId: dto.estateId!,
+
+                                role: dto.role,
+
+                                full_name: dto.full_name,
+
+                                phone: dto.phone,
+
+                                email: dto.email,
+
+                                zone_assignment: dto.zone_assignment,
+
+                                shift_pattern: dto.shift_pattern,
+
+                                duty_cycle: dto.duty_cycle,
+
+                                resumption_date:
+                                    dto.resumption_date
+                                        ? new Date(
+                                            dto.resumption_date,
+                                        )
+                                        : null,
+
+                                government_id_type: dto.government_id_type,
+
+                                government_id_no: dto.government_id_no,
+
+                                height: dto.height,
+
+                                build: dto.build,
+
+                                distinguishing_marks: dto.distinguishing_marks,
+
+                                nok_name: dto.nok_name,
+
+                                nok_phone: dto.nok_phone,
+
+                                nok_relationship: dto.nok_relationship,
+
+                                guarantor_name: dto.guarantor_name,
+
+                                guarantor_phone: dto.guarantor_phone,
+
+                                guarantor_occupation: dto.guarantor_occupation,
+
+                                guarantor_work_address: dto.guarantor_work_address,
+
+                                guarantor_nin: dto.guarantor_nin,
+
+                                guarantor_relationship: dto.guarantor_relationship,
+
+                                salary_band: dto.salary_band,
+
+                                bank_name: dto.bank_name,
+
+                                account_number: dto.account_number,
+
+                                account_name: dto.account_name,
+
+                                first_aid: dto.first_aid ?? false,
+
+                                fire_safety: dto.fire_safety ?? false,
+
+                                qr_gate_ops: dto.qr_gate_ops ?? false,
+
+                                biometric_capture: dto.biometric_capture ?? false,
+
+                                crisis_response: dto.crisis_response ?? false,
+
+                                female_screening: dto.female_screening ?? false,
+
+                                self_defence: dto.self_defence ?? false,
+
+                                cctv_operation: dto.cctv_operation ?? false,
+                            },
+                        })
+
+                        return {
+                            user,
+                            guard,
+                        }
+                    },
+                )
+
+            await this.createActivityLog({
+                estateId: dto.estateId!,
+
+                category: LogCategory.SECURITY,
+
+                action: 'GUARD_CREATED',
+
+                description: `Guard profile created for ${guard.full_name} (selfonboarding)`,
+
+                actorId: guard.userId,
+
+                actorRole: Role.ADMIN,
+
+                metadata: {
+                    guardId: guard.id,
+                },
+            })
+
+            const appDownloadLink =
+                process.env.APP_DOWNLOAD_LINK ?? 'https://localhost:3001';
+            const emailDelivery =
+                await this.emailService.sendGuardOnboardingActivationEmail({
+                    toEmail: dto.email,
+                    fullName: `${dto.full_name}`,
+                    estate: estate.name,
+                    activationCode: tempPassword,
+                    appDownloadLink,
+                });
+
+            return success(
+                {
+                    guard: result.guard,
+                    temporaryPassword: tempPassword,
+                    emailDelivery,
+                },
+                'Guard Created',
+                'Guard created successfully',
+            )
+        } catch (err: any) {
+            console.log('GuardcreationErr:', err)
+
+            return error(
+                'Creation Failed',
+                'Unable to create guard profile',
+                HttpStatus.BAD_REQUEST,
+            )
+        }
+    }
+
+      async verifyNinOnly(user: { id: string }, ninData: NinVerificationDto) {
+        try {
+          // Fetch the latest user details from the database
+          const latestUser = await this.prisma.user.findUnique({
+            where: { id: user.id },
+          });
+          const guard = await this.prisma.guard.findFirst({
+            where: { userId: user.id },
+          });
+    
+          const ninExists = await this.prisma.resident.findFirst({
+            where: {
+              nin: ninData.idNumber,
+              userId: { not: user.id },
+            },
+          });
+          if ((process.env.NODE_ENV || '').toLowerCase() !== 'development') {
+            if (ninExists) {
+              console.log('Nin exists in database');
+              throw new HttpException(
+                {
+                  statusCode: HttpStatus.BAD_REQUEST,
+                  status: 'error',
+                  title: 'Nin already exists',
+                  message: 'This NIN is being used by another user.',
+                },
+                HttpStatus.BAD_REQUEST,
+              );
+            }
+          }
+          if (!latestUser || !guard) {
+            throw new HttpException(
+              {
+                status: 'error',
+                title: 'Verification Failed',
+                message: 'User not found',
+              },
+              HttpStatus.NOT_FOUND,
+            );
+          }
+    
+          // Verify NIN with QoreID
+          const verify_nin = await this.identityService.verifyNin(ninData);
+          if (!verify_nin || !verify_nin.nin) {
+            throw new HttpException(
+              {
+                status: 'error',
+                title: 'Verification Failed',
+                message: 'Failed to verify NIN',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+    
+          // Compare NIN details with latest user details
+        //   if (
+        //     verify_nin.nin.firstname &&
+        //     guard.first_name &&
+        //     verify_nin.nin.firstname.toLowerCase().trim() !==
+        //       resident.first_name.toLowerCase().trim()
+        //   ) {
+        //     console.log('[NIN Verification] Failed: First name mismatch', {
+        //       nin: verify_nin.nin.firstname,
+        //       user: resident.first_name,
+        //     });
+        //     throw new HttpException(
+        //       {
+        //         statusCode: HttpStatus.BAD_REQUEST,
+        //         status: 'error',
+        //         title: 'NIN Mismatch',
+        //         message: 'First name on NIN does not match your account.',
+        //       },
+        //       HttpStatus.BAD_REQUEST,
+        //     );
+        //   }
+    
+        //   if (
+        //     verify_nin.nin.lastname &&
+        //     resident.last_name &&
+        //     verify_nin.nin.lastname.toLowerCase().trim() !==
+        //       resident.last_name.toLowerCase().trim()
+        //   ) {
+        //     console.log('[NIN Verification] Failed: Last name mismatch', {
+        //       nin: verify_nin.nin.lastname,
+        //       user: resident.last_name,
+        //     });
+        //     throw new HttpException(
+        //       {
+        //         statusCode: HttpStatus.BAD_REQUEST,
+        //         status: 'error',
+        //         title: 'NIN Mismatch',
+        //         message: 'Last name on NIN does not match your account.',
+        //       },
+        //       HttpStatus.BAD_REQUEST,
+        //     );
+        //   }
+    
+        //   if (verify_nin.nin.birthdate && resident.dob) {
+        //     // Format dates for comparison (YYYY-MM-DD)
+        //     const ninDob = dayjs(verify_nin.nin.birthdate, 'DD-MM-YYYY').format(
+        //       'YYYY-MM-DD',
+        //     );
+        //     const userDob = dayjs(resident.dob).format('YYYY-MM-DD');
+    
+        //     if (ninDob !== userDob) {
+        //       console.log('[NIN Verification] Failed: DOB mismatch', {
+        //         nin: ninDob,
+        //         user: userDob,
+        //       });
+        //       throw new HttpException(
+        //         {
+        //           statusCode: HttpStatus.BAD_REQUEST,
+        //           status: 'error',
+        //           title: 'NIN Mismatch',
+        //           message: 'Date of birth on NIN does not match your account.',
+        //         },
+        //         HttpStatus.BAD_REQUEST,
+        //       );
+        //     }
+        //   }
+    
+          // Ensure idcard_no is properly saved with validation
+          if (!ninData.idNumber) {
+            throw new HttpException(
+              {
+                status: 'error',
+                title: 'Validation Failed',
+                message: 'NIN (idcard_no) is required for verification',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+    
+          const approvedAt = guard.approvedAt ?? new Date();
+    
+          const updateData = {
+            nin: ninData.idNumber,
+            kycStatus: KycStatus.COMPLETED,
+            // status: ResidentStatus.ACTIVE,
+            approvedAt,
+          };
+    
+          console.log('[NIN Verification] Updating user with data:', updateData);
+    
+          const result = await this.prisma.$transaction(async (tx) => {
+            const updatedGuard= await tx.guard.update({
+              where: { id: guard.id },
+              data: updateData,
+            });
+    
+            return {
+              updatedGuard,
+            };
+          });
+    
+          console.log(
+            '[NIN Verification] Update successful for user:',
+            latestUser.id,
+          );
+    
+          return success(
+            {
+              guard: result.updatedGuard,
+              nin_verification: verify_nin,
+            },
+            'NIN Verification Successful',
+            'Your NIN has been verified successfully and your account is active',
+          );
+        } catch (err) {
+          console.error('[NIN Verification] Error:', err);
+          if (err instanceof HttpException) {
+            throw err;
+          }
+          return error(
+            'Verification Failed',
+            getErrorMessage(err, 'An error occurred during NIN verification'),
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
 
     async getGuards(
         userId: string,

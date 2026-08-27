@@ -725,4 +725,309 @@ If you weren't expecting this invitation, you can safely ignore this email.
             };
         }
     }
+
+    async sendGuardOnboardingActivationEmail(input: {
+        toEmail: string;
+        fullName?: string;
+        estate: string;
+        activationCode: string;
+        appDownloadLink: string;
+    }) {
+        const toEmail = input.toEmail?.trim();
+
+        if (!toEmail) {
+            return {
+                accepted: false,
+                status: 'SKIPPED',
+                reason: 'No recipient email provided',
+            };
+        }
+
+        const from = this.config.get<string>('RESEND_FROM_EMAIL')?.trim();
+
+        if (!from) {
+            return {
+                accepted: false,
+                status: 'SKIPPED',
+                reason: 'RESEND_FROM_EMAIL not configured',
+            };
+        }
+
+        const subject = 'Welcome to Odera Safe • Guard Activation Code';
+
+        const text = [
+            `Hello ${input.fullName ?? 'there'},`,
+            '',
+            `Your Odera Safe guard activation code for ${input.activationCode} estate.`,
+            `Open and install the Odera Safe app here: ${input.appDownloadLink}`,
+            '',
+            'Use this code to complete your guard onboarding.',
+            '',
+            'For your security, never share this activation code with anyone.',
+        ].join('\n');
+
+        const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Odera Safe Guard Activation</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f5f7fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+    Your Odera Safe guard activation code is ready. Complete your onboarding in just a few steps.
+</div>
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+    style="background:#f5f7fb;padding:40px 16px;">
+<tr>
+<td align="center">
+
+<table role="presentation" width="600" cellspacing="0" cellpadding="0"
+    style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);">
+
+<!-- Header -->
+<tr>
+<td style="background:#a41818;padding:36px;text-align:center;color:#ffffff;">
+
+<h1 style="margin:0;font-size:30px;font-weight:700;">
+    Odera Safe
+</h1>
+
+<p style="margin-top:10px;font-size:16px;color:#ffffff;">
+    Guard Activation
+</p>
+
+</td>
+</tr>
+
+<!-- Body -->
+<tr>
+<td style="padding:40px;">
+
+<p style="margin-top:0;font-size:18px;">
+    Hello <strong>${input.fullName ?? 'Guard'}</strong>,
+</p>
+
+<p style="line-height:1.7;color:#475569;">
+    Welcome to <strong>Odera Safe</strong>.
+    Your guard onboarding has been created successfully for house
+    <strong>${input.estate}</strong>.
+</p>
+
+<p style="line-height:1.7;color:#475569;">
+    Open the link below in your phone's browser to access the
+    Odera Safe app. You can then install it on your home screen
+    for a native app experience.
+</p>
+
+<p style="line-height:1.7;color:#475569;">
+    Use the activation code below to complete your guard registration
+    and access the Odera Safe security platform.
+</p>
+
+<!-- Code -->
+<table width="100%" cellspacing="0" cellpadding="0" style="margin:32px 0;">
+<tr>
+<td align="center"
+    style="
+        background:#eef4ff;
+        border:2px dashed #a41818;
+        border-radius:12px;
+        padding:28px;
+    ">
+
+<div style="
+    font-size:38px;
+    font-weight:700;
+    letter-spacing:10px;
+    color:#a41818;
+">
+    ${input.activationCode}
+</div>
+
+<div style="
+    margin-top:10px;
+    font-size:13px;
+    color:#64748b;
+">
+    Guard Activation Code
+</div>
+
+</td>
+</tr>
+</table>
+
+<!-- Button -->
+<table cellspacing="0" cellpadding="0" align="center">
+<tr>
+<td style="
+    border-radius:8px;
+    background:#a41818;
+">
+
+<a
+    href="${input.appDownloadLink}"
+    style="
+        display:inline-block;
+        padding:16px 32px;
+        font-size:16px;
+        font-weight:bold;
+        color:#ffffff;
+        text-decoration:none;
+    "
+>
+    Open & Install App
+</a>
+
+</td>
+</tr>
+</table>
+
+<!-- Installation Instructions -->
+<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:36px;">
+<tr>
+<td style="
+    background:#f8fafc;
+    border-left:4px solid #a41818;
+    padding:20px;
+    border-radius:8px;
+">
+
+<p style="margin-top:0;font-weight:bold;color:#1f2937;">
+    📱 Install Odera Safe on your phone
+</p>
+
+<p style="margin:12px 0;color:#475569;line-height:1.6;">
+    <strong>iPhone (Safari)</strong><br>
+    Tap the <strong>Share</strong> button, then select
+    <strong>Add to Home Screen</strong>.
+</p>
+
+<p style="margin:12px 0;color:#475569;line-height:1.6;">
+    <strong>Android (Chrome)</strong><br>
+    Tap the browser menu (⋮), then choose
+    <strong>Install App</strong> or <strong>Add to Home Screen</strong>.
+</p>
+
+</td>
+</tr>
+</table>
+
+<!-- Security Notice -->
+<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:28px;">
+<tr>
+<td style="
+    background:#fff7ed;
+    border-left:4px solid #f97316;
+    padding:20px;
+    border-radius:8px;
+">
+
+<p style="margin:0 0 10px;font-weight:bold;color:#9a3412;">
+    🔐 Security Notice
+</p>
+
+<p style="margin:0;color:#475569;line-height:1.6;">
+    Your activation code is private and should never be shared with
+    residents, visitors, or anyone else. Use it only to activate your
+    Odera Safe guard account.
+</p>
+
+</td>
+</tr>
+</table>
+
+<p style="margin-top:32px;line-height:1.7;color:#475569;">
+    Once you've opened the app, enter the activation code to activate
+    your account and complete your onboarding.
+</p>
+
+<p style="line-height:1.7;color:#475569;">
+    If you weren't expecting this invitation, you can safely ignore
+    this email.
+</p>
+
+</td>
+</tr>
+
+<!-- Footer -->
+<tr>
+<td style="
+    background:#f8fafc;
+    padding:24px;
+    text-align:center;
+    font-size:13px;
+    color:#64748b;
+">
+
+<p style="margin:0;">
+    © ${new Date().getFullYear()} Odera Safe
+</p>
+
+<p style="margin-top:8px;">
+    Making estates safer, smarter and connected.
+</p>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`;
+
+        try {
+            const { data, error } = await this.resend.emails.send({
+                from,
+                to: toEmail,
+                subject,
+                text,
+                html,
+            });
+
+            if (error) {
+                this.logger.warn(
+                    `Guard email delivery failed for ${toEmail}: ${error.message}`,
+                );
+
+                return {
+                    accepted: false,
+                    status: 'FAILED',
+                    reason: error.message,
+                };
+            }
+
+            return {
+                accepted: true,
+                status: 'SENT',
+                provider: 'resend',
+                recipient: toEmail,
+                emailId: data?.id,
+            };
+        } catch (error) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'Unknown Resend error';
+
+            this.logger.error(
+                `Guard email delivery failed for ${toEmail}: ${message}`,
+            );
+
+            return {
+                accepted: false,
+                status: 'FAILED',
+                reason: message,
+            };
+        }
+    }
 }

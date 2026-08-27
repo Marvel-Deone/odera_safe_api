@@ -405,6 +405,12 @@ enum ResidentAssociateCategory {
   CO_RESIDENT
 }
 
+enum ResidentAssociateApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum NinVerificationStatus {
   NOT_SUBMITTED
   VERIFIED
@@ -543,12 +549,10 @@ model User {
   estateFinanceRecords         EstateFinanceRecord[]
   passwordResetOtps            PasswordResetOtp[]
   supportTickets               SupportTicket[]
-  // relation fields for support tickets
-  createdSupportTickets   SupportTicket[] @relation("SupportTicketCreator")
-  resolvedSupportTickets  SupportTicket[] @relation("SupportTicketResolver")
-  cancelledSupportTickets SupportTicket[] @relation("SupportTicketCanceller")
+  createdSupportTickets        SupportTicket[]              @relation("SupportTicketCreator")
+  resolvedSupportTickets       SupportTicket[]              @relation("SupportTicketResolver")
+  cancelledSupportTickets      SupportTicket[]              @relation("SupportTicketCanceller")
   supportTicketTimelineEntries SupportTicketTimelineEntry[]
-  
 }
 
 model PasswordResetOtp {
@@ -625,6 +629,9 @@ model Resident {
   tenancy_ownership_doc   String?
 
   wallet_pin String?
+  passcode   String? @unique
+  qrPayload  String? @unique
+  qrCode     String?
 
   ndprConsentDataProcessing Boolean   @default(false)
   ndprConsentIdentity       Boolean   @default(false)
@@ -659,6 +666,7 @@ model Resident {
   residentAssociates    ResidentAssociate[]
 
   @@index([apartmentTypeId])
+  @@index([qrPayload])
 }
 
 model ResidentSelfOnboarding {
@@ -688,27 +696,31 @@ model ResidentSelfOnboarding {
 }
 
 model ResidentAssociate {
-  id                    String                    @id @default(uuid())
+  id                    String                          @id @default(uuid())
   residentId            String
-  userId                String?                   @unique
-  category              ResidentAssociateCategory @default(CO_RESIDENT)
+  userId                String?                         @unique
+  category              ResidentAssociateCategory       @default(CO_RESIDENT)
   fullName              String
-  email                 String?                   @unique
+  email                 String?                         @unique
   phoneNumber           String
-  role                  String                    @default("Co-resident")
+  role                  String                          @default("Co-resident")
   idType                String?
   idNumber              String?
   faceCapture           String?
   workingDays           Weekday[]
   entryTime             String?
   exitTime              String?
-  passcode              String?                   @unique
-  qrPayload             String?                   @unique
+  passcode              String?                         @unique
+  qrPayload             String?                         @unique
   qrCode                String?
-  ninVerificationStatus NinVerificationStatus     @default(NOT_SUBMITTED)
+  ninVerificationStatus NinVerificationStatus           @default(NOT_SUBMITTED)
   ninVerificationData   Json?
-  createdAt             DateTime                  @default(now())
-  updatedAt             DateTime                  @updatedAt
+  approvalStatus        ResidentAssociateApprovalStatus @default(PENDING)
+  approvedAt            DateTime?
+  approvedById          String?
+  rejectionReason       String?
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
 
   resident Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
   user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -917,6 +929,7 @@ model Guard {
   government_id_type String?
   government_id_no   String?
   nin                String?
+  kycStatus          KycStatus @default(NOT_SUBMITTED)
 
   height               String?
   build                String?
@@ -960,6 +973,7 @@ model Guard {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  approvedAt DateTime?
 
   estate Estate @relation(fields: [estateId], references: [id])
   user   User   @relation(fields: [userId], references: [id])

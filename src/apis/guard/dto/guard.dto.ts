@@ -4,6 +4,7 @@ import {
     IsEmail,
     IsBoolean,
     IsEnum,
+    IsUUID,
 } from 'class-validator'
 import {
     ApiProperty,
@@ -12,6 +13,12 @@ import {
 import { GuardRole } from '@prisma/client'
 
 export class CreateGuardDto {
+    @ApiProperty({
+        example: '5478828829999999999',
+    })
+    @IsOptional()
+    estateId?: string
+
     @ApiProperty({
         example: 'guard@example.com',
     })
@@ -79,12 +86,12 @@ export class CreateGuardDto {
     @IsString()
     government_id_no?: string
 
-    @ApiPropertyOptional({
-        example: '12345678901',
-    })
-    @IsOptional()
-    @IsString()
-    nin?: string
+    // @ApiPropertyOptional({
+    //     example: '12345678901',
+    // })
+    // @IsOptional()
+    // @IsString()
+    // nin?: string
 
     @ApiPropertyOptional({
         example: '1.80m',

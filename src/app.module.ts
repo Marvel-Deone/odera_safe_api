@@ -37,6 +37,7 @@ import { ResidentAssociateModule } from './apis/resident-associate/resident-asso
 // import { ClientModule } from './shared/client/client.module';
 import { SosModule } from './apis/sos/sos.module';
 import { SupportTicketModule } from './apis/support-ticket/support-ticket.module';
+import { IdentityModule } from './apis/identity/identity.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { SupportTicketModule } from './apis/support-ticket/support-ticket.module
     BusinessHubModule,
     ResidentAssociateModule,
     SupportTicketModule,
+    IdentityModule,
   ],
   controllers: [AppController, DashboardController],
   providers: [AppService, DashboardService],
