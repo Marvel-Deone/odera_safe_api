@@ -21,6 +21,7 @@ import { FinanceService } from '../finance/finance.service';
 import { EmailService } from '../../shared/email.service';
 import * as QRCode from 'qrcode';
 import { randomUUID } from 'crypto';
+import { IdentityService } from '../identity/identity.service';
 
 const getErrorMessage = (err: unknown, fallback = 'Unknown error') =>
   err instanceof Error
@@ -35,35 +36,35 @@ const getResponseMessage = (err: unknown) =>
   (err as { response?: { data?: { message?: string } } })?.response?.data
     ?.message;
 
-const getResponseStatus = (
-  err: unknown,
-  fallback = HttpStatus.INTERNAL_SERVER_ERROR,
-) =>
-  (
-    err as {
-      response?: {
-        status?: number;
-        data?: { statusCode?: number; status?: number };
-      };
-    }
-  )?.response?.status ||
-  (
-    err as {
-      response?: {
-        status?: number;
-        data?: { statusCode?: number; status?: number };
-      };
-    }
-  )?.response?.data?.statusCode ||
-  (
-    err as {
-      response?: {
-        status?: number;
-        data?: { statusCode?: number; status?: number };
-      };
-    }
-  )?.response?.data?.status ||
-  fallback;
+  const getResponseStatus = (
+    err: unknown,
+    fallback = HttpStatus.INTERNAL_SERVER_ERROR,
+  ) =>
+    (
+      err as {
+        response?: {
+          status?: number;
+          data?: { statusCode?: number; status?: number };
+        };
+      }
+    )?.response?.status ||
+    (
+      err as {
+        response?: {
+          status?: number;
+          data?: { statusCode?: number; status?: number };
+        };
+      }
+    )?.response?.data?.statusCode ||
+    (
+      err as {
+        response?: {
+          status?: number;
+          data?: { statusCode?: number; status?: number };
+        };
+      }
+    )?.response?.data?.status ||
+    fallback;
 
 type ResidentApartmentTypeValidation = {
   apartmentTypeId?: string;
@@ -79,9 +80,9 @@ type WalletAccountData = {
 
 @Injectable()
 export class ResidentService {
-  qore_id_secret = process.env.QORE_ID_SECRET_KEY;
-  qore_id_client_id = process.env.QORE_ID_CLIENT_ID;
-  qore_id_url = process.env.QORE_ID_BASE_URL;
+  // qore_id_secret = process.env.QORE_ID_SECRET_KEY;
+  // qore_id_client_id = process.env.QORE_ID_CLIENT_ID;
+  // qore_id_url = process.env.QORE_ID_BASE_URL;
 
   constructor(
     private prisma: PrismaService,
@@ -89,6 +90,7 @@ export class ResidentService {
     private readonly clientsService: ClientService,
     private readonly financeService: FinanceService,
     private readonly emailService: EmailService,
+    private readonly identityService: IdentityService,
   ) {}
 
   private async validateApartmentTypeForEstate(
@@ -402,177 +404,177 @@ export class ResidentService {
   }
 
   // QoreID Login
-  private async qoreIdLogin() {
-    try {
-      const qoreIdInfo = {
-        clientId: this.qore_id_client_id,
-        secret: this.qore_id_secret,
-      };
+  // private async qoreIdLogin() {
+  //   try {
+  //     const qoreIdInfo = {
+  //       clientId: this.qore_id_client_id,
+  //       secret: this.qore_id_secret,
+  //     };
 
-      const loginHeaders = { 'Content-Type': 'application/json' };
-      console.log('Sending QoreID login request...');
-      const qoreid_login = await this.clientsService.postUrl(
-        `${this.qore_id_url}/token`,
-        qoreIdInfo,
-        loginHeaders,
-      );
-      console.log('QoreID login successful');
+  //     const loginHeaders = { 'Content-Type': 'application/json' };
+  //     console.log('Sending QoreID login request...');
+  //     const qoreid_login = await this.clientsService.postUrl(
+  //       `${this.qore_id_url}/token`,
+  //       qoreIdInfo,
+  //       loginHeaders,
+  //     );
+  //     console.log('QoreID login successful');
 
-      return qoreid_login;
-    } catch (err) {
-      const statusCode = getResponseStatus(err);
-      console.error(
-        'Error during QoreID login:',
-        getResponseMessage(err) || getErrorMessage(err),
-      );
-      throw new HttpException(
-        {
-          statusCode,
-          status: 'error',
-          title: 'Login Failed',
-          message:
-            getResponseMessage(err) || 'An error occurred during QoreID login.',
-          data: getErrorData(err) || getErrorMessage(err),
-        },
-        statusCode,
-      );
-    }
-  }
+  //     return qoreid_login;
+  //   } catch (err) {
+  //     const statusCode = getResponseStatus(err);
+  //     console.error(
+  //       'Error during QoreID login:',
+  //       getResponseMessage(err) || getErrorMessage(err),
+  //     );
+  //     throw new HttpException(
+  //       {
+  //         statusCode,
+  //         status: 'error',
+  //         title: 'Login Failed',
+  //         message:
+  //           getResponseMessage(err) || 'An error occurred during QoreID login.',
+  //         data: getErrorData(err) || getErrorMessage(err),
+  //       },
+  //       statusCode,
+  //     );
+  //   }
+  // }
 
   // NIN Verification
-  private async verifyNinWithQoreId(user, accessToken) {
-    try {
-      if (!user.idNumber || !user.firstname || !user.lastname) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.BAD_REQUEST,
-            status: 'error',
-            title: 'NIN Verification Failed',
-            message:
-              'NIN, first name, and last name are required for identity matching',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+  // private async verifyNinWithQoreId(user, accessToken) {
+  //   try {
+  //     if (!user.idNumber || !user.firstname || !user.lastname) {
+  //       throw new HttpException(
+  //         {
+  //           statusCode: HttpStatus.BAD_REQUEST,
+  //           status: 'error',
+  //           title: 'NIN Verification Failed',
+  //           message:
+  //             'NIN, first name, and last name are required for identity matching',
+  //         },
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //     }
 
-      const headers = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      };
-      console.log('Sending NIN verification request...', 'userPayload:', user);
-      console.log(
-        'NIN verification URL:',
-        `${this.qore_id_url}/v1/ng/identities/nin/${user.idNumber}`,
-      );
+  //     const headers = {
+  //       'Content-Type': 'application/json',
+  //       Authorization: `Bearer ${accessToken}`,
+  //     };
+  //     console.log('Sending NIN verification request...', 'userPayload:', user);
+  //     console.log(
+  //       'NIN verification URL:',
+  //       `${this.qore_id_url}/v1/ng/identities/nin/${user.idNumber}`,
+  //     );
 
-      const enquiry = await this.clientsService.postUrl(
-        `${this.qore_id_url}/v1/ng/identities/nin/${user.idNumber}`,
-        {
-          firstname: user.firstname,
-          lastname: user.lastname,
-        },
-        headers,
-      );
-      console.log('NIN verification response:', enquiry);
+  //     const enquiry = await this.clientsService.postUrl(
+  //       `${this.qore_id_url}/v1/ng/identities/nin/${user.idNumber}`,
+  //       {
+  //         firstname: user.firstname,
+  //         lastname: user.lastname,
+  //       },
+  //       headers,
+  //     );
+  //     console.log('NIN verification response:', enquiry);
 
-      return enquiry;
-    } catch (err) {
-      const statusCode = getResponseStatus(err, HttpStatus.BAD_GATEWAY);
-      console.error(
-        'Error during NIN verification:',
-        getResponseMessage(err) || getErrorMessage(err),
-      );
-      throw new HttpException(
-        {
-          statusCode,
-          status: 'error',
-          title: 'NIN Verification Failed',
-          message:
-            getResponseMessage(err) ||
-            'An error occurred during NIN verification.',
-          data: getErrorData(err),
-        },
-        statusCode,
-      );
-    }
-  }
+  //     return enquiry;
+  //   } catch (err) {
+  //     const statusCode = getResponseStatus(err, HttpStatus.BAD_GATEWAY);
+  //     console.error(
+  //       'Error during NIN verification:',
+  //       getResponseMessage(err) || getErrorMessage(err),
+  //     );
+  //     throw new HttpException(
+  //       {
+  //         statusCode,
+  //         status: 'error',
+  //         title: 'NIN Verification Failed',
+  //         message:
+  //           getResponseMessage(err) ||
+  //           'An error occurred during NIN verification.',
+  //         data: getErrorData(err),
+  //       },
+  //       statusCode,
+  //     );
+  //   }
+  // }
 
   // Verify NIN
-  async verifyNIN(userData) {
-    console.log('userData:', userData);
+  // async verifyNIN(userData) {
+  //   console.log('userData:', userData);
 
-    try {
-      if (!userData.idNumber || !userData.firstname || !userData.lastname) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.BAD_REQUEST,
-            status: 'error',
-            title: 'NIN Verification Failed',
-            message:
-              'NIN, first name, and last name are required for identity matching',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+  //   try {
+  //     if (!userData.idNumber || !userData.firstname || !userData.lastname) {
+  //       throw new HttpException(
+  //         {
+  //           statusCode: HttpStatus.BAD_REQUEST,
+  //           status: 'error',
+  //           title: 'NIN Verification Failed',
+  //           message:
+  //             'NIN, first name, and last name are required for identity matching',
+  //         },
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //     }
 
-      console.log('Starting NIN verification process...');
-      const user = {
-        idNumber: userData.idNumber,
-        firstname: userData.firstname,
-        lastname: userData.lastname,
-      };
-      console.log('NIN entry created:', user);
+  //     console.log('Starting NIN verification process...');
+  //     const user = {
+  //       idNumber: userData.idNumber,
+  //       firstname: userData.firstname,
+  //       lastname: userData.lastname,
+  //     };
+  //     console.log('NIN entry created:', user);
 
-      const qoreid_login = await this.qoreIdLogin();
-      if (!qoreid_login) {
-        throw new HttpException(
-          {
-            status: 'error',
-            title: 'Verification Failed',
-            message: 'Failed to authenticate with QoreID',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-      console.log('NUIN:', user);
+  //     const qoreid_login = await this.identityService.qoreIdLogin();
+  //     if (!qoreid_login) {
+  //       throw new HttpException(
+  //         {
+  //           status: 'error',
+  //           title: 'Verification Failed',
+  //           message: 'Failed to authenticate with QoreID',
+  //         },
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     }
+  //     console.log('NUIN:', user);
 
-      const enquiry = await this.verifyNinWithQoreId(
-        user,
-        qoreid_login.accessToken,
-      );
-      if (!enquiry) {
-        throw new HttpException(
-          {
-            status: 'error',
-            title: 'Verification Failed',
-            message: 'Failed to verify NIN with QoreID',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+  //     const enquiry = await this.identityService.verifyNinWithQoreId(
+  //       user,
+  //       qoreid_login.accessToken,
+  //     );
+  //     if (!enquiry) {
+  //       throw new HttpException(
+  //         {
+  //           status: 'error',
+  //           title: 'Verification Failed',
+  //           message: 'Failed to verify NIN with QoreID',
+  //         },
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     }
 
-      return enquiry;
-    } catch (err) {
-      console.error('Error during NIN verification process:', err);
-      if (err instanceof HttpException) {
-        throw err;
-      }
+  //     return enquiry;
+  //   } catch (err) {
+  //     console.error('Error during NIN verification process:', err);
+  //     if (err instanceof HttpException) {
+  //       throw err;
+  //     }
 
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          status: 'error',
-          title: 'Registration Failed',
-          message:
-            getErrorData(err) ||
-            getErrorMessage(err) ||
-            'An error occurred while verifying NIN.',
-          data: getErrorData(err) || getErrorMessage(err),
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //     throw new HttpException(
+  //       {
+  //         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+  //         status: 'error',
+  //         title: 'Registration Failed',
+  //         message:
+  //           getErrorData(err) ||
+  //           getErrorMessage(err) ||
+  //           'An error occurred while verifying NIN.',
+  //         data: getErrorData(err) || getErrorMessage(err),
+  //       },
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   async verifyNinOnly(user: { id: string }, ninData: NinVerificationDto) {
     try {
@@ -617,7 +619,7 @@ export class ResidentService {
       }
 
       // Verify NIN with QoreID
-      const verify_nin = await this.verifyNIN(ninData);
+      const verify_nin = await this.identityService.verifyNin(ninData);
       if (!verify_nin || !verify_nin.nin) {
         throw new HttpException(
           {
@@ -627,47 +629,6 @@ export class ResidentService {
           },
           HttpStatus.BAD_REQUEST,
         );
-      }
-
-      // Check face verification match
-      if (verify_nin.face_verification) {
-        if (!verify_nin.face_verification.match) {
-          console.log('[NIN Verification] Failed: Face verification mismatch', {
-            match_score: verify_nin.face_verification.match_score,
-            threshold: verify_nin.face_verification.matching_threshold,
-          });
-          throw new HttpException(
-            {
-              statusCode: HttpStatus.BAD_REQUEST,
-              status: 'error',
-              title: 'Face Verification Failed',
-              message:
-                'Face verification failed. Please ensure the photo matches your NIN.',
-            },
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-
-        // Check if match score is below threshold
-        if (
-          verify_nin.face_verification.match_score <
-          verify_nin.face_verification.matching_threshold
-        ) {
-          console.log('[NIN Verification] Failed: Low face match score', {
-            match_score: verify_nin.face_verification.match_score,
-            threshold: verify_nin.face_verification.matching_threshold,
-          });
-          throw new HttpException(
-            {
-              statusCode: HttpStatus.BAD_REQUEST,
-              status: 'error',
-              title: 'Face Verification Failed',
-              message:
-                'Face verification score is too low. Please try again with a clearer photo.',
-            },
-            HttpStatus.BAD_REQUEST,
-          );
-        }
       }
 
       // Compare NIN details with latest user details

@@ -1,4 +1,5 @@
 import {
+    HttpException,
     HttpStatus,
     Injectable,
 } from '@nestjs/common'
@@ -7,6 +8,7 @@ import {
     GateAction,
     GuardRole,
     IncidentStatus,
+    KycStatus,
     LogCategory,
     Role,
     ShiftStatus,
@@ -27,12 +29,20 @@ import {
 import { CreateIncidentDto } from './dto/create-incident.dto'
 import { CreateGuardDto } from './dto/guard.dto'
 import { EmailService } from '../../shared/email.service'
+import { NinVerificationDto } from '../identity/dto/verify-nin.dto'
+import { IdentityService } from '../identity/identity.service'
+
+const getErrorMessage = (err: unknown, fallback = 'Unknown error') =>
+  err instanceof Error
+    ? err.message
+    : (err as { message?: string })?.message || fallback;
 
 @Injectable()
 export class GuardService {
     constructor(
         private prisma: PrismaService,
         private readonly emailService: EmailService,
+        private readonly identityService: IdentityService,
     ) { }
 
     async createGuard(
@@ -420,6 +430,187 @@ export class GuardService {
             )
         }
     }
+
+      async verifyNinOnly(user: { id: string }, ninData: NinVerificationDto) {
+        try {
+          // Fetch the latest user details from the database
+          const latestUser = await this.prisma.user.findUnique({
+            where: { id: user.id },
+          });
+          const guard = await this.prisma.guard.findFirst({
+            where: { userId: user.id },
+          });
+    
+          const ninExists = await this.prisma.resident.findFirst({
+            where: {
+              nin: ninData.idNumber,
+              userId: { not: user.id },
+            },
+          });
+          if ((process.env.NODE_ENV || '').toLowerCase() !== 'development') {
+            if (ninExists) {
+              console.log('Nin exists in database');
+              throw new HttpException(
+                {
+                  statusCode: HttpStatus.BAD_REQUEST,
+                  status: 'error',
+                  title: 'Nin already exists',
+                  message: 'This NIN is being used by another user.',
+                },
+                HttpStatus.BAD_REQUEST,
+              );
+            }
+          }
+          if (!latestUser || !guard) {
+            throw new HttpException(
+              {
+                status: 'error',
+                title: 'Verification Failed',
+                message: 'User not found',
+              },
+              HttpStatus.NOT_FOUND,
+            );
+          }
+    
+          // Verify NIN with QoreID
+          const verify_nin = await this.identityService.verifyNin(ninData);
+          if (!verify_nin || !verify_nin.nin) {
+            throw new HttpException(
+              {
+                status: 'error',
+                title: 'Verification Failed',
+                message: 'Failed to verify NIN',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+    
+          // Compare NIN details with latest user details
+        //   if (
+        //     verify_nin.nin.firstname &&
+        //     guard.first_name &&
+        //     verify_nin.nin.firstname.toLowerCase().trim() !==
+        //       resident.first_name.toLowerCase().trim()
+        //   ) {
+        //     console.log('[NIN Verification] Failed: First name mismatch', {
+        //       nin: verify_nin.nin.firstname,
+        //       user: resident.first_name,
+        //     });
+        //     throw new HttpException(
+        //       {
+        //         statusCode: HttpStatus.BAD_REQUEST,
+        //         status: 'error',
+        //         title: 'NIN Mismatch',
+        //         message: 'First name on NIN does not match your account.',
+        //       },
+        //       HttpStatus.BAD_REQUEST,
+        //     );
+        //   }
+    
+        //   if (
+        //     verify_nin.nin.lastname &&
+        //     resident.last_name &&
+        //     verify_nin.nin.lastname.toLowerCase().trim() !==
+        //       resident.last_name.toLowerCase().trim()
+        //   ) {
+        //     console.log('[NIN Verification] Failed: Last name mismatch', {
+        //       nin: verify_nin.nin.lastname,
+        //       user: resident.last_name,
+        //     });
+        //     throw new HttpException(
+        //       {
+        //         statusCode: HttpStatus.BAD_REQUEST,
+        //         status: 'error',
+        //         title: 'NIN Mismatch',
+        //         message: 'Last name on NIN does not match your account.',
+        //       },
+        //       HttpStatus.BAD_REQUEST,
+        //     );
+        //   }
+    
+        //   if (verify_nin.nin.birthdate && resident.dob) {
+        //     // Format dates for comparison (YYYY-MM-DD)
+        //     const ninDob = dayjs(verify_nin.nin.birthdate, 'DD-MM-YYYY').format(
+        //       'YYYY-MM-DD',
+        //     );
+        //     const userDob = dayjs(resident.dob).format('YYYY-MM-DD');
+    
+        //     if (ninDob !== userDob) {
+        //       console.log('[NIN Verification] Failed: DOB mismatch', {
+        //         nin: ninDob,
+        //         user: userDob,
+        //       });
+        //       throw new HttpException(
+        //         {
+        //           statusCode: HttpStatus.BAD_REQUEST,
+        //           status: 'error',
+        //           title: 'NIN Mismatch',
+        //           message: 'Date of birth on NIN does not match your account.',
+        //         },
+        //         HttpStatus.BAD_REQUEST,
+        //       );
+        //     }
+        //   }
+    
+          // Ensure idcard_no is properly saved with validation
+          if (!ninData.idNumber) {
+            throw new HttpException(
+              {
+                status: 'error',
+                title: 'Validation Failed',
+                message: 'NIN (idcard_no) is required for verification',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+    
+          const approvedAt = guard.approvedAt ?? new Date();
+    
+          const updateData = {
+            nin: ninData.idNumber,
+            kycStatus: KycStatus.COMPLETED,
+            // status: ResidentStatus.ACTIVE,
+            approvedAt,
+          };
+    
+          console.log('[NIN Verification] Updating user with data:', updateData);
+    
+          const result = await this.prisma.$transaction(async (tx) => {
+            const updatedGuard= await tx.guard.update({
+              where: { id: guard.id },
+              data: updateData,
+            });
+    
+            return {
+              updatedGuard,
+            };
+          });
+    
+          console.log(
+            '[NIN Verification] Update successful for user:',
+            latestUser.id,
+          );
+    
+          return success(
+            {
+              guard: result.updatedGuard,
+              nin_verification: verify_nin,
+            },
+            'NIN Verification Successful',
+            'Your NIN has been verified successfully and your account is active',
+          );
+        } catch (err) {
+          console.error('[NIN Verification] Error:', err);
+          if (err instanceof HttpException) {
+            throw err;
+          }
+          return error(
+            'Verification Failed',
+            getErrorMessage(err, 'An error occurred during NIN verification'),
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      }
 
     async getGuards(
         userId: string,

@@ -60,8 +60,6 @@ export class ResidentController {
   @Post('verify-nin')
   @UseGuards(JwtAuthGuard)
   @SkipLevyCheck()
-  // @ApiBearerAuth('access-token')
-  // @UsePipes(DtoValidationPipe)
   @ApiOperation({
     summary: 'Verify NIN with face capture',
     description: "Verifies user's NIN and face capture through QoreID",
