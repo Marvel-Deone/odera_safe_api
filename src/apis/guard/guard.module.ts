@@ -8,11 +8,15 @@ import { PrismaService } from '../../database/prisma/prisma.service'
 import { PatrolMonitoringService } from '../patrol-monitoring/patrol-monitoring.service'
 import { EmailService } from '../../shared/email.service'
 import { IdentityService } from '../identity/identity.service'
+import { ClientService } from '../../shared/client/client.service'
+import { HttpModule, HttpService } from '@nestjs/axios'
 
 @Module({
+  imports: [HttpModule,],
   controllers: [GuardController, PublicGuardController],
 
   providers: [
+    ClientService,
     GuardService,
     PrismaService,
     PatrolMonitoringService,

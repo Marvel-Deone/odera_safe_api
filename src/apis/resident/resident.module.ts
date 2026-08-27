@@ -11,9 +11,11 @@ import { ClientService } from '../../shared/client/client.service';
 import { HttpModule, HttpService } from '@nestjs/axios';
 import { FinanceModule } from '../finance/finance.module';
 import { EmailService } from '../../shared/email.service';
+import { IdentityModule } from '../identity/identity.module';
+import { IdentityService } from '../identity/identity.service';
 
 @Module({
-    imports: [ConfigModule, PrismaModule, HttpModule, FinanceModule],
+    imports: [ConfigModule, PrismaModule, HttpModule, FinanceModule, IdentityModule,],
     providers: [
         ResidentService,
         ResidentSelfOnboardingService,
@@ -21,6 +23,7 @@ import { EmailService } from '../../shared/email.service';
         EmailService,
         PaystackService,
         ClientService,
+        IdentityService,
     ],
     controllers: [ResidentController, ResidentSelfOnboardingController],
 })
