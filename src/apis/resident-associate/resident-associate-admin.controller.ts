@@ -2,7 +2,6 @@ import {
     Body,
     Controller,
     Get,
-    Param,
     Patch,
     UseGuards,
 } from '@nestjs/common';
@@ -21,7 +20,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 
 import { ResidentAssociateAdminService } from './resident-associate-admin.service';
-import { RejectResidentAssociateDto } from './dto/reject-resident-associate.dto';
+import { ApproveResidentAssociatesDto } from './dto/approval-resident-associate.dto';
+import { RejectResidentAssociatesDto } from './dto/reject-resident-associate.dto';
 
 @ApiTags('Resident Associate Administration')
 @ApiBearerAuth()
@@ -36,45 +36,40 @@ export class ResidentAssociateAdminController {
 
     @Get('pending')
     @ApiOperation({
-        summary:
-            'Get pending co-resident applications',
+        summary: 'Get pending co-resident applications',
     })
     findPending() {
         return this.adminService.findPending();
     }
 
-    @Patch(':id/approve')
+    @Patch('approve')
     @ApiOperation({
         summary:
-            'Approve a co-resident application',
+            'Approve one or more co-resident applications',
     })
     approve(
         @CurrentUser() user: any,
-        @Param('id') associateId: string,
+        @Body() dto: ApproveResidentAssociatesDto,
     ) {
         return this.adminService.approve(
-            associateId,
+            dto.associateIds,
             user.id,
         );
     }
 
-    @Patch(':id/reject')
+    @Patch('reject')
     @ApiOperation({
         summary:
-            'Reject a co-resident application',
+            'Reject one or more co-resident applications',
     })
     reject(
         @CurrentUser() user: any,
-        @Param('id') associateId: string,
-        @Body() dto: RejectResidentAssociateDto,
-        body: {
-            rejectionReason?: string;
-        },
+        @Body() dto: RejectResidentAssociatesDto,
     ) {
         return this.adminService.reject(
-            associateId,
+            dto.associateIds,
             user.id,
-            body.rejectionReason,
+            dto.rejectionReason,
         );
     }
 }
