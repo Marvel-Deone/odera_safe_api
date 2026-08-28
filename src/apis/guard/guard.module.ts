@@ -10,9 +10,10 @@ import { EmailService } from '../../shared/email.service'
 import { IdentityService } from '../identity/identity.service'
 import { ClientService } from '../../shared/client/client.service'
 import { HttpModule, HttpService } from '@nestjs/axios'
+import { StorageModule } from '../../storage/storage.module'
 
 @Module({
-  imports: [HttpModule,],
+  imports: [HttpModule, StorageModule],
   controllers: [GuardController, PublicGuardController],
 
   providers: [
