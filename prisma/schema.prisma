@@ -969,6 +969,10 @@ model Guard {
 
   passport_photo_url String?
 
+  faceCaptureKey  String?
+  // faceCaptureUrl  String?
+  faceCapturedAt  DateTime?
+
   is_active Boolean @default(true)
 
   createdAt DateTime @default(now())

@@ -9,10 +9,16 @@ import {
   Body,
   UseGuards,
   Req,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -135,22 +141,22 @@ export class GuardController {
     Role.SUPER_ADMIN,
   )
 
-   @Post('guards/verify-nin')
-    @UseGuards(JwtAuthGuard)
-    @ApiOperation({
-      summary: 'Verify NIN with NIN no',
-      description: "Verifies user's NIN through QoreID",
-    })
-    @ApiResponse({
-      status: 200,
-      description: 'NIN verification successful',
-    })
-    async verifyNinOnly(
-      @CurrentUser() user: any,
-      @Body() ninData: NinVerificationDto,
-    ) {
-      return await this.guardsService.verifyNinOnly(user, ninData);
-    }
+  @Post('guards/verify-nin')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Verify NIN with NIN no',
+    description: "Verifies user's NIN through QoreID",
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'NIN verification successful',
+  })
+  async verifyNinOnly(
+    @CurrentUser() user: any,
+    @Body() ninData: NinVerificationDto,
+  ) {
+    return await this.guardsService.verifyNinOnly(user, ninData);
+  }
 
   @ApiOperation({
     summary: 'Guard dashboard',
@@ -344,67 +350,6 @@ export class GuardController {
     )
   }
 
-  // @Post('guards/incidents')
-  // @Roles(Role.GUARD)
-  // createIncident(
-  //   @CurrentUser() user: any,
-  //   @Body() dto: CreateIncidentDto,
-  // ) {
-  //   return this.guardsService.createIncident(
-  //     user.id,
-  //     dto,
-  //   )
-  // }
-
-  // @Get('guards/incidents')
-  // @Roles(Role.GUARD)
-  // getMyIncidents(
-  //   @CurrentUser() user: any,
-  // ) {
-  //   return this.guardsService.getMyIncidents(
-  //     user.id,
-  //   )
-  // }
-
-  // @Get('admin/incidents')
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  // getAllIncidents(
-  //   @CurrentUser() user: any,
-  // ) {
-  //   return this.guardsService.getAllIncidents(
-  //     user.id,
-  //   )
-  // }
-
-  // @Get('admin/incidents/:id')
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  // getIncidentById(
-  //   @CurrentUser() user: any,
-  //   @Param('id') id: string,
-  // ) {
-  //   return this.guardsService.getIncidentById(
-  //     user.id,
-  //     id,
-  //   )
-  // }
-
-  // @Patch('admin/incidents/:id')
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  // updateIncidentStatus(
-  //   @CurrentUser() user: any,
-  //   @Param('id') id: string,
-  //   @Body()
-  //   dto: {
-  //     status: IncidentStatus
-  //     adminNotes?: string
-  //   },
-  // ) {
-  //   return this.guardsService.updateIncidentStatus(
-  //     user.id,
-  //     id,
-  //     dto,
-  //   )
-  // }
   @Post('admin/patrol-checkpoints')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Create patrol checkpoint' })
@@ -527,5 +472,57 @@ export class PublicGuardController {
     dto: CreateGuardDto,
   ) {
     return this.guardsService.guardSelfOnboarding(dto)
+  }
+
+  @Post(':guardId/face-capture')
+  @ApiOperation({
+    summary: 'Upload guard face capture',
+    description:
+      'Uploads and stores the face capture image for a guard.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        face_capture: {
+          type: 'string',
+          format: 'binary',
+          description:
+            'Guard face capture image (JPEG, PNG, or WebP)',
+        },
+      },
+      required: ['face_capture'],
+    },
+  })
+  @UseInterceptors(FileInterceptor('face_capture'))
+  async uploadFaceCapture(
+    @Param('guardId') guardId: string,
+    @UploadedFile() file: any,
+  ) {
+    if (!file) {
+      throw new BadRequestException(
+        'Face capture image is required',
+      );
+    }
+
+    return this.guardsService.uploadFaceCapture(
+      guardId,
+      file,
+    );
+  }
+
+  @Get(':guardId/face-capture')
+  @ApiOperation({
+    summary: 'Get guard face capture',
+    description:
+      'Generates a temporary signed URL for the guard face capture.',
+  })
+  async getFaceCapture(
+    @Param('guardId') guardId: string,
+  ) {
+    return this.guardsService.getFaceCapture(
+      guardId,
+    );
   }
 }
